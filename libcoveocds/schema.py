@@ -17,7 +17,7 @@ import libcoveocds.config
 
 class SchemaOCDS(SchemaJsonMixin):
 
-    def __init__(self, select_version=None, release_data=None, cache_schema=False):
+    def __init__(self, select_version=None, release_data=None, cache_schema=False, lib_cove_ocds_config=None):
         '''Build the schema object using an specific OCDS schema version
 
         The version used will be select_version, release_data.get('version') or
@@ -26,7 +26,7 @@ class SchemaOCDS(SchemaJsonMixin):
         and self.invalid_version_data respectively.
         '''
 
-        self.lib_cove_ocds_config = libcoveocds.config.LibCoveOCDSConfig()  # TODO allow passed in as a param too
+        self.lib_cove_ocds_config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
         self.release_schema_name = self.lib_cove_ocds_config.config['schema_item_name']
         self.release_pkg_schema_name = self.lib_cove_ocds_config.config['schema_name']['release']
         self.record_pkg_schema_name = self.lib_cove_ocds_config.config['schema_name']['record']
