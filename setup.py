@@ -1,0 +1,24 @@
+from setuptools import setup, find_packages
+
+setup(
+    name='libcoveocds',
+    version='0.0.0',
+    author='Open Data Services',
+    author_email='code@opendataservices.coop',
+    url='https://github.com/open-contracting/lib-cove-ocds',
+    description='A data review library',
+    packages=find_packages(),
+    long_description='A data review library',
+    install_requires=[
+        'jsonref',
+        'jsonschema',
+        'CommonMark',
+        'bleach',
+        'requests',
+    ],
+    classifiers=[
+            'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+    ],
+    entry_points='''[console_scripts]
+libcoveocds = libcoveocds.cli.__main__:main''',
+)
