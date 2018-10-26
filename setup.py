@@ -15,6 +15,8 @@ setup(
         'CommonMark',
         'bleach',
         'requests',
+        'json-merge-patch',
+        'cached-property',
     ],
     classifiers=[
             'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',

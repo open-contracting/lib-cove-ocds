@@ -1,1 +1,2 @@
+-e git+https://github.com/OpenDataServices/flatten-tool.git@v0.3.0#egg=flattentool
 -e .

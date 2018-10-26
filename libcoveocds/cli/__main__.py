@@ -1,16 +1,7 @@
-import argparse
-import tempfile
-import shutil
-import json
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OCDS Macaw CLI')
-    parser.add_argument("filename")
-
-    args = parser.parse_args()
-
-
+    print("Does not do anything yet, sorry")
 
 
 if __name__ == '__main__':
