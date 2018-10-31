@@ -14,11 +14,14 @@ from collections import OrderedDict
 from flattentool.schema import get_property_type_set
 from jsonschema import FormatChecker, RefResolver
 from jsonschema.exceptions import ValidationError
-from jsonschema.validators import Draft4Validator as validator
+import jsonschema.validators
 
 
 from django.utils.html import escape, conditional_escape, format_html
 
+# Because we will be changing items on this validator, it's important we take a copy!
+# Otherwise we could cause conflicts with other software in the same process.
+validator = jsonschema.validators.extend(jsonschema.validators.Draft4Validator, validators={})
 
 uniqueItemsValidator = validator.VALIDATORS.pop("uniqueItems")
 LANGUAGE_RE = re.compile("^(.*_(((([A-Za-z]{2,3}(-([A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?)|[A-Za-z]{4}|[A-Za-z]{5,8})(-([A-Za-z]{4}))?(-([A-Za-z]{2}|[0-9]{3}))?(-([A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*(-([0-9A-WY-Za-wy-z](-[A-Za-z0-9]{2,8})+))*(-(x(-[A-Za-z0-9]{1,8})+))?)|(x(-[A-Za-z0-9]{1,8})+)))$") # noqa
