@@ -1,13 +1,16 @@
 import os
 import json
 from libcoveocds.libcore.tools import get_file_type
-from libcoveocds.lib.api import APIException
 from libcoveocds.schema import SchemaOCDS
 from libcoveocds.libcore.converters import convert_json, convert_spreadsheet
 from libcoveocds.libcore.common import get_spreadsheet_meta_data
 from libcoveocds.common_checks import common_checks_ocds
 from libcoveocds.lib.api import context_api_transform
 from libcoveocds.config import LibCoveOCDSConfig
+
+
+class APIException(Exception):
+    pass
 
 
 def ocds_json_output(output_dir, file, schema_version, convert, cache_schema=False, file_type=None, json_data=None,

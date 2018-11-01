@@ -2,8 +2,7 @@ import pytest
 import tempfile
 import shutil
 import os
-from libcoveocds.lib.api import APIException
-from libcoveocds.api import ocds_json_output
+from libcoveocds.api import ocds_json_output, APIException
 
 
 def test_basic_1():

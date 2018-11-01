@@ -1,10 +1,6 @@
 import json
 
 
-class APIException(Exception):
-    pass
-
-
 def context_api_transform(context):
     validation_errors = context.get('validation_errors')
     context['validation_errors'] = []
