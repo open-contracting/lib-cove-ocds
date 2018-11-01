@@ -70,20 +70,28 @@ def update_docs(document_parent, counter):
     return count
 
 
-def get_file_type(file):
-    if isinstance(file, str):
-        name = file.lower()
-    else:
-        name = file.name.lower()
-    if name.endswith('.json'):
+def get_file_type(file_name):
+    """ Takes an filename (type string), and returns a string saying what type it is."""
+    # Older versions of this could take DJango objects to.
+    # Tho we don't really want to support that, put in a check for that.
+    if not isinstance(file_name, str):
+        file_name = file_name.name
+    # Normalise the file name
+    file_name = file_name.lower()
+    # First, just check the extension on the file name
+    if file_name.endswith('.json'):
         return 'json'
-    elif name.endswith('.xlsx'):
+    if file_name.endswith('.xlsx'):
         return 'xlsx'
-    elif name.endswith('.csv'):
+    if file_name.endswith('.csv'):
         return 'csv'
-    else:
-        first_byte = file.read(1)
-        if first_byte in [b'{', b'[']:
-            return 'json'
-        else:
-            raise UnrecognisedFileType
+    # Try and load the first bit of the file to see if it's JSON?
+    try:
+        with open(file_name, 'rb') as fp:
+            first_byte = fp.read(1)
+            if first_byte in [b'{', b'[']:
+                return 'json'
+    except FileNotFoundError:
+        pass
+    # All right, we give up.
+    raise UnrecognisedFileType
