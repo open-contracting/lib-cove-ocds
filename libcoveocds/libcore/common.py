@@ -11,10 +11,12 @@ from cached_property import cached_property
 from .tools import cached_get_request, decimal_default
 from urllib.parse import urlparse, urljoin
 from collections import OrderedDict
+from flattentool import unflatten
 from flattentool.schema import get_property_type_set
 from jsonschema import FormatChecker, RefResolver
 from jsonschema.exceptions import ValidationError
 import jsonschema.validators
+from .exceptions import cove_spreadsheet_conversion_error
 
 
 from django.utils.html import escape, conditional_escape, format_html
@@ -838,3 +840,26 @@ def add_is_codelist(obj):
     for value in obj.get("definitions", {}).values():
         if "properties" in value:
             add_is_codelist(value)
+
+
+@cove_spreadsheet_conversion_error
+def get_spreadsheet_meta_data(upload_dir, file_name, schema, file_type='xlsx', name='Meta'):
+    if file_type == 'csv':
+        input_name = upload_dir
+    else:
+        input_name = file_name
+    output_name = os.path.join(upload_dir, 'metatab.json')
+
+    unflatten(
+        input_name=input_name,
+        output_name=output_name,
+        input_format=file_type,
+        metatab_only=True,
+        metatab_schema=schema,
+        metatab_name=name,
+        metatab_vertical_orientation=True
+    )
+
+    with open(output_name) as metatab_data:
+        metatab_json = json.load(metatab_data)
+    return metatab_json

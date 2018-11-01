@@ -1,5 +1,10 @@
 # Lib Cove OCDS
 
+## Command line
+
+Call `libcoveocds` and pass the filename of some JSON data.
+
+    libcoveocds tests/fixtures/common_checks/basic_1.json
 
 ## Code for use by external users
 

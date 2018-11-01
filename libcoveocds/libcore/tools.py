@@ -1,7 +1,7 @@
 from functools import lru_cache, wraps
 from decimal import Decimal
-
 import requests
+from .exceptions import UnrecognisedFileType
 
 
 @lru_cache(maxsize=64)
@@ -68,3 +68,22 @@ def update_docs(document_parent, counter):
         if doc_type:
             counter.update([doc_type])
     return count
+
+
+def get_file_type(file):
+    if isinstance(file, str):
+        name = file.lower()
+    else:
+        name = file.name.lower()
+    if name.endswith('.json'):
+        return 'json'
+    elif name.endswith('.xlsx'):
+        return 'xlsx'
+    elif name.endswith('.csv'):
+        return 'csv'
+    else:
+        first_byte = file.read(1)
+        if first_byte in [b'{', b'[']:
+            return 'json'
+        else:
+            raise UnrecognisedFileType
