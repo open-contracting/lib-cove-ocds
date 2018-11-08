@@ -125,6 +125,7 @@ def convert_json(upload_dir, upload_url, file_name, lib_cove_ocds_config, schema
         root_id=lib_cove_ocds_config.config['root_id'],
         schema=schema_url,
         disable_local_refs=lib_cove_ocds_config.config['flatten_tool']['disable_local_refs'],
+        remove_empty_schema_columns=lib_cove_ocds_config.config['flatten_tool']['remove_empty_schema_columns'],
     )
 
     if xml:

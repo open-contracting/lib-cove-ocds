@@ -23,6 +23,7 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     'current_language': 'en',
     'flatten_tool': {
         'disable_local_refs': True,
+        'remove_empty_schema_columns': True,
     }
 }
 
