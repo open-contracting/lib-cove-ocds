@@ -21,6 +21,9 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     'input_methods': ['upload', 'url', 'text'],
     'support_email': 'data@open-contracting.org',
     'current_language': 'en',
+    'flatten_tool': {
+        'disable_local_refs': True,
+    }
 }
 
 # Set default schema version to the latest version

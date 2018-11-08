@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - When duplicate ID's are detected, show a better message https://github.com/OpenDataServices/cove/issues/782
+- Add config option for disable_local_refs mode in flatten-tool, default to on.
 
 ## [0.1.0] - 2018-11-02
 
