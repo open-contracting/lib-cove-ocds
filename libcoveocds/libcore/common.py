@@ -67,9 +67,9 @@ def unique_ids(validator, ui, instance, schema):
                     yield error
                 return
 
-        if non_unique_ids:
-            msg = "Non-unique ID Values (first 3 shown):  {}"
-            yield ValidationError(msg.format(", ".join(str(x) for x in list(non_unique_ids)[:3])))
+        for non_unique_id in non_unique_ids:
+            msg = "Non-unique ID Values"
+            yield ValidationError(msg, instance=non_unique_id)
 
 
 def required_draft4(validator, required, instance, schema):

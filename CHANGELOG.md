@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- When duplicate ID's are detected, show a better message https://github.com/OpenDataServices/cove/issues/782
 
 ## [0.1.0] - 2018-11-02
 
