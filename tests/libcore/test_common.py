@@ -198,3 +198,36 @@ def test_get_schema_non_required_ids():
     ]
 
     assert sorted(non_required_ids) == results
+
+
+# https://github.com/OpenDataServices/cove/issues/1054
+def test_get_additional_codelist_values_replaced():
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'common',
+                           'get_additional_codelist_values_replaced.json')) as fp:  # noqa
+        json_data_w_additial_codelists = json.load(fp)
+
+    schema_obj = SchemaOCDS(select_version='1.1', release_data=json_data_w_additial_codelists)
+
+    # Currently, schema_obj.extensions has an odd data structure (a tuple for each extension)
+    # and schema_obj.process_codelists() - called by get_additional_codelist_values - refuses to work with it!
+    #    if not isinstance(extension_detail, dict): continue
+    # So we have to call get_release_schema_obj() BEFORE doing anything else  ...
+    #  ... because that will build the correct data structure in schema_obj.extensions
+    # (This feels like a bug waiting to happen to someone)
+    schema_obj.get_release_schema_obj()
+
+    # Now call the code we actually want to test ....
+    additional_codelist_values = get_additional_codelist_values(schema_obj, json_data_w_additial_codelists)
+
+    assert additional_codelist_values == {
+        'releases/tender/documents/documentType': {
+            'field': 'documentType',
+            'codelist': 'documentType.csv',
+            'path': 'releases/tender/documents',
+            'codelist_url': 'https://raw.githubusercontent.com/open-contracting-extensions/ocds_ppp_extension/master/codelists/documentType.csv',  # noqa
+            'extension_codelist': False,
+            'isopen': True,
+            'codelist_amend_urls': [],
+            'values': ['foo']
+        }
+    }
