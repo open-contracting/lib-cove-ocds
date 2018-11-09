@@ -67,7 +67,8 @@ def convert_spreadsheet(upload_dir, upload_url, file_name, file_type, lib_cove_o
         'heading_source_map': heading_source_map_path,
         'metatab_schema': pkg_schema_url,
         'metatab_name': metatab_name,
-        'metatab_vertical_orientation': True
+        'metatab_vertical_orientation': True,
+        'disable_local_refs': lib_cove_ocds_config.config['flatten_tool']['disable_local_refs'],
     }
 
     if lib_cove_ocds_config.config.get('hashcomments'):
@@ -122,7 +123,9 @@ def convert_json(upload_dir, upload_url, file_name, lib_cove_ocds_config, schema
         main_sheet_name=lib_cove_ocds_config.config['root_list_path'],
         root_list_path=lib_cove_ocds_config.config['root_list_path'],
         root_id=lib_cove_ocds_config.config['root_id'],
-        schema=schema_url
+        schema=schema_url,
+        disable_local_refs=lib_cove_ocds_config.config['flatten_tool']['disable_local_refs'],
+        remove_empty_schema_columns=lib_cove_ocds_config.config['flatten_tool']['remove_empty_schema_columns'],
     )
 
     if xml:
