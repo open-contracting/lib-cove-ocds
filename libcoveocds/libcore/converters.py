@@ -61,7 +61,7 @@ def convert_spreadsheet(upload_dir, upload_url, file_name, file_type, lib_cove_o
     flattentool_options = {
         'output_name': converted_path,
         'input_format': file_type,
-        'default_lib_cove_ocds_config.configuration': 'RootListPath {}'.format(lib_cove_ocds_config.config['root_list_path']), # noqa
+        'default_configuration': 'RootListPath {}'.format(lib_cove_ocds_config.config['root_list_path']), # noqa
         'encoding': encoding,
         'cell_source_map': cell_source_map_path,
         'heading_source_map': heading_source_map_path,
