@@ -76,14 +76,12 @@ def get_file_type(file_name):
     # Tho we don't really want to support that, put in a check for that.
     if not isinstance(file_name, str):
         file_name = file_name.name
-    # Normalise the file name
-    file_name = file_name.lower()
     # First, just check the extension on the file name
-    if file_name.endswith('.json'):
+    if file_name.lower().endswith('.json'):
         return 'json'
-    if file_name.endswith('.xlsx'):
+    if file_name.lower().endswith('.xlsx'):
         return 'xlsx'
-    if file_name.endswith('.csv'):
+    if file_name.lower().endswith('.csv'):
         return 'csv'
     # Try and load the first bit of the file to see if it's JSON?
     try:
