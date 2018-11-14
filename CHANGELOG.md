@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.2] - 2018-11-14
+
 ### Fixed
 
 - get_file_type() - could not detect JSON file if extension was not "JSON" and filename had upper case letters in it
