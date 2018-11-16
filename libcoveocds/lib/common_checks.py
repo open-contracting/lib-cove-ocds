@@ -1,6 +1,6 @@
 import collections
 import re
-import libcoveocds.libcore.tools as tools
+import libcove.lib.tools as tools
 
 
 @tools.ignore_errors

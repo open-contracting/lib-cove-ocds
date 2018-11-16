@@ -1,9 +1,9 @@
 import os
 import json
-from libcoveocds.libcore.tools import get_file_type
+from libcove.lib.tools import get_file_type
 from libcoveocds.schema import SchemaOCDS
-from libcoveocds.libcore.converters import convert_json, convert_spreadsheet
-from libcoveocds.libcore.common import get_spreadsheet_meta_data
+from libcove.lib.converters import convert_json, convert_spreadsheet
+from libcove.lib.common import get_spreadsheet_meta_data
 from libcoveocds.common_checks import common_checks_ocds
 from libcoveocds.lib.api import context_api_transform
 from libcoveocds.config import LibCoveOCDSConfig
