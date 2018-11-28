@@ -9,9 +9,9 @@ import requests
 from cached_property import cached_property
 
 
-from libcoveocds.libcore.common import SchemaJsonMixin, schema_dict_fields_generator, get_schema_codelist_paths, \
+from libcove.lib.common import SchemaJsonMixin, schema_dict_fields_generator, get_schema_codelist_paths, \
     load_core_codelists, load_codelist
-from libcoveocds.libcore.tools import cached_get_request
+from libcove.lib.tools import cached_get_request
 import libcoveocds.config
 
 

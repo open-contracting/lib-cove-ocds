@@ -1,6 +1,6 @@
 import json
 
-from libcoveocds.libcore.common import common_checks_context, get_additional_codelist_values
+from libcove.lib.common import common_checks_context, get_additional_codelist_values
 
 from libcoveocds.lib.common_checks import lookup_schema, get_releases_aggregates, \
     get_records_aggregates, add_conformance_rule_errors
