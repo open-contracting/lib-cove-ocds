@@ -119,20 +119,14 @@ validator.VALIDATORS["oneOf"] = oneOf_draft4
 class SchemaJsonMixin():
     @cached_property
     def release_schema_str(self):
-        if getattr(self, 'cache_schema', False):
-            response = cached_get_request(self.release_schema_url)
-        else:
-            response = requests.get(self.release_schema_url)
+        response = cached_get_request(self.release_schema_url)
         return response.text
 
     @cached_property
     def release_pkg_schema_str(self):
         uri_scheme = urlparse(self.release_pkg_schema_url).scheme
         if uri_scheme == 'http' or uri_scheme == 'https':
-            if getattr(self, 'cache_schema', False):
-                response = cached_get_request(self.release_pkg_schema_url)
-            else:
-                response = requests.get(self.release_pkg_schema_url)
+            response = cached_get_request(self.release_pkg_schema_url)
             return response.text
         else:
             with open(self.release_pkg_schema_url) as fp:
@@ -223,7 +217,7 @@ def get_schema_codelist_paths(schema_obj, obj=None, current_path=(), codelist_pa
 def load_codelist(url):
     codelist_map = {}
 
-    response = requests.get(url)
+    response = cached_get_request(url)
     response.raise_for_status()
     reader = csv.DictReader(line.decode("utf8") for line in response.iter_lines())
     for record in reader:

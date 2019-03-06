@@ -182,7 +182,7 @@ class SchemaOCDS(SchemaJsonMixin):
         for extensions_descriptor_url in self.extensions.keys():
 
             try:
-                response = requests.get(extensions_descriptor_url)
+                response = cached_get_request(extensions_descriptor_url)
                 if not response.ok:
                     # extension descriptor is required to proceed
                     self.invalid_extension[extensions_descriptor_url] = '{}: {}'.format(
@@ -196,10 +196,7 @@ class SchemaOCDS(SchemaJsonMixin):
             url = '{}/{}'.format(extensions_descriptor_url[:i], 'release-schema.json')
 
             try:
-                if self.cache_schema:
-                    extension = cached_get_request(url)
-                else:
-                    extension = requests.get(url)
+                extension = cached_get_request(url)
             except requests.exceptions.RequestException:
                 continue
 
@@ -219,10 +216,7 @@ class SchemaOCDS(SchemaJsonMixin):
 
             schema_obj = json_merge_patch.merge(schema_obj, extension_data)
             try:
-                if self.cache_schema:
-                    response = cached_get_request(extensions_descriptor_url)
-                else:
-                    response = requests.get(extensions_descriptor_url)
+                response = cached_get_request(extensions_descriptor_url)
                 extensions_descriptor = response.json()
 
             except ValueError:  # would be json.JSONDecodeError for Python 3.5+
@@ -276,10 +270,7 @@ class SchemaOCDS(SchemaJsonMixin):
     def record_pkg_schema_str(self):
         uri_scheme = urlparse(self.record_pkg_schema_url).scheme
         if uri_scheme == 'http' or uri_scheme == 'https':
-            if self.cache_schema:
-                response = cached_get_request(self.record_pkg_schema_url)
-            else:
-                response = requests.get(self.record_pkg_schema_url)
+            response = cached_get_request(self.record_pkg_schema_url)
             return response.text
         else:
             with open(self.record_pkg_schema_url) as fp:
