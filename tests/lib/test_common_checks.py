@@ -229,7 +229,7 @@ def test_get_releases_aggregates():
     assert actual == {}
 
 
-def test_bad_ocds_prefixes():
+def test_release_bad_ocds_prefixes():
     file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'common_checks', 'tenders_releases_7_releases_check_ocids.json') # noqa
     results = [
         ('bad-prefix-000001', 'releases/0/ocid'),
@@ -249,4 +249,16 @@ def test_bad_ocds_prefixes():
 
     assert len(user_data_ocids) == 7  # 1 good, 6 bad ocds prefixes
     assert 'ocds-00good-000003' in user_data_ocids  # good ocds prefix
+    assert get_bad_ocds_prefixes(user_data) == results
+
+
+def test_record_bad_ocds_prefixes_with_bad_compiled_release():
+    file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'common_checks', 'record_check_ocids.json') # noqa
+    results = [
+        ('bad-prefix-000001', 'records/0/ocid'),
+    ]
+
+    with open(os.path.join(file_name)) as fp:
+        user_data = json.load(fp)
+
     assert get_bad_ocds_prefixes(user_data) == results
