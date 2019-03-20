@@ -405,7 +405,7 @@ def get_bad_ocds_prefixes(json_data):
                     bad_prefixes.append((ocid, 'records/%s/releases/%s/ocid' % (n_rec, n_rel)))
 
             compiled_release = record.get('compiledRelease', {})
-            if compiled_release:
+            if compiled_release and isinstance(compiled_release, dict):
                 ocid = compiled_release.get('ocid', '')
                 if ocid and not prefix_regex.match(ocid):
                     bad_prefixes.append((ocid, 'records/%s/compiledRelease/ocid' % n_rec))
