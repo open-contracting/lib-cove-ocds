@@ -24,7 +24,8 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     'flatten_tool': {
         'disable_local_refs': True,
         'remove_empty_schema_columns': True,
-    }
+    },
+    'cache_all_requests': False
 }
 
 # Set default schema version to the latest version
@@ -33,5 +34,10 @@ LIB_COVE_OCDS_CONFIG_DEFAULT['schema_version'] = \
 
 
 class LibCoveOCDSConfig:
-    def __init__(self, config=LIB_COVE_OCDS_CONFIG_DEFAULT):
-        self.config = config
+    def __init__(self, config=None):
+        # We need to make sure we take a copy,
+        #   so that changes to one config object don't end up effecting other config objects.
+        if config:
+            self.config = config.copy()
+        else:
+            self.config = LIB_COVE_OCDS_CONFIG_DEFAULT.copy()

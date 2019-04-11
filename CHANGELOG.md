@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- cache_all_requests config option, off by default
+
 ### Changed
 
 - Upgraded lib-cove to v0.6.0
+- The cache_schema option to SchemaOCDS and ocds_json_output is now deprecated; but for now it just sets the new cache_all_requests option
 
 ## [0.3.0] - 2019-04-01
 

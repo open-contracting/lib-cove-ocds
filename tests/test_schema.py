@@ -21,7 +21,13 @@ def test_basic_1():
     assert schema.default_version == "1.1"
     assert schema.default_schema_host == "http://standard.open-contracting.org/schema/1__1__3/"
     assert schema.schema_host == "http://standard.open-contracting.org/schema/1__1__3/"
-    assert not schema.cache_schema
+    assert not schema.config.config['cache_all_requests']
+
+
+def test_deprecated_cache_schema_1():
+    schema = libcoveocds.schema.SchemaOCDS(cache_schema=True)
+    # cache_schema is deprecated but it should still set the new option.
+    assert schema.config.config['cache_all_requests']
 
 
 def test_pass_config_1():
@@ -40,7 +46,7 @@ def test_pass_config_1():
     assert schema.default_version == "1.0"
     assert schema.default_schema_host == "http://standard.open-contracting.org/schema/1__0__3/"
     assert schema.schema_host == "http://standard.open-contracting.org/schema/1__0__3/"
-    assert not schema.cache_schema
+    assert not schema.config.config['cache_all_requests']
 
 
 @pytest.mark.parametrize(('select_version', 'release_data', 'version', 'invalid_version_argument',

@@ -11,7 +11,7 @@ from cached_property import cached_property
 
 from libcove.lib.common import SchemaJsonMixin, schema_dict_fields_generator, get_schema_codelist_paths, \
     load_core_codelists, load_codelist
-from libcove.lib.tools import cached_get_request
+from libcove.lib.tools import get_request
 import libcoveocds.config
 
 
@@ -26,17 +26,20 @@ class SchemaOCDS(SchemaJsonMixin):
         and self.invalid_version_data respectively.
         '''
 
-        self.lib_cove_ocds_config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
-        self.release_schema_name = self.lib_cove_ocds_config.config['schema_item_name']
-        self.release_pkg_schema_name = self.lib_cove_ocds_config.config['schema_name']['release']
-        self.record_pkg_schema_name = self.lib_cove_ocds_config.config['schema_name']['record']
-        self.version_choices = self.lib_cove_ocds_config.config['schema_version_choices']
-        self.default_version = self.lib_cove_ocds_config.config['schema_version']
+        self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
+        self.release_schema_name = self.config.config['schema_item_name']
+        self.release_pkg_schema_name = self.config.config['schema_name']['release']
+        self.record_pkg_schema_name = self.config.config['schema_name']['record']
+        self.version_choices = self.config.config['schema_version_choices']
+        self.default_version = self.config.config['schema_version']
         self.default_schema_host = self.version_choices[self.default_version][1]
 
         self.version = self.default_version
         self.schema_host = self.default_schema_host
-        self.cache_schema = cache_schema
+
+        # cache_schema is a deprecated option - now set cache_all_requests in the config instead.
+        if cache_schema:
+            self.config.config['cache_all_requests'] = True
 
         # Missing package is only for original json data
         self.missing_package = False
@@ -55,7 +58,7 @@ class SchemaOCDS(SchemaJsonMixin):
         self.extended = False
         self.extended_schema_file = None
         self.extended_schema_url = None
-        self.codelists = self.lib_cove_ocds_config.config['schema_codelists']['1.1']
+        self.codelists = self.config.config['schema_codelists']['1.1']
 
         if select_version:
             try:
@@ -92,7 +95,7 @@ class SchemaOCDS(SchemaJsonMixin):
         self.extended_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=True)
 
         core_unique_files = frozenset(value[0] for value in self.core_codelist_schema_paths.values())
-        self.core_codelists = load_core_codelists(self.codelists, core_unique_files)
+        self.core_codelists = load_core_codelists(self.codelists, core_unique_files, config=self.config)
 
         self.extended_codelists = deepcopy(self.core_codelists)
         self.extended_codelist_urls = {}
@@ -113,7 +116,7 @@ class SchemaOCDS(SchemaJsonMixin):
 
             for codelist in codelist_list:
                 try:
-                    codelist_map = load_codelist(base_url + codelist)
+                    codelist_map = load_codelist(base_url + codelist, config=self.config)
                 except UnicodeDecodeError:
                     extension_detail['failed_codelists'][codelist] = "Unicode Error, codelists need to be in UTF-8"
                 except Exception as e:
@@ -196,10 +199,7 @@ class SchemaOCDS(SchemaJsonMixin):
             url = '{}/{}'.format(extensions_descriptor_url[:i], 'release-schema.json')
 
             try:
-                if self.cache_schema:
-                    extension = cached_get_request(url)
-                else:
-                    extension = requests.get(url)
+                extension = get_request(url, config=self.config)
             except requests.exceptions.RequestException:
                 continue
 
@@ -219,16 +219,13 @@ class SchemaOCDS(SchemaJsonMixin):
 
             schema_obj = json_merge_patch.merge(schema_obj, extension_data)
             try:
-                if self.cache_schema:
-                    response = cached_get_request(extensions_descriptor_url)
-                else:
-                    response = requests.get(extensions_descriptor_url)
+                response = get_request(extensions_descriptor_url, config=self.config)
                 extensions_descriptor = response.json()
 
             except ValueError:  # would be json.JSONDecodeError for Python 3.5+
                 self.invalid_extension[extensions_descriptor_url] = 'invalid JSON'
                 continue
-            cur_language = self.lib_cove_ocds_config.config['current_language']
+            cur_language = self.config.config['current_language']
 
             extension_description = {'url': extensions_descriptor_url, 'release_schema_url': url}
 
@@ -276,10 +273,7 @@ class SchemaOCDS(SchemaJsonMixin):
     def record_pkg_schema_str(self):
         uri_scheme = urlparse(self.record_pkg_schema_url).scheme
         if uri_scheme == 'http' or uri_scheme == 'https':
-            if self.cache_schema:
-                response = cached_get_request(self.record_pkg_schema_url)
-            else:
-                response = requests.get(self.record_pkg_schema_url)
+            response = get_request(self.record_pkg_schema_url, config=self.config)
             return response.text
         else:
             with open(self.record_pkg_schema_url) as fp:
