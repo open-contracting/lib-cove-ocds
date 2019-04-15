@@ -34,28 +34,23 @@ class AdditionalCheck():
 class EmptyFieldCheck(AdditionalCheck):
     """Identifying when fields, objects and arrays exist but are empty or contain only whitespace"""
 
+    def update_object(self, path_prefix, key):
+        self.failed = True
+        self.output.append({
+            'type': 'empty_field',
+            'json_location': path_prefix + key
+        })
+
     def process(self, release, path_prefix):
         flattened_release = OrderedDict(flatten_dict(release))
 
         for key, value in flattened_release.items():
             if isinstance(value, str) and len(value.strip()) == 0:
-                self.failed = True
-                self.output.append({
-                    'type': 'empty_field',
-                    'json_location': path_prefix + key
-                })
-            if isinstance(value, dict) and len(value) == 0:
-                self.failed = True
-                self.output.append({
-                    'type': 'empty_field',
-                    'json_location': path_prefix + key
-                })
-            if isinstance(value, list) and len(value) == 0:
-                self.failed = True
-                self.output.append({
-                    'type': 'empty_field',
-                    'json_location': path_prefix + key
-                })
+                self.update_object(path_prefix, key)
+            elif isinstance(value, dict) and len(value) == 0:
+                self.update_object(path_prefix, key)
+            elif isinstance(value, list) and len(value) == 0:
+                self.update_object(path_prefix, key)
 
 
 TEST_CLASSES = {
