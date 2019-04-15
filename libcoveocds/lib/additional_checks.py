@@ -3,8 +3,8 @@ from collections import OrderedDict
 import libcove.lib.tools as tools
 
 
-def flatten_dict(grant, path=""):
-    for key, value in sorted(grant.items()):
+def flatten_dict(release, path=""):
+    for key, value in sorted(release.items()):
         if isinstance(value, list):
             if len(value) == 0:
                 yield ("{}/{}".format(path, key), value)
