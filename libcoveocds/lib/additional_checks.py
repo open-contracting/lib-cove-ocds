@@ -6,12 +6,16 @@ import libcove.lib.tools as tools
 def flatten_dict(grant, path=""):
     for key, value in sorted(grant.items()):
         if isinstance(value, list):
+            if len(value) == 0:
+                yield ("{}/{}".format(path, key), value)
             for num, item in enumerate(value):
                 if isinstance(item, dict):
                     yield from flatten_dict(item, "{}/{}/{}".format(path, key, num))
                 else:
                     yield ("{}/{}/{}".format(path, key, num), item)
         elif isinstance(value, dict):
+            if len(value) == 0:
+                yield ("{}/{}".format(path, key), value)
             yield from flatten_dict(value, "{}/{}".format(path, key))
         else:
             yield ("{}/{}".format(path, key), value)
@@ -32,6 +36,7 @@ class EmptyFieldCheck(AdditionalCheck):
 
     def process(self, release, path_prefix):
         flattened_release = OrderedDict(flatten_dict(release))
+
         for key, value in flattened_release.items():
             if isinstance(value, str) and len(value.strip()) == 0:
                 self.failed = True
