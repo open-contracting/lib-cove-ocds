@@ -8,11 +8,13 @@ def test_empty_fields_basic():
         data = json.load(json_file)
 
     additional_checks = run_additional_checks(data, TEST_CLASSES['additional'])
-    result = [
-        {'json_location': 'releases/0/parties/0/address', 'type': 'empty_field'},
-        {'json_location': 'releases/0/planning/budget/id', 'type': 'empty_field'},
-        {'json_location': 'releases/0/tender/items/0/additionalClassifications', 'type': 'empty_field'}
-    ]
+    result = {
+        'empty_field': [
+            {'path': 'releases/0/parties/0/address'},
+            {'path': 'releases/0/planning/budget/id'},
+            {'path': 'releases/0/tender/items/0/additionalClassifications'}
+        ]
+    }
 
     assert additional_checks == result
 
@@ -28,32 +30,23 @@ def test_empty_fields_empty_string():
         ]
     }
 
-    assert (
-        run_additional_checks(data, TEST_CLASSES['additional']) ==
-        [{'json_location': 'releases/0/date', 'type': 'empty_field'}]
-    )
+    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'path': 'releases/0/date'}]}
 
 
 def test_empty_fields_empty_dict():
     data = {"releases": [{"buyer": {}}]}
 
-    assert (
-            run_additional_checks(data, TEST_CLASSES['additional']) ==
-            [{'json_location': 'releases/0/buyer', 'type': 'empty_field'}]
-    )
+    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'path': 'releases/0/buyer'}]}
 
 
 def test_empty_fields_empty_list():
     data = {"releases": [{"parties": []}]}
 
-    assert (
-            run_additional_checks(data, TEST_CLASSES['additional']) ==
-            [{'json_location': 'releases/0/parties', 'type': 'empty_field'}]
-    )
+    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'path': 'releases/0/parties'}]}
 
 
 def test_empty_fields_all_fine():
     with open('./tests/fixtures/additional_checks/basic_1.json', encoding='utf-8') as json_file:
         data = json.load(json_file)
 
-    assert run_additional_checks(data, TEST_CLASSES['additional']) == []
+    assert run_additional_checks(data, TEST_CLASSES['additional']) == {}

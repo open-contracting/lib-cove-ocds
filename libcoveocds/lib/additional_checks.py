@@ -60,6 +60,20 @@ TEST_CLASSES = {
 }
 
 
+def get_additional_checks_results(test_instances):
+    results = {}
+
+    for test_instance in test_instances:
+        if not test_instance.failed:
+            continue
+        for output in test_instance.output:
+            if output['type'] not in results:
+                results[output['type']] = []
+            results[output['type']].append({'path': output['json_location']})
+
+    return results
+
+
 @tools.ignore_errors
 def run_additional_checks(json_data, test_classes):
     if 'releases' not in json_data:
@@ -70,12 +84,4 @@ def run_additional_checks(json_data, test_classes):
         for test_instance in test_instances:
             test_instance.process(release, 'releases/{}'.format(num))
 
-    results = []
-
-    for test_instance in test_instances:
-        if not test_instance.failed:
-            continue
-        for output in test_instance.output:
-            results.append(output)
-
-    return results
+    return get_additional_checks_results(test_instances)
