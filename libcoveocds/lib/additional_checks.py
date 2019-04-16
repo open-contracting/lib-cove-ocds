@@ -66,10 +66,13 @@ def get_additional_checks_results(test_instances):
     for test_instance in test_instances:
         if not test_instance.failed:
             continue
+
         for output in test_instance.output:
-            if output['type'] not in results:
-                results[output['type']] = []
-            results[output['type']].append({'path': output['json_location']})
+            type = output['type']
+            if type not in results:
+                results[type] = []
+            output.pop('type', None)
+            results[type].append(output)
 
     return results
 

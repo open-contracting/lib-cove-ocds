@@ -10,9 +10,9 @@ def test_empty_fields_basic():
     additional_checks = run_additional_checks(data, TEST_CLASSES['additional'])
     result = {
         'empty_field': [
-            {'path': 'releases/0/parties/0/address'},
-            {'path': 'releases/0/planning/budget/id'},
-            {'path': 'releases/0/tender/items/0/additionalClassifications'}
+            {'json_location': 'releases/0/parties/0/address'},
+            {'json_location': 'releases/0/planning/budget/id'},
+            {'json_location': 'releases/0/tender/items/0/additionalClassifications'}
         ]
     }
 
@@ -30,19 +30,19 @@ def test_empty_fields_empty_string():
         ]
     }
 
-    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'path': 'releases/0/date'}]}
+    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'json_location': 'releases/0/date'}]}
 
 
 def test_empty_fields_empty_dict():
     data = {"releases": [{"buyer": {}}]}
 
-    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'path': 'releases/0/buyer'}]}
+    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'json_location': 'releases/0/buyer'}]}
 
 
 def test_empty_fields_empty_list():
     data = {"releases": [{"parties": []}]}
 
-    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'path': 'releases/0/parties'}]}
+    assert run_additional_checks(data, TEST_CLASSES['additional']) == {'empty_field': [{'json_location': 'releases/0/parties'}]}
 
 
 def test_empty_fields_all_fine():
