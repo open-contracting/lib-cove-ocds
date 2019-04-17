@@ -19,6 +19,10 @@ def ocds_json_output(output_dir, file, schema_version, convert, cache_schema=Fal
     if not lib_cove_ocds_config:
         lib_cove_ocds_config = LibCoveOCDSConfig()
 
+    # cache_schema is a deprecated option - now set cache_all_requests in the config instead.
+    if cache_schema:
+        lib_cove_ocds_config.config['cache_all_requests'] = True
+
     context = {}
     if not file_type:
         file_type = get_file_type(file)
@@ -32,7 +36,7 @@ def ocds_json_output(output_dir, file, schema_version, convert, cache_schema=Fal
                 except ValueError:
                     raise APIException('The file looks like invalid json')
 
-        schema_ocds = SchemaOCDS(schema_version, json_data, cache_schema=cache_schema)
+        schema_ocds = SchemaOCDS(schema_version, json_data, lib_cove_ocds_config=lib_cove_ocds_config)
 
         if schema_ocds.invalid_version_data:
             msg = '\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m'
@@ -48,9 +52,10 @@ def ocds_json_output(output_dir, file, schema_version, convert, cache_schema=Fal
             )
 
     else:
-        metatab_schema_url = SchemaOCDS(select_version='1.1').release_pkg_schema_url
+        metatab_schema_url = SchemaOCDS(select_version='1.1', lib_cove_ocds_config=lib_cove_ocds_config)\
+            .release_pkg_schema_url
         metatab_data = get_spreadsheet_meta_data(output_dir, file, metatab_schema_url, file_type=file_type)
-        schema_ocds = SchemaOCDS(schema_version, release_data=metatab_data, cache_schema=cache_schema)
+        schema_ocds = SchemaOCDS(schema_version, release_data=metatab_data, lib_cove_ocds_config=lib_cove_ocds_config)
 
         if schema_ocds.invalid_version_data:
             msg = '\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m'
