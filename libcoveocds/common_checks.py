@@ -2,6 +2,7 @@ import json
 
 from libcove.lib.common import common_checks_context, get_additional_codelist_values
 
+from libcoveocds.lib.additional_checks import run_additional_checks, TEST_CLASSES
 from libcoveocds.lib.common_checks import lookup_schema, get_releases_aggregates, \
     get_records_aggregates, add_conformance_rule_errors
 
@@ -81,6 +82,13 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
             'additional_closed_codelist_values': closed_codelist_values,
             'additional_open_codelist_values': open_codelist_values
         })
+
+    additional_checks = run_additional_checks(
+        json_data, TEST_CLASSES['additional'], ignore_errors=True, return_on_error=None)
+
+    context.update({
+        'additional_checks': additional_checks
+    })
 
     context = add_conformance_rule_errors(context, json_data, schema_obj)
     return context
