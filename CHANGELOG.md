@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Add additional check EmptyFieldCheck for records.
+
 ## [0.4.0] - 2019-04-17
 
 ### Added
 
 - cache_all_requests config option, off by default.
-- Add additional check EmptyFieldCheck.
+- Add additional check EmptyFieldCheck for releases.
 
 ### Changed
 
