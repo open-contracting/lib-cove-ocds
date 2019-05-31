@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.1] - 2019-05-31
+
+### Fixed
+
+- When cache_all_requests was on, some requests were not being cached
+
 ## [0.5.0] - 2019-05-09
 
 ### Added
