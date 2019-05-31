@@ -185,7 +185,7 @@ class SchemaOCDS(SchemaJsonMixin):
         for extensions_descriptor_url in self.extensions.keys():
 
             try:
-                response = requests.get(extensions_descriptor_url)
+                response = get_request(extensions_descriptor_url, config=self.config)
                 if not response.ok:
                     # extension descriptor is required to proceed
                     self.invalid_extension[extensions_descriptor_url] = '{}: {}'.format(
