@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.0] - 2019-06-26
+
+### Changed
+
+- OCDS Version 1.1.4 has been released! Changed default config to match
+- The standard site is now available over SSL
+
 ## [0.6.1] - 2019-06-14
 
 ### Changed
