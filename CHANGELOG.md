@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2019-06-10
+
+### Changed
+
+- Add handling of new additional fields context
+
 ## [0.5.1] - 2019-05-31
 
 ### Fixed
@@ -15,7 +21,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.5.0] - 2019-05-09
 
-### Added
 - Add additional check EmptyFieldCheck for records.
 
 ## [0.4.0] - 2019-04-17

@@ -14,7 +14,9 @@ def context_api_transform(context):
     context['deprecated_fields'] = []
 
     additional_fields = context.pop('data_only')
+    all_additional_fields = context.pop('additional_fields')
     context['additional_fields'] = []
+    context['all_additional_fields'] = []
     context.pop('additional_fields_count')
 
     context['ocds_prefixes_bad_format'] = list(context.pop('ocds_prefixes_bad_format', []))
@@ -55,5 +57,9 @@ def context_api_transform(context):
                 'field': field_group[1],
                 'usage_count': field_group[2]
             })
+
+    if all_additional_fields:
+        for info in all_additional_fields.values():
+            context['all_additional_fields'].append(info)
 
     return context

@@ -9,6 +9,7 @@ def test_context_api_transform_validation_additional_fields():
         'data_only': [['path_to_d', 'field_d', 1],
                       ['path_to_e', 'field_e', 2],
                       ['path_to_f', 'field_f', 3]],
+        'additional_fields': {'path_to_d': {'some_info': 'some_value'}},
         'additional_fields_count': 6,
         'validation_errors_count': 3
     }
@@ -16,6 +17,7 @@ def test_context_api_transform_validation_additional_fields():
         'additional_fields': [{'field': 'field_d', 'path': 'path_to_d', 'usage_count': 1},
                               {'field': 'field_e', 'path': 'path_to_e', 'usage_count': 2},
                               {'field': 'field_f', 'path': 'path_to_f', 'usage_count': 3}],
+        'all_additional_fields': [{'some_info': 'some_value'}],
         'deprecated_fields': [],
         'extensions': {},
         'validation_errors': [{'description': 'description_a', 'field': 'field_a', 'path': 'path_to_a', 'type': 'type_a', 'value': 'a_value'}, # noqa
@@ -78,6 +80,7 @@ def test_context_api_transform_extensions():
         'validation_errors_count': 0,
         'additional_fields_count': 0,
         'data_only': [],
+        'additional_fields': [],
         'deprecated_fields': []
     }
 
@@ -114,6 +117,7 @@ def test_context_api_transform_deprecations():
         'validation_errors': [],
         'validation_errors_count': 0,
         'data_only': [],
+        'additional_fields': [],
         'additional_fields_count': 0,
         'extensions': {},
     }
