@@ -382,7 +382,7 @@ def get_records_aggregates(json_data):
 
 def get_bad_ocds_prefixes(json_data):
     '''Yield tuples with ('ocid', 'path/to/ocid') for ocids with malformed prefixes'''
-    prefix_regex = re.compile(r'^ocds-[a-zA-Z0-9]{6}-')
+    prefix_regex = re.compile(r'^ocds-[a-z0-9]{6}')
     releases = json_data.get('releases', [])
     records = json_data.get('records', [])
     bad_prefixes = []
