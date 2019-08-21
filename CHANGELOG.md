@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.1] - 2019-08-21
+
 ### Changed
 
 - get_bad_ocds_prefixes no longer tests for hyphens after OCID prefixes, and no longer allows uppercase letters in OCID prefixes.
