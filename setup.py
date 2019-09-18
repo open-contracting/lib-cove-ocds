@@ -1,28 +1,46 @@
 from setuptools import setup, find_packages
 
+with open('README.md') as f:
+    long_description = f.read()
+
 setup(
     name='libcoveocds',
     version='0.7.1',
     author='Open Data Services',
-    author_email='code@opendataservices.coop',
+    author_email='data@open-contracting.org',
     url='https://github.com/open-contracting/lib-cove-ocds',
-    description='A data review library',
-    packages=find_packages(),
-    long_description='A data review library',
+    description='A data review library for the Open Contracting Data Standard (OCDS)',
+    license='AGPLv3',
+    packages=find_packages(exclude=['tests', 'tests.*']),
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     install_requires=[
-        'jsonref',
-        'jsonschema',
+        'bleach',
+        'cached-property',
         'CommonMark',
         'Django',
-        'bleach',
-        'requests',
         'json-merge-patch',
-        'cached-property',
-        # TODO Should also have flatten-tool >= v0.4.0 - that is currently in requirements instead.
+        'jsonref',
+        'jsonschema',
+        'requests',
+        # The following are in .travis.yml instead.
+        # 'flatten-tool',
+        # 'lib-cove',
     ],
+    extras_require={
+        'test': [
+            'coveralls',
+            'pytest',
+            'pytest-cov',
+        ],
+    },
     classifiers=[
-            'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+        'Programming Language :: Python :: 3.6',
     ],
-    entry_points='''[console_scripts]
-libcoveocds = libcoveocds.cli.__main__:main''',
+    entry_points={
+        'console_scripts': [
+            'libcoveocds = libcoveocds.cli.__main__:main',
+        ],
+    },
 )
