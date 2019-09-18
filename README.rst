@@ -21,9 +21,9 @@ Other code (in ``libcore``, ``lib``, etc.) should not be used by external users 
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/libcoveocds.svg
    :target: https://pypi.org/project/libcoveocds/
-.. |Build Status| image:: https://secure.travis-ci.org/open-contracting/libcoveocds.png
-   :target: https://travis-ci.org/open-contracting/libcoveocds
-.. |Coverage Status| image:: https://coveralls.io/repos/github/open-contracting/libcoveocds/badge.svg?branch=master
-   :target: https://coveralls.io/github/open-contracting/libcoveocds?branch=master
+.. |Build Status| image:: https://secure.travis-ci.org/open-contracting/lib-cove-ocds.png
+   :target: https://travis-ci.org/open-contracting/lib-cove-ocds
+.. |Coverage Status| image:: https://coveralls.io/repos/github/open-contracting/lib-cove-ocds/badge.svg?branch=master
+   :target: https://coveralls.io/github/open-contracting/lib-cove-ocds?branch=master
 .. |Python Version| image:: https://img.shields.io/pypi/pyversions/libcoveocds.svg
    :target: https://pypi.org/project/libcoveocds/
