@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.2] - 2019-09-18
+
+- Fixes package to declare dependencies in setup.py.
+
 ## [0.7.1] - 2019-08-21
 
 ### Changed
