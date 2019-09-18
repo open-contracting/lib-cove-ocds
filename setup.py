@@ -14,9 +14,8 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     long_description=long_description,
     install_requires=[
+        'flattentool',
         'libcove',
-        # The following are in .travis.yml instead.
-        # 'flatten-tool',
     ],
     extras_require={
         'test': [
