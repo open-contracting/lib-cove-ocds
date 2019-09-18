@@ -1,10 +1,16 @@
+sudo: false
 language: python
 cache: pip
 python:
   - "3.6"
   - "3.5"
+env:
+  - BASEDIR="https://raw.githubusercontent.com/open-contracting/standard-maintenance-scripts/master"
 install:
-  - pip install -r requirements_dev.txt
+  - curl -s -S --retry 3 $BASEDIR/tests/install.sh | bash -
+  - pip install .[test]
 script:
-  - flake8
-  - python -m pytest tests/
+  - curl -s -S --retry 3 $BASEDIR/tests/script.sh | bash -
+  - pytest --cov libcoveocds
+after_success:
+  coveralls
