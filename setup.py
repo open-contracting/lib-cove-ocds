@@ -15,14 +15,6 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     install_requires=[
-        'bleach',
-        'cached-property',
-        'CommonMark',
-        'Django',
-        'json-merge-patch',
-        'jsonref',
-        'jsonschema',
-        'requests',
         # The following are in .travis.yml instead.
         # 'flatten-tool',
         # 'lib-cove',
