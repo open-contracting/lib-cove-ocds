@@ -19,6 +19,17 @@ The only code that should be used directly by users is the ``libcoveocds.config`
 
 Other code (in ``libcore``, ``lib``, etc.) should not be used by external users of this library directly, as the structure and use of these may change more frequently.
 
+PyPi
+----
+
+This project is published on PyPi. https://pypi.org/project/libcoveocds/
+
+When creating a release version, please make sure to publish there too. 
+
+::
+
+   python setup.py sdist upload
+
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/libcoveocds.svg
    :target: https://pypi.org/project/libcoveocds/
 .. |Build Status| image:: https://secure.travis-ci.org/open-contracting/lib-cove-ocds.png
@@ -27,3 +38,5 @@ Other code (in ``libcore``, ``lib``, etc.) should not be used by external users 
    :target: https://coveralls.io/github/open-contracting/lib-cove-ocds?branch=master
 .. |Python Version| image:: https://img.shields.io/pypi/pyversions/libcoveocds.svg
    :target: https://pypi.org/project/libcoveocds/
+
+
