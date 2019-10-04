@@ -16,6 +16,14 @@ setup(
     install_requires=[
         'flattentool',
         'libcove',
+        'bleach',
+        'cached-property',
+        'CommonMark',
+        'Django',
+        'json-merge-patch',
+        'jsonref',
+        'jsonschema',
+        'requests',
     ],
     extras_require={
         'test': [
