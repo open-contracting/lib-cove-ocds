@@ -1,10 +1,12 @@
 import json
 
+import bleach
+from django.utils.html import conditional_escape, escape, format_html, mark_safe
 from libcove.lib.common import common_checks_context, get_additional_codelist_values
 
-from libcoveocds.lib.additional_checks import run_additional_checks, TEST_CLASSES
-from libcoveocds.lib.common_checks import lookup_schema, get_releases_aggregates, \
-    get_records_aggregates, add_conformance_rule_errors
+from libcoveocds.lib.additional_checks import TEST_CLASSES, run_additional_checks
+from libcoveocds.lib.common_checks import (add_conformance_rule_errors, get_records_aggregates,
+                                           get_releases_aggregates, lookup_schema)
 
 # This is so it can work with commonmark v0.8.1 and up (commonmark only!) and 0.7.5 and down (CommonMark only!)
 try:
@@ -12,9 +14,7 @@ try:
 except ImportError:
     import CommonMark as commonmark
 
-import bleach
 
-from django.utils.html import mark_safe, escape, conditional_escape, format_html
 
 
 validation_error_lookup = {

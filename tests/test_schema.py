@@ -1,8 +1,9 @@
-import libcoveocds.schema
-import libcoveocds.config
 import copy
+
 import pytest
 
+import libcoveocds.config
+import libcoveocds.schema
 
 DEFAULT_OCDS_VERSION = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT['schema_version']
 METRICS_EXT = 'https://raw.githubusercontent.com/open-contracting/ocds_metrics_extension/master/extension.json'

@@ -1,7 +1,7 @@
-import os
 import json
-from libcoveocds.lib.common_checks import get_releases_aggregates, get_bad_ocds_prefixes
+import os
 
+from libcoveocds.lib.common_checks import get_bad_ocds_prefixes, get_releases_aggregates
 
 EMPTY_RELEASE_AGGREGATE = {
     'award_doc_count': 0,
