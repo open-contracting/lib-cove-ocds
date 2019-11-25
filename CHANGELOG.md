@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.4] - 2019-10-31
+
 ### Fixed
 
 - Needed dependencies were removed. 
 Put back Python Dependencies until we can properly review which ones can be removed and which cant.
 https://github.com/open-contracting/lib-cove-ocds/issues/31
+- Don't error when looking up a path on a empty schema (e.g. due to broken refs)
 
 ## [0.7.3] - 2019-09-23
 

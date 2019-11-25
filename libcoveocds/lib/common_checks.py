@@ -355,6 +355,8 @@ def _lookup_schema(schema, path, ref_info=None):
             return _lookup_schema(schema['properties'][path_item], child_path, ref_info)
         else:
             return None, None
+    else:
+        return None, None
 
 
 def lookup_schema(schema, path):
