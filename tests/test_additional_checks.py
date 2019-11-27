@@ -1,6 +1,6 @@
 import json
 
-from libcoveocds.lib.additional_checks import run_additional_checks, TEST_CLASSES
+from libcoveocds.lib.additional_checks import TEST_CLASSES, run_additional_checks
 
 
 def test_empty_fields_releases_basic():

@@ -1,9 +1,10 @@
-import tempfile
+import json
+import os
 import shutil
+import tempfile
+
 import libcoveocds.common_checks
 import libcoveocds.schema
-import os
-import json
 
 
 def test_basic_1():
