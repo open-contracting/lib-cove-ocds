@@ -30,6 +30,7 @@ setup(
             'coveralls',
             'pytest',
             'pytest-cov',
+            'isort',
         ],
     },
     classifiers=[
