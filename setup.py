@@ -21,6 +21,9 @@ setup(
         'Django',
         'json-merge-patch',
         'requests',
+        # libcove doesn't declare all its direct dependencies.
+        # https://github.com/OpenDataServices/lib-cove/issues/30
+        'flattentool',
     ],
     extras_require={
         'test': [
