@@ -2,13 +2,11 @@ import json
 import os
 from collections import OrderedDict
 from copy import deepcopy
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import json_merge_patch
 import requests
-from cached_property import cached_property
-from libcove.lib.common import (SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists,
-                                schema_dict_fields_generator)
+from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists
 from libcove.lib.tools import get_request
 
 import libcoveocds.config

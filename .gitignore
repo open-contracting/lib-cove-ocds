@@ -4,3 +4,5 @@
 /.ve
 /dist
 __pycache__
+*.swp
+*~
