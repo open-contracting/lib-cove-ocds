@@ -428,7 +428,7 @@ def add_conformance_rule_errors(context, json_data, schema_obj):
     ocds_prefixes_bad_format = get_bad_ocds_prefixes(json_data)
 
     if ocds_prefixes_bad_format:
-        ocid_schema_description = schema_obj.get_release_schema_obj()['properties']['ocid']['description']
+        ocid_schema_description = schema_obj.get_schema_obj()['properties']['ocid']['description']
         ocid_info_index = ocid_schema_description.index('For more information')
         ocid_description = ocid_schema_description[:ocid_info_index]
         ocid_info_url = ocid_schema_description[ocid_info_index:].split('[')[1].split(']')[1][1:-1]

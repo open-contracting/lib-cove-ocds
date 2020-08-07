@@ -45,9 +45,9 @@ def ocds_json_output(output_dir, file, schema_version, convert, cache_schema=Fal
             msg = '\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m'
             raise APIException(msg.format(str(list(schema_ocds.version_choices.keys()))))
         if schema_ocds.extensions:
-            schema_ocds.create_extended_release_schema_file(output_dir, "")
+            schema_ocds.create_extended_schema_file(output_dir, "")
 
-        url = schema_ocds.extended_schema_file or schema_ocds.release_schema_url
+        url = schema_ocds.extended_schema_file or schema_ocds.schema_url
 
         if convert:
             context.update(convert_json(
@@ -56,7 +56,7 @@ def ocds_json_output(output_dir, file, schema_version, convert, cache_schema=Fal
 
     else:
         metatab_schema_url = SchemaOCDS(select_version='1.1', lib_cove_ocds_config=lib_cove_ocds_config)\
-            .release_pkg_schema_url
+            .pkg_schema_url
         metatab_data = get_spreadsheet_meta_data(output_dir, file, metatab_schema_url, file_type=file_type)
         schema_ocds = SchemaOCDS(schema_version, release_data=metatab_data, lib_cove_ocds_config=lib_cove_ocds_config)
 
@@ -64,10 +64,10 @@ def ocds_json_output(output_dir, file, schema_version, convert, cache_schema=Fal
             msg = '\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m'
             raise APIException(msg.format(str(list(schema_ocds.version_choices.keys()))))
         if schema_ocds.extensions:
-            schema_ocds.create_extended_release_schema_file(output_dir, '')
+            schema_ocds.create_extended_schema_file(output_dir, '')
 
-        url = schema_ocds.extended_schema_file or schema_ocds.release_schema_url
-        pkg_url = schema_ocds.release_pkg_schema_url
+        url = schema_ocds.extended_schema_file or schema_ocds.schema_url
+        pkg_url = schema_ocds.pkg_schema_url
 
         context.update(convert_spreadsheet(
             output_dir, '', file, file_type, lib_cove_ocds_config, schema_url=url, pkg_schema_url=pkg_url, cache=False)

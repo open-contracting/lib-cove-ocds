@@ -115,9 +115,7 @@ validator.VALIDATORS["oneOf"] = oneOf_draft4
 
 
 def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, cache=True):
-    schema_name = schema_obj.release_pkg_schema_name
-    if 'records' in json_data:
-        schema_name = schema_obj.record_pkg_schema_name
+    schema_name = schema_obj.pkg_schema_name
     common_checks = common_checks_context(upload_dir, json_data, schema_obj, schema_name, context,
                                           fields_regex=True, api=api, cache=cache)
     validation_errors = common_checks['context']['validation_errors']
@@ -134,7 +132,7 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
             else:
                 error['message_safe'] = conditional_escape(error['message'])
 
-        schema_block, ref_info = lookup_schema(schema_obj.get_release_pkg_schema_obj(deref=True), error['path_no_number']) # noqa
+        schema_block, ref_info = lookup_schema(schema_obj.get_pkg_schema_obj(deref=True), error['path_no_number']) # noqa
         if schema_block and error['message_type'] != 'required':
             if 'description' in schema_block:
                 error['schema_title'] = escape(schema_block.get('title', ''))
@@ -163,7 +161,9 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
 
     if schema_name == 'record-package-schema.json':
         context['records_aggregates'] = get_records_aggregates(json_data, ignore_errors=bool(validation_errors))
-        context['schema_url'] = schema_obj.record_pkg_schema_url
+        # Do this for records, as there's no record-schema.json (this probably
+        # causes problems for flatten-tool)
+        context['schema_url'] = schema_obj.pkg_schema_url
     else:
         additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
         closed_codelist_values = {key: value for key, value in additional_codelist_values.items() if not value['isopen']} # noqa

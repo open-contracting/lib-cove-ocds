@@ -523,7 +523,10 @@ def test_validation_release_or_record_package(
         json_data = json.load(fp)
 
     cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS()
+    if package_schema_filename == 'record-package-schema.json':
+        schema = libcoveocds.schema.SchemaOCDS(record_pkg=True)
+    else:
+        schema = libcoveocds.schema.SchemaOCDS(record_pkg=False)
     context = {
         'file_type': 'json',
     }
