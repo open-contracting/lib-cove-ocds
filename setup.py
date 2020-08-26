@@ -5,7 +5,7 @@ with open('README.rst', encoding='utf-8') as f:
 
 setup(
     name='libcoveocds',
-    version='0.7.6',
+    version='0.8.0',
     author='Open Data Services',
     author_email='data@open-contracting.org',
     url='https://github.com/open-contracting/lib-cove-ocds',
