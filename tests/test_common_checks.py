@@ -190,7 +190,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.", # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#39;id&#39; whereas linked releases do not. Your releases contain a mixture.", # noqa
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.", # noqa
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
@@ -324,7 +324,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.", # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#39;id&#39; whereas linked releases do not. Your releases contain a mixture.", # noqa
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.", # noqa
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
