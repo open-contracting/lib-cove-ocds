@@ -12,13 +12,18 @@ UNKNOWN_URL_EXT = 'http://bad-url-for-extensions.com/extension.json'
 NOT_FOUND_URL_EXT = 'https://standard.open-contracting.org/this-file-is-not-found-404.json/en'
 
 
-def test_basic_1():
-    schema = libcoveocds.schema.SchemaOCDS()
+@pytest.mark.parametrize('record_pkg', [False, True])
+def test_basic_1(record_pkg):
+    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg)
 
     assert schema.version == "1.1"
-    assert schema.release_schema_name == "release-schema.json"
-    assert schema.release_pkg_schema_name == "release-package-schema.json"
-    assert schema.record_pkg_schema_name == "record-package-schema.json"
+    if record_pkg:
+        # Ignore schema.schema_name for records, as there's no
+        # record-schema.json (this probably causes problems for flatten-tool)
+        assert schema.pkg_schema_name == "record-package-schema.json"
+    else:
+        assert schema.schema_name == "release-schema.json"
+        assert schema.pkg_schema_name == "release-package-schema.json"
     assert schema.default_version == "1.1"
     assert schema.default_schema_host == "https://standard.open-contracting.org/schema/1__1__5/"
     assert schema.schema_host == "https://standard.open-contracting.org/schema/1__1__5/"
@@ -31,19 +36,24 @@ def test_deprecated_cache_schema_1():
     assert schema.config.config['cache_all_requests']
 
 
-def test_pass_config_1():
+@pytest.mark.parametrize('record_pkg', [False, True])
+def test_pass_config_1(record_pkg):
 
     config = copy.deepcopy(libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT)
     config['schema_version'] = '1.0'
 
     lib_cove_ocds_config = libcoveocds.config.LibCoveOCDSConfig(config=config)
 
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=lib_cove_ocds_config)
+    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=lib_cove_ocds_config, record_pkg=record_pkg)
 
     assert schema.version == "1.0"
-    assert schema.release_schema_name == "release-schema.json"
-    assert schema.release_pkg_schema_name == "release-package-schema.json"
-    assert schema.record_pkg_schema_name == "record-package-schema.json"
+    if record_pkg:
+        # Ignore schema.schema_name for records, as there's no
+        # record-schema.json (this probably causes problems for flatten-tool)
+        assert schema.pkg_schema_name == "record-package-schema.json"
+    else:
+        assert schema.schema_name == "release-schema.json"
+        assert schema.pkg_schema_name == "release-package-schema.json"
     assert schema.default_version == "1.0"
     assert schema.default_schema_host == "https://standard.open-contracting.org/schema/1__0__3/"
     assert schema.schema_host == "https://standard.open-contracting.org/schema/1__0__3/"
@@ -71,9 +81,9 @@ def test_schema_ocds_constructor(select_version, release_data, version, invalid_
     url = host + name
 
     assert schema.version == version
-    assert schema.release_pkg_schema_name == name
+    assert schema.pkg_schema_name == name
     assert schema.schema_host == host
-    assert schema.release_pkg_schema_url == url
+    assert schema.pkg_schema_url == url
     assert schema.invalid_version_argument == invalid_version_argument
     assert schema.invalid_version_data == invalid_version_data
     assert schema.extensions == extensions
@@ -95,13 +105,13 @@ def test_schema_ocds_extensions(release_data, extensions, invalid_extension, ext
     assert schema.extensions == extensions
     assert not schema.extended
 
-    release_schema_obj = schema.get_release_schema_obj()
+    schema_obj = schema.get_schema_obj()
     assert schema.invalid_extension == invalid_extension
     assert schema.extended == extended
 
     if extends_schema:
-        assert 'Metric' in release_schema_obj['definitions'].keys()
-        assert release_schema_obj['definitions']['Award']['properties'].get('agreedMetrics')
+        assert 'Metric' in schema_obj['definitions'].keys()
+        assert schema_obj['definitions']['Award']['properties'].get('agreedMetrics')
     else:
-        assert 'Metric' not in release_schema_obj['definitions'].keys()
-        assert not release_schema_obj['definitions']['Award']['properties'].get('agreedMetrics')
+        assert 'Metric' not in schema_obj['definitions'].keys()
+        assert not schema_obj['definitions']['Award']['properties'].get('agreedMetrics')

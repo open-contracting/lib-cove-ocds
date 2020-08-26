@@ -2,13 +2,11 @@ import json
 import os
 from collections import OrderedDict
 from copy import deepcopy
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import json_merge_patch
 import requests
-from cached_property import cached_property
-from libcove.lib.common import (SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists,
-                                schema_dict_fields_generator)
+from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists
 from libcove.lib.tools import get_request
 
 import libcoveocds.config
@@ -16,7 +14,8 @@ import libcoveocds.config
 
 class SchemaOCDS(SchemaJsonMixin):
 
-    def __init__(self, select_version=None, release_data=None, cache_schema=False, lib_cove_ocds_config=None):
+    def __init__(self, select_version=None, release_data=None, cache_schema=False, lib_cove_ocds_config=None,
+                 record_pkg=False):
         '''Build the schema object using an specific OCDS schema version
 
         The version used will be select_version, release_data.get('version') or
@@ -26,9 +25,18 @@ class SchemaOCDS(SchemaJsonMixin):
         '''
 
         self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
-        self.release_schema_name = self.config.config['schema_item_name']
-        self.release_pkg_schema_name = self.config.config['schema_name']['release']
-        self.record_pkg_schema_name = self.config.config['schema_name']['record']
+        self.schema_name = self.config.config['schema_item_name']
+        self.pkg_schema_name = self.config.config['schema_name']['release']
+        self.record_pkg = record_pkg
+        if record_pkg:
+            self.pkg_schema_name = self.config.config['schema_name']['record']
+            self.release_schema = SchemaOCDS(
+                select_version=select_version,
+                release_data=release_data,
+                cache_schema=cache_schema,
+                lib_cove_ocds_config=lib_cove_ocds_config,
+                record_pkg=False,
+            )
         self.version_choices = self.config.config['schema_version_choices']
         self.default_version = self.config.config['schema_version']
         self.default_schema_host = self.version_choices[self.default_version][1]
@@ -85,9 +93,8 @@ class SchemaOCDS(SchemaJsonMixin):
         else:
             pass
 
-        self.release_schema_url = urljoin(self.schema_host, self.release_schema_name)
-        self.release_pkg_schema_url = urljoin(self.schema_host, self.release_pkg_schema_name)
-        self.record_pkg_schema_url = urljoin(self.schema_host, self.record_pkg_schema_name)
+        self.schema_url = urljoin(self.schema_host, self.schema_name)
+        self.pkg_schema_url = urljoin(self.schema_host, self.pkg_schema_name)
 
     def process_codelists(self):
         self.core_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=False)
@@ -149,33 +156,43 @@ class SchemaOCDS(SchemaJsonMixin):
                 except KeyError:
                     self.extended_codelist_urls[codelist] = [base_url + codelist]
 
-    def get_release_schema_obj(self, deref=False):
-        release_schema_obj = self._release_schema_obj
+    def get_schema_obj(self, deref=False):
+        schema_obj = self._schema_obj
         if self.extended_schema_file:
             with open(self.extended_schema_file) as fp:
-                release_schema_obj = json.load(fp)
+                schema_obj = json.load(fp)
         elif self.extensions:
-            release_schema_obj = deepcopy(self._release_schema_obj)
-            self.apply_extensions(release_schema_obj)
+            schema_obj = deepcopy(self._schema_obj)
+            self.apply_extensions(schema_obj)
         if deref:
             if self.extended:
-                extended_release_schema_str = json.dumps(release_schema_obj)
-                release_schema_obj = self.deref_schema(extended_release_schema_str)
+                extended_schema_str = json.dumps(schema_obj)
+                schema_obj = self.deref_schema(extended_schema_str)
             else:
-                release_schema_obj = self.deref_schema(self.release_schema_str)
-        return release_schema_obj
+                schema_obj = self.deref_schema(self.schema_str)
+        return schema_obj
 
-    def get_release_pkg_schema_obj(self, deref=False, use_extensions=True):
-        package_schema_obj = deepcopy(self._release_pkg_schema_obj)
+    def get_pkg_schema_obj(self, deref=False, use_extensions=True):
+        package_schema_obj = deepcopy(self._pkg_schema_obj)
         if deref:
             if self.extended and use_extensions:
-                deref_release_schema_obj = self.get_release_schema_obj(deref=True)
-                package_schema_obj['properties']['releases']['items'] = {}
-                release_pkg_schema_str = json.dumps(package_schema_obj)
-                package_schema_obj = self.deref_schema(release_pkg_schema_str)
-                package_schema_obj['properties']['releases']['items'].update(deref_release_schema_obj)
+
+                if self.record_pkg:
+                    package_schema_obj = self.deref_schema(self.pkg_schema_str)
+                    deref_release_schema_obj = self.release_schema.get_schema_obj(deref=True)
+                    package_schema_obj['properties']['records']['items'][
+                        'properties']['compiledRelease'] = deref_release_schema_obj
+                    package_schema_obj['properties']['records']['items'][
+                        'properties']['releases']['oneOf'][1] = deref_release_schema_obj
+                else:
+                    deref_schema_obj = self.get_schema_obj(deref=True)
+                    package_schema_obj['properties']['releases']['items'] = {}
+                    pkg_schema_str = json.dumps(package_schema_obj)
+                    package_schema_obj = self.deref_schema(pkg_schema_str)
+                    package_schema_obj['properties']['releases']['items'].update(deref_schema_obj)
+
             else:
-                return self.deref_schema(self.release_pkg_schema_str)
+                return self.deref_schema(self.pkg_schema_str)
         return package_schema_obj
 
     def apply_extensions(self, schema_obj):
@@ -226,7 +243,7 @@ class SchemaOCDS(SchemaJsonMixin):
                 continue
             cur_language = self.config.config['current_language']
 
-            extension_description = {'url': extensions_descriptor_url, 'release_schema_url': url}
+            extension_description = {'url': extensions_descriptor_url, 'schema_url': url}
 
             for field in ['description', 'name', 'documentationUrl']:
                 field_object = extensions_descriptor.get(field, {})
@@ -245,8 +262,8 @@ class SchemaOCDS(SchemaJsonMixin):
             self.extensions[extensions_descriptor_url] = extension_description
             self.extended = True
 
-    def create_extended_release_schema_file(self, upload_dir, upload_url):
-        filepath = os.path.join(upload_dir, 'extended_release_schema.json')
+    def create_extended_schema_file(self, upload_dir, upload_url):
+        filepath = os.path.join(upload_dir, 'extended_schema.json')
 
         # Always replace any existing extended schema file
         if os.path.exists(filepath):
@@ -257,42 +274,13 @@ class SchemaOCDS(SchemaJsonMixin):
         if not self.extensions:
             return
 
-        release_schema_obj = self.get_release_schema_obj()
+        schema_obj = self.get_schema_obj()
         if not self.extended:
             return
 
         with open(filepath, 'w') as fp:
-            release_schema_str = json.dumps(release_schema_obj, indent=4)
-            fp.write(release_schema_str)
+            schema_str = json.dumps(schema_obj, indent=4)
+            fp.write(schema_str)
 
         self.extended_schema_file = filepath
-        self.extended_schema_url = urljoin(upload_url, 'extended_release_schema.json')
-
-    @cached_property
-    def record_pkg_schema_str(self):
-        uri_scheme = urlparse(self.record_pkg_schema_url).scheme
-        if uri_scheme == 'http' or uri_scheme == 'https':
-            response = get_request(self.record_pkg_schema_url, config=self.config)
-            return response.text
-        else:
-            with open(self.record_pkg_schema_url) as fp:
-                return fp.read()
-
-    @property
-    def _record_pkg_schema_obj(self):
-        return json.loads(self.record_pkg_schema_str)
-
-    def get_record_pkg_schema_obj(self, deref=False):
-        if deref:
-            deref_package_schema = self.deref_schema(self.record_pkg_schema_str)
-            if self.extended:
-                deref_release_schema_obj = self.get_release_schema_obj(deref=True)
-                deref_package_schema['properties']['records']['items'][
-                    'properties']['compiledRelease'] = deref_release_schema_obj
-                deref_package_schema['properties']['records']['items'][
-                    'properties']['releases']['oneOf'][1] = deref_release_schema_obj
-            return deref_package_schema
-        return deepcopy(self._record_pkg_schema_obj)
-
-    def get_record_pkg_schema_fields(self):
-        return set(schema_dict_fields_generator(self.get_record_pkg_schema_obj(deref=True)))
+        self.extended_schema_url = urljoin(upload_url, 'extended_schema.json')
