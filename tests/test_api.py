@@ -4,7 +4,12 @@ import tempfile
 
 import pytest
 
+import libcoveocds.config
 from libcoveocds.api import APIException, ocds_json_output
+
+# Cache for faster tests.
+config = libcoveocds.config.LibCoveOCDSConfig()
+config.config['cache_all_requests'] = True
 
 
 def test_basic_1():
@@ -14,7 +19,8 @@ def test_basic_1():
         os.path.realpath(__file__)), 'fixtures', 'api', 'basic_1.json'
     )
 
-    results = ocds_json_output(cove_temp_folder, json_filename, schema_version='', convert=False)
+    results = ocds_json_output(cove_temp_folder, json_filename, schema_version='', convert=False,
+                               lib_cove_ocds_config=config)
 
     assert results['version_used'] == '1.1'
 
