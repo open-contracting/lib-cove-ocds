@@ -6,6 +6,13 @@ import tempfile
 import libcoveocds.api
 
 
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Lib Cove OCDS CLI')
     parser.add_argument("filename")
@@ -25,7 +32,7 @@ def main():
     finally:
         shutil.rmtree(cove_temp_folder)
 
-    print(json.dumps(result, indent=4))
+    print(json.dumps(result, indent=4, cls=SetEncoder))
 
 
 if __name__ == '__main__':
