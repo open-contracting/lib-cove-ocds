@@ -50,6 +50,7 @@ def get_releases_aggregates(json_data):
     release_award_item_ids = set()
     release_contract_item_ids = set()
     item_identifier_schemes = set()
+    unique_item_ids = set()
 
     unique_currency = set()
 
@@ -153,6 +154,8 @@ def get_releases_aggregates(json_data):
             tender_items = tender.get('items', [])
             for item in tender_items:
                 item_id = item.get('id')
+                if item_id:
+                    unique_item_ids.add(item_id)
                 if item_id and release_id:
                     release_tender_item_ids.add((ocid, release_id, item_id))
                 get_item_scheme(item)
@@ -177,6 +180,8 @@ def get_releases_aggregates(json_data):
             award_items = award.get('items', [])
             for item in award_items:
                 item_id = item.get('id')
+                if item_id:
+                    unique_item_ids.add(item_id)
                 if item_id and release_id and award_id:
                     release_award_item_ids.add((ocid, release_id, award_id, item_id))
                 get_item_scheme(item)
@@ -200,6 +205,8 @@ def get_releases_aggregates(json_data):
             contract_items = contract.get('items', [])
             for item in contract_items:
                 item_id = item.get('id')
+                if item_id:
+                    unique_item_ids.add(item_id)
                 if item_id and release_id and contract_id:
                     release_contract_item_ids.add((ocid, release_id, contract_id, item_id))
                 get_item_scheme(item)
@@ -315,6 +322,7 @@ def get_releases_aggregates(json_data):
         tender_item_count=len(release_tender_item_ids),
         award_item_count=len(release_award_item_ids),
         contract_item_count=len(release_contract_item_ids),
+        unique_item_ids_count=len(unique_item_ids),
 
         item_identifier_schemes=sorted(item_identifier_schemes, key=lambda x: str(x)),
         unique_currency=sorted(unique_currency, key=lambda x: str(x)),
