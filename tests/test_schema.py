@@ -5,6 +5,10 @@ import pytest
 import libcoveocds.config
 import libcoveocds.schema
 
+# Cache for faster tests.
+config = libcoveocds.config.LibCoveOCDSConfig()
+config.config['cache_all_requests'] = True
+
 DEFAULT_OCDS_VERSION = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT['schema_version']
 METRICS_EXT = 'https://raw.githubusercontent.com/open-contracting/ocds_metrics_extension/master/extension.json'
 CODELIST_EXT = 'https://raw.githubusercontent.com/INAImexico/ocds_extendedProcurementCategory_extension/0ed54770c85500cf21f46e88fb06a30a5a2132b1/extension.json' # noqa
@@ -101,7 +105,7 @@ def test_schema_ocds_constructor(select_version, release_data, version, invalid_
      {UNKNOWN_URL_EXT: 'fetching failed'}, True, True),
 ])
 def test_schema_ocds_extensions(release_data, extensions, invalid_extension, extended, extends_schema):
-    schema = libcoveocds.schema.SchemaOCDS(release_data=release_data)
+    schema = libcoveocds.schema.SchemaOCDS(release_data=release_data, lib_cove_ocds_config=config)
     assert schema.extensions == extensions
     assert not schema.extended
 
