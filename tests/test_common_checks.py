@@ -86,12 +86,12 @@ def test_dupe_ids_1():
 
 
 @pytest.mark.parametrize(
-    "package_schema_filename,filename,schema_subdir,validation_error_jsons_expected",
+    "record_pkg,filename,schema_subdir,validation_error_jsons_expected",
     [
-        ("release-package-schema.json", "releases_no_validation_errors.json", "", []),
-        ("record-package-schema.json", "records_no_validation_errors.json", "", []),
+        (False, "releases_no_validation_errors.json", "", []),
+        (True, "records_no_validation_errors.json", "", []),
         (
-            "record-package-schema.json",
+            True,
             "records_invalid_releases.json",
             "",
             [
@@ -225,7 +225,7 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_invalid_releases.json",
             "1-0",
             [
@@ -359,7 +359,7 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "release-package-schema.json",
+            False,
             "releases_non_unique.json",
             "",
             [
@@ -382,7 +382,7 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_non_unique.json",
             "",
             [
@@ -405,7 +405,7 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "release-package-schema.json",
+            False,
             "releases_non_unique_no_id.json",
             "",
             [
@@ -438,7 +438,7 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_non_unique_no_ocid.json",
             "",
             [
@@ -473,7 +473,7 @@ def test_dupe_ids_1():
         # Check that we handle unique arrays correctly also
         # (e.g. that we don't incorrectly claim they are not unique)
         (
-            "release-package-schema.json",
+            False,
             "releases_unique.json",
             "",
             [
@@ -493,7 +493,7 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_unique.json",
             "",
             [
@@ -515,7 +515,7 @@ def test_dupe_ids_1():
     ],
 )
 def test_validation_release_or_record_package(
-    package_schema_filename, filename, validation_error_jsons_expected, schema_subdir
+    record_pkg, filename, validation_error_jsons_expected, schema_subdir
 ):
     schema_host = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -528,10 +528,7 @@ def test_validation_release_or_record_package(
         json_data = json.load(fp)
 
     cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
-    if package_schema_filename == 'record-package-schema.json':
-        schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config, record_pkg=True)
-    else:
-        schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config, record_pkg=False)
+    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config, record_pkg=record_pkg)
     context = {
         'file_type': 'json',
     }
