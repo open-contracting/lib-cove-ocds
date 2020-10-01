@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] 
 
+### Added
+
+- Added many options to CLI: convert, output-dir, schema-version, delete, exclude-file
+
 ### Changed
 
 - Cache all requests in the tests https://github.com/OpenDataServices/lib-cove/pull/59
