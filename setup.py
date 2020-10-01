@@ -21,6 +21,7 @@ setup(
         'Django',
         'json-merge-patch',
         'requests',
+        'click',
     ],
     extras_require={
         'test': [
