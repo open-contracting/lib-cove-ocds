@@ -21,7 +21,7 @@ def flatten_dict(data, path=""):
             yield ("{}/{}".format(path, key), value)
 
 
-class AdditionalCheck():
+class AdditionalCheck:
     def __init__(self, **kw):
         self.failed = False
         self.output = []
@@ -35,10 +35,7 @@ class EmptyFieldCheck(AdditionalCheck):
 
     def update_object(self, path_prefix, key):
         self.failed = True
-        self.output.append({
-            'type': 'empty_field',
-            'json_location': path_prefix + key
-        })
+        self.output.append({"type": "empty_field", "json_location": path_prefix + key})
 
     def process(self, data, path_prefix):
         flattened_data = OrderedDict(flatten_dict(data))
@@ -52,11 +49,7 @@ class EmptyFieldCheck(AdditionalCheck):
                 self.update_object(path_prefix, key)
 
 
-TEST_CLASSES = {
-    'additional': [
-        EmptyFieldCheck
-    ]
-}
+TEST_CLASSES = {"additional": [EmptyFieldCheck]}
 
 
 def get_additional_checks_results(test_instances):
@@ -67,24 +60,24 @@ def get_additional_checks_results(test_instances):
             continue
 
         for output in test_instance.output:
-            type = output['type']
+            type = output["type"]
             if type not in results:
                 results[type] = []
-            output.pop('type', None)
+            output.pop("type", None)
             results[type].append(output)
 
     return results
 
 
 def get_file_type_records_or_releases(json_data):
-    if json_data.get('releases'):
-        return 'releases'
-    return 'records'
+    if json_data.get("releases"):
+        return "releases"
+    return "records"
 
 
 @tools.ignore_errors
 def run_additional_checks(json_data, test_classes):
-    if json_data.get('releases') is None and json_data.get('records') is None:
+    if json_data.get("releases") is None and json_data.get("records") is None:
         return []
 
     file_type = get_file_type_records_or_releases(json_data)
@@ -93,6 +86,6 @@ def run_additional_checks(json_data, test_classes):
 
     for num, data in enumerate(json_data[file_type]):
         for test_instance in test_instances:
-            test_instance.process(data, '{}/{}'.format(file_type, num))
+            test_instance.process(data, "{}/{}".format(file_type, num))
 
     return get_additional_checks_results(test_instances)
