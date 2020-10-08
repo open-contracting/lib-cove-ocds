@@ -77,10 +77,12 @@ def test_context_api_transform_extensions():
 
     'extensions': {
         'extended_schema_url': 'extended_release_schema.json',
-        'extensions': [{'description': 'description_a', 'documentationUrl': 'documentation_a', 'name': 'a', 'url': 'url_a'}, # noqa
-                       {'description': 'description_b', 'documentationUrl': 'documentation_b', 'name': 'b', 'url': 'url_b'}, # noqa
-                       {'description': 'description_c', 'documentationUrl': 'documentation_c', 'name': 'c', 'url': 'url_c'}, # noqa
-                       {'description': 'description_d', 'documentationUrl': 'documentation_d', 'name': 'd', 'url': 'url_d'}], # noqa
+        'extensions': [
+            {'description': 'description_a', 'documentationUrl': 'documentation_a', 'name': 'a', 'url': 'url_a'},
+            {'description': 'description_b', 'documentationUrl': 'documentation_b', 'name': 'b', 'url': 'url_b'},
+            {'description': 'description_c', 'documentationUrl': 'documentation_c', 'name': 'c', 'url': 'url_c'},
+            {'description': 'description_d', 'documentationUrl': 'documentation_d', 'name': 'd', 'url': 'url_d'},
+        ],
         'invalid_extensions': [['bad_url_x', 'x_error_msg'],
                                ['bad_url_z', 'z_error_msg'],
                                ['bad_url_y', 'y_error_msg']],
