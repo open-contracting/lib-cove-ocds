@@ -22,8 +22,8 @@ except ImportError:
 
 validation_error_lookup = {
     "date-time": mark_safe(
-        'Incorrect date format. Dates should use the form YYYY-MM-DDT00:00:00Z. Learn more about <a href="https://standard.open-contracting.org/latest/en/schema/reference/#date">dates in OCDS</a>.'
-    ),  # noqa
+        'Incorrect date format. Dates should use the form YYYY-MM-DDT00:00:00Z. Learn more about <a href="https://standard.open-contracting.org/latest/en/schema/reference/#date">dates in OCDS</a>.'  # noqa: E501
+    ),
 }
 
 
@@ -133,7 +133,7 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
 
         schema_block, ref_info = lookup_schema(
             schema_obj.get_pkg_schema_obj(deref=True), error["path_no_number"]
-        )  # noqa
+        )
         if schema_block and error["message_type"] != "required":
             if "description" in schema_block:
                 error["schema_title"] = escape(schema_block.get("title", ""))
@@ -170,7 +170,7 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
         additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
         closed_codelist_values = {
             key: value for key, value in additional_codelist_values.items() if not value["isopen"]
-        }  # noqa
+        }
         open_codelist_values = {key: value for key, value in additional_codelist_values.items() if value["isopen"]}
 
         context.update(

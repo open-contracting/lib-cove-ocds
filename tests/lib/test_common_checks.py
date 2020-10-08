@@ -199,7 +199,7 @@ def test_get_releases_aggregates():
         os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "release_aggregate.json"
         )
-    ) as fp:  # noqa
+    ) as fp:
         data = json.load(fp)
 
     assert get_releases_aggregates({"releases": data["releases"]}) == EXPECTED_RELEASE_AGGREGATE
@@ -219,7 +219,7 @@ def test_get_releases_aggregates():
 
     with open(
         os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "samplerubbish.json")
-    ) as fp:  # noqa
+    ) as fp:
         data = json.load(fp)
 
     actual = get_releases_aggregates(data)
@@ -229,7 +229,7 @@ def test_get_releases_aggregates():
 
     with open(
         os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "badfile.json")
-    ) as fp:  # noqa
+    ) as fp:
         data = json.load(fp)
 
     actual = get_releases_aggregates(data, ignore_errors=True)
@@ -243,7 +243,7 @@ def test_release_bad_ocds_prefixes():
         "fixtures",
         "common_checks",
         "tenders_releases_7_releases_check_ocids.json",
-    )  # noqa
+    )
     results = [
         ("bad-prefix-000001", "releases/0/ocid"),
         ("bad-prefix-000002", "releases/1/ocid"),
@@ -268,7 +268,7 @@ def test_release_bad_ocds_prefixes():
 def test_record_bad_ocds_prefixes_with_bad_compiled_release():
     file_name = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "record_check_ocids.json"
-    )  # noqa
+    )
     results = [
         ("bad-prefix-000001", "records/0/ocid"),
     ]

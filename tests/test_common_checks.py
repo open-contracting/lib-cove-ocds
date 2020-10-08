@@ -194,8 +194,8 @@ def test_dupe_ids_1():
                     "values": [{"path": "records/1/releases/0"}],
                 },
                 {
-                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa
+                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
@@ -211,7 +211,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa
+                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa: E501
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -328,8 +328,8 @@ def test_dupe_ids_1():
                     "values": [{"path": "records/1/releases/0"}],
                 },
                 {
-                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa
+                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
@@ -345,7 +345,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa
+                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa: E501
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",

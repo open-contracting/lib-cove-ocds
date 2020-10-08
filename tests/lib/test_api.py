@@ -7,16 +7,16 @@ def test_context_api_transform_validation_additional_fields():
             [
                 '{"message_type":"type_a", "message":"description_a", "path_no_number":"field_a"}',
                 [{"path": "path_to_a", "value": "a_value"}],
-            ],  # noqa
+            ],
             [
                 '{"message_type":"type_b", "message":"description_b", "path_no_number":"field_b"}',
                 [{"path": "path_to_b", "value": ""}],
-            ],  # noqa
+            ],
             [
                 '{"message_type":"type_c", "message":"description_c", "path_no_number":"field_c"}',
                 [{"path": "path_to_c"}],
             ],
-        ],  # noqa
+        ],
         "data_only": [["path_to_d", "field_d", 1], ["path_to_e", "field_e", 2], ["path_to_f", "field_f", 3]],
         "additional_fields": {"path_to_d": {"some_info": "some_value"}},
         "additional_fields_count": 6,
@@ -38,16 +38,16 @@ def test_context_api_transform_validation_additional_fields():
                 "path": "path_to_a",
                 "type": "type_a",
                 "value": "a_value",
-            },  # noqa
+            },
             {
                 "description": "description_b",
                 "field": "field_b",
                 "path": "path_to_b",
                 "type": "type_b",
                 "value": "",
-            },  # noqa
+            },
             {"description": "description_c", "field": "field_c", "path": "path_to_c", "type": "type_c", "value": ""},
-        ],  # noqa
+        ],
     }
     transform_context = context_api_transform(context)
 
@@ -97,25 +97,25 @@ def test_context_api_transform_extensions():
                     "url": "url_a",
                     "documentationUrl": "documentation_a",
                     "name": "a",
-                },  # noqa
+                },
                 "url_b": {
                     "description": "description_b",
                     "url": "url_b",
                     "documentationUrl": "documentation_b",
                     "name": "b",
-                },  # noqa
+                },
                 "url_c": {
                     "description": "description_c",
                     "url": "url_c",
                     "documentationUrl": "documentation_c",
                     "name": "c",
-                },  # noqa
+                },
                 "url_d": {
                     "description": "description_d",
                     "url": "url_d",
                     "documentationUrl": "documentation_d",
                     "name": "d",
-                },  # noqa
+                },
                 "bad_url_x": [],
                 "bad_url_y": [],
                 "bad_url_z": [],

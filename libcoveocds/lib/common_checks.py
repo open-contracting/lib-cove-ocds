@@ -234,22 +234,22 @@ def get_releases_aggregates(json_data):
     unique_buyers_count = len(unique_buyers_identifier) + len(unique_buyers_name_no_id)
     unique_buyers = [name + " (" + str(id) + ")" for id, name in unique_buyers_identifier.items()] + list(
         unique_buyers_name_no_id
-    )  # noqa
+    )
 
     unique_suppliers_count = len(unique_suppliers_identifier) + len(unique_suppliers_name_no_id)
     unique_suppliers = [name + " (" + str(id) + ")" for id, name in unique_suppliers_identifier.items()] + list(
         unique_suppliers_name_no_id
-    )  # noqa
+    )
 
     unique_procuring_count = len(unique_procuring_identifier) + len(unique_procuring_name_no_id)
     unique_procuring = [name + " (" + str(id) + ")" for id, name in unique_procuring_identifier.items()] + list(
         unique_procuring_name_no_id
-    )  # noqa
+    )
 
     unique_tenderers_count = len(unique_tenderers_identifier) + len(unique_tenderers_name_no_id)
     unique_tenderers = [name + " (" + str(id) + ")" for id, name in unique_tenderers_identifier.items()] + list(
         unique_tenderers_name_no_id
-    )  # noqa
+    )
 
     unique_org_identifier_count = len(
         set(unique_buyers_identifier)
@@ -323,7 +323,7 @@ def get_releases_aggregates(json_data):
         unique_organisation_schemes=sorted(unique_organisation_schemes, key=lambda x: str(x)),
         organisations_with_address=len(organisation_identifier_address) + len(organisation_name_no_id_address),
         organisations_with_contact_point=len(organisation_identifier_contact_point)
-        + len(organisation_name_no_id_contact_point),  # noqa
+        + len(organisation_name_no_id_contact_point),
         total_item_count=len(release_tender_item_ids) + len(release_award_item_ids) + len(release_contract_item_ids),
         tender_item_count=len(release_tender_item_ids),
         award_item_count=len(release_award_item_ids),
