@@ -7,8 +7,12 @@ from libcove.lib.common import common_checks_context, get_additional_codelist_va
 from libcove.lib.tools import decimal_default
 
 from libcoveocds.lib.additional_checks import TEST_CLASSES, run_additional_checks
-from libcoveocds.lib.common_checks import (add_conformance_rule_errors, get_records_aggregates,
-                                           get_releases_aggregates, lookup_schema)
+from libcoveocds.lib.common_checks import (
+    add_conformance_rule_errors,
+    get_records_aggregates,
+    get_releases_aggregates,
+    lookup_schema,
+)
 
 # This is so it can work with commonmark v0.8.1 and up (commonmark only!) and 0.7.5 and down (CommonMark only!)
 try:
@@ -17,7 +21,9 @@ except ImportError:
     import CommonMark as commonmark
 
 validation_error_lookup = {
-    'date-time': mark_safe('Incorrect date format. Dates should use the form YYYY-MM-DDT00:00:00Z. Learn more about <a href="https://standard.open-contracting.org/latest/en/schema/reference/#date">dates in OCDS</a>.'), # noqa
+    "date-time": mark_safe(
+        'Incorrect date format. Dates should use the form YYYY-MM-DDT00:00:00Z. Learn more about <a href="https://standard.open-contracting.org/latest/en/schema/reference/#date">dates in OCDS</a>.'
+    ),  # noqa
 }
 
 
@@ -55,20 +61,14 @@ def oneOf_draft4(validator, oneOf, instance, schema):
         # there is no oneOf.
         if (
             schema.get("title") == "Releases"
-            or schema.get("description")
-            == "An array of linking identifiers or releases"
+            or schema.get("description") == "An array of linking identifiers or releases"
         ):
             # If instance is not a list, or is a list of zero length, then
             # validating against either subschema will work.
             # Assume instance is an array of Linked releases, if there are no
             # "id"s in any of the releases.
-            if type(instance) is not list or all(
-                "id" not in release for release in instance
-            ):
-                if (
-                    "properties" in subschema.get("items", {})
-                    and "id" not in subschema["items"]["properties"]
-                ):
+            if type(instance) is not list or all("id" not in release for release in instance):
+                if "properties" in subschema.get("items", {}) and "id" not in subschema["items"]["properties"]:
                     for err in errs:
                         err.assumption = "linked_releases"
                         yield err
@@ -76,11 +76,9 @@ def oneOf_draft4(validator, oneOf, instance, schema):
             # Assume instance is an array of Embedded releases, if there is an
             # "id" in each of the releases
             elif all("id" in release for release in instance):
-                if "id" in subschema.get("items", {}).get(
-                    "properties", {}
-                ) or subschema.get("items", {}).get("$ref", "").endswith(
-                    "release-schema.json"
-                ):
+                if "id" in subschema.get("items", {}).get("properties", {}) or subschema.get("items", {}).get(
+                    "$ref", ""
+                ).endswith("release-schema.json"):
                     for err in errs:
                         err.assumption = "embedded_releases"
                         yield err
@@ -116,71 +114,78 @@ validator.VALIDATORS["oneOf"] = oneOf_draft4
 
 def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, cache=True):
     schema_name = schema_obj.pkg_schema_name
-    common_checks = common_checks_context(upload_dir, json_data, schema_obj, schema_name, context,
-                                          fields_regex=True, api=api, cache=cache)
-    validation_errors = common_checks['context']['validation_errors']
+    common_checks = common_checks_context(
+        upload_dir, json_data, schema_obj, schema_name, context, fields_regex=True, api=api, cache=cache
+    )
+    validation_errors = common_checks["context"]["validation_errors"]
 
     new_validation_errors = []
     for (json_key, values) in validation_errors:
         error = json.loads(json_key)
-        new_message = validation_error_lookup.get(error['message_type'])
+        new_message = validation_error_lookup.get(error["message_type"])
         if new_message:
-            error['message_safe'] = conditional_escape(new_message)
+            error["message_safe"] = conditional_escape(new_message)
         else:
-            if 'message_safe' in error:
-                error['message_safe'] = mark_safe(error['message_safe'])
+            if "message_safe" in error:
+                error["message_safe"] = mark_safe(error["message_safe"])
             else:
-                error['message_safe'] = conditional_escape(error['message'])
+                error["message_safe"] = conditional_escape(error["message"])
 
-        schema_block, ref_info = lookup_schema(schema_obj.get_pkg_schema_obj(deref=True), error['path_no_number']) # noqa
-        if schema_block and error['message_type'] != 'required':
-            if 'description' in schema_block:
-                error['schema_title'] = escape(schema_block.get('title', ''))
-                error['schema_description_safe'] = mark_safe(bleach.clean(
-                    commonmark.commonmark(schema_block['description']),
-                    tags=bleach.sanitizer.ALLOWED_TAGS + ['p']
-                ))
+        schema_block, ref_info = lookup_schema(
+            schema_obj.get_pkg_schema_obj(deref=True), error["path_no_number"]
+        )  # noqa
+        if schema_block and error["message_type"] != "required":
+            if "description" in schema_block:
+                error["schema_title"] = escape(schema_block.get("title", ""))
+                error["schema_description_safe"] = mark_safe(
+                    bleach.clean(
+                        commonmark.commonmark(schema_block["description"]), tags=bleach.sanitizer.ALLOWED_TAGS + ["p"]
+                    )
+                )
             if ref_info:
-                ref = ref_info['reference']['$ref']
-                if ref.endswith('release-schema.json'):
-                    ref = ''
+                ref = ref_info["reference"]["$ref"]
+                if ref.endswith("release-schema.json"):
+                    ref = ""
                 else:
-                    ref = ref.strip('#')
-                ref_path = '/'.join(ref_info['path'])
-                schema = 'release-schema.json'
+                    ref = ref.strip("#")
+                ref_path = "/".join(ref_info["path"])
+                schema = "release-schema.json"
             else:
-                ref = ''
-                ref_path = error['path_no_number']
-                schema = 'release-package-schema.json'
-            error['docs_ref'] = format_html('{},{},{}', schema, ref, ref_path)
+                ref = ""
+                ref_path = error["path_no_number"]
+                schema = "release-package-schema.json"
+            error["docs_ref"] = format_html("{},{},{}", schema, ref, ref_path)
 
         new_validation_errors.append([json.dumps(error, sort_keys=True), values])
-    common_checks['context']['validation_errors'] = new_validation_errors
+    common_checks["context"]["validation_errors"] = new_validation_errors
 
-    context.update(common_checks['context'])
+    context.update(common_checks["context"])
 
-    if schema_name == 'record-package-schema.json':
-        context['records_aggregates'] = get_records_aggregates(json_data, ignore_errors=bool(validation_errors))
+    if schema_name == "record-package-schema.json":
+        context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=bool(validation_errors))
         # Do this for records, as there's no record-schema.json (this probably
         # causes problems for flatten-tool)
-        context['schema_url'] = schema_obj.pkg_schema_url
+        context["schema_url"] = schema_obj.pkg_schema_url
     else:
         additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
-        closed_codelist_values = {key: value for key, value in additional_codelist_values.items() if not value['isopen']} # noqa
-        open_codelist_values = {key: value for key, value in additional_codelist_values.items() if value['isopen']}
+        closed_codelist_values = {
+            key: value for key, value in additional_codelist_values.items() if not value["isopen"]
+        }  # noqa
+        open_codelist_values = {key: value for key, value in additional_codelist_values.items() if value["isopen"]}
 
-        context.update({
-            'releases_aggregates': get_releases_aggregates(json_data, ignore_errors=bool(validation_errors)),
-            'additional_closed_codelist_values': closed_codelist_values,
-            'additional_open_codelist_values': open_codelist_values
-        })
+        context.update(
+            {
+                "releases_aggregates": get_releases_aggregates(json_data, ignore_errors=bool(validation_errors)),
+                "additional_closed_codelist_values": closed_codelist_values,
+                "additional_open_codelist_values": open_codelist_values,
+            }
+        )
 
     additional_checks = run_additional_checks(
-        json_data, TEST_CLASSES['additional'], ignore_errors=True, return_on_error=None)
+        json_data, TEST_CLASSES["additional"], ignore_errors=True, return_on_error=None
+    )
 
-    context.update({
-        'additional_checks': additional_checks
-    })
+    context.update({"additional_checks": additional_checks})
 
     context = add_conformance_rule_errors(context, json_data, schema_obj)
     return context

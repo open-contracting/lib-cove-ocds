@@ -11,21 +11,21 @@ import libcoveocds.schema
 
 # Cache for faster tests.
 config = libcoveocds.config.LibCoveOCDSConfig()
-config.config['cache_all_requests'] = True
+config.config["cache_all_requests"] = True
 
 
 def test_basic_1():
 
-    cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
+    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
-    json_filename = os.path.join(os.path.dirname(
-        os.path.realpath(__file__)), 'fixtures', 'common_checks', 'basic_1.json'
+    json_filename = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "basic_1.json"
     )
     with open(json_filename) as fp:
         json_data = json.load(fp)
 
     context = {
-        'file_type': 'json',
+        "file_type": "json",
     }
 
     try:
@@ -40,21 +40,21 @@ def test_basic_1():
     finally:
         shutil.rmtree(cove_temp_folder)
 
-    assert results['version_used'] == '1.1'
+    assert results["version_used"] == "1.1"
 
 
 def test_dupe_ids_1():
 
-    cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
+    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
-    json_filename = os.path.join(os.path.dirname(
-        os.path.realpath(__file__)), 'fixtures', 'common_checks', 'dupe_ids_1.json'
+    json_filename = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "dupe_ids_1.json"
     )
     with open(json_filename) as fp:
         json_data = json.load(fp)
 
     context = {
-        'file_type': 'json',
+        "file_type": "json",
     }
 
     try:
@@ -70,19 +70,19 @@ def test_dupe_ids_1():
         shutil.rmtree(cove_temp_folder)
 
     # https://github.com/OpenDataServices/cove/issues/782 Defines how we want this error shown
-    assert len(results['validation_errors'][0][1]) == 2
+    assert len(results["validation_errors"][0][1]) == 2
     # test paths
-    assert results['validation_errors'][0][1][0]['path'] == 'releases'
-    assert results['validation_errors'][0][1][1]['path'] == 'releases'
+    assert results["validation_errors"][0][1][0]["path"] == "releases"
+    assert results["validation_errors"][0][1][1]["path"] == "releases"
     # test values
     # we don't know what order they will come out in, so fix the order ourselves
     values = [
-        results['validation_errors'][0][1][0]['value'],
-        results['validation_errors'][0][1][1]['value'],
+        results["validation_errors"][0][1][0]["value"],
+        results["validation_errors"][0][1][1]["value"],
     ]
     values.sort()
-    assert values[0] == 'ocds-213czf-000-00001-01-planning'
-    assert values[1] == 'ocds-213czf-000-00001-02-planning'
+    assert values[0] == "ocds-213czf-000-00001-01-planning"
+    assert values[1] == "ocds-213czf-000-00001-02-planning"
 
 
 @pytest.mark.parametrize(
@@ -194,8 +194,8 @@ def test_dupe_ids_1():
                     "values": [{"path": "records/1/releases/0"}],
                 },
                 {
-                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.", # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.", # noqa
+                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
@@ -211,7 +211,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).", # noqa
+                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -328,8 +328,8 @@ def test_dupe_ids_1():
                     "values": [{"path": "records/1/releases/0"}],
                 },
                 {
-                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.", # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.", # noqa
+                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
@@ -345,7 +345,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).", # noqa
+                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -514,9 +514,7 @@ def test_dupe_ids_1():
         ),
     ],
 )
-def test_validation_release_or_record_package(
-    record_pkg, filename, validation_error_jsons_expected, schema_subdir
-):
+def test_validation_release_or_record_package(record_pkg, filename, validation_error_jsons_expected, schema_subdir):
     schema_host = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
         "fixtures",
@@ -527,10 +525,10 @@ def test_validation_release_or_record_package(
     with open(os.path.join(schema_host, filename)) as fp:
         json_data = json.load(fp)
 
-    cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
+    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config, record_pkg=record_pkg)
     context = {
-        'file_type': 'json',
+        "file_type": "json",
     }
 
     results = libcoveocds.common_checks.common_checks_ocds(
@@ -540,7 +538,7 @@ def test_validation_release_or_record_package(
         schema,
     )
 
-    validation_errors = results['validation_errors']
+    validation_errors = results["validation_errors"]
 
     validation_error_jsons = []
     for validation_error_json, values in validation_errors:
