@@ -97,7 +97,7 @@ def test_dupe_ids_1():
             [
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -110,7 +110,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -126,7 +126,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'initiationType' is missing but required within 'releases'",
-                    "message_safe": "<code>initiationType</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;initiationType&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -139,7 +139,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'ocid' is missing but required within 'releases'",
-                    "message_safe": "<code>ocid</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -152,7 +152,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'releases' is not a JSON array",
-                    "message_safe": "<code>releases</code> is not a JSON array",
+                    "message_safe": "&#x27;releases&#x27; is not a JSON array",
                     "validator": "type",
                     "assumption": "linked_releases",
                     "message_type": "array",
@@ -169,7 +169,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'tag' is missing but required within 'releases'",
-                    "message_safe": "<code>tag</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;tag&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -182,7 +182,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'url' is missing but required within 'releases'",
-                    "message_safe": "<code>url</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;url&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -211,7 +211,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa: E501
+                    "message_safe": "[] is too short",
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -221,6 +221,7 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": None,
                     "values": [{"path": "records/0/releases"}],
+                    "instance": "[]",
                 },
             ],
         ),
@@ -231,7 +232,7 @@ def test_dupe_ids_1():
             [
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -244,7 +245,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -260,7 +261,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'initiationType' is missing but required within 'releases'",
-                    "message_safe": "<code>initiationType</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;initiationType&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -273,7 +274,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'ocid' is missing but required within 'releases'",
-                    "message_safe": "<code>ocid</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -286,7 +287,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'releases' is not a JSON array",
-                    "message_safe": "<code>releases</code> is not a JSON array",
+                    "message_safe": "&#x27;releases&#x27; is not a JSON array",
                     "validator": "type",
                     "assumption": "linked_releases",
                     "message_type": "array",
@@ -303,7 +304,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'tag' is missing but required within 'releases'",
-                    "message_safe": "<code>tag</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;tag&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -316,7 +317,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'url' is missing but required within 'releases'",
-                    "message_safe": "<code>url</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;url&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -345,7 +346,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).",  # noqa: E501
+                    "message_safe": "[] is too short",
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -355,6 +356,7 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": None,
                     "values": [{"path": "records/0/releases"}],
+                    "instance": "[]",
                 },
             ],
         ),
@@ -411,7 +413,7 @@ def test_dupe_ids_1():
             [
                 {
                     "message": "'id' is missing but required",
-                    "message_safe": "<code>id</code> is missing but required",
+                    "message_safe": "&#x27;id&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
@@ -444,7 +446,7 @@ def test_dupe_ids_1():
             [
                 {
                     "message": "'ocid' is missing but required",
-                    "message_safe": "<code>ocid</code> is missing but required",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
@@ -479,7 +481,7 @@ def test_dupe_ids_1():
             [
                 {
                     "message": "'id' is missing but required",
-                    "message_safe": "<code>id</code> is missing but required",
+                    "message_safe": "&#x27;id&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
@@ -499,7 +501,7 @@ def test_dupe_ids_1():
             [
                 {
                     "message": "'ocid' is missing but required",
-                    "message_safe": "<code>ocid</code> is missing but required",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
