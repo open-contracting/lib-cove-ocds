@@ -68,11 +68,12 @@ def process(filename, output_dir, convert, schema_version, delete, exclude_file)
         if not has_disk_output:
             shutil.rmtree(output_dir)
 
+    output = json.dumps(result, indent=2, cls=SetEncoder)
     if has_disk_output:
         with open(os.path.join(output_dir, "results.json"), "w") as fp:
-            fp.write(json.dumps(result, indent=2))
+            fp.write(output)
 
-    print(json.dumps(result, indent=2, cls=SetEncoder))
+    print(output)
 
 
 if __name__ == "__main__":
