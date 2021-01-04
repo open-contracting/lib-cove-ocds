@@ -10,6 +10,13 @@ import libcoveocds.api
 from libcoveocds.config import LibCoveOCDSConfig
 
 
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 @click.command()
 @click.argument("filename")
 @click.option("-c", "--convert", is_flag=True, help="Convert data from nested (json) to flat format (spreadsheet)")
@@ -65,7 +72,7 @@ def process(filename, output_dir, convert, schema_version, delete, exclude_file)
         with open(os.path.join(output_dir, "results.json"), "w") as fp:
             fp.write(json.dumps(result, indent=2))
 
-    print(json.dumps(result, indent=2))
+    print(json.dumps(result, indent=2, cls=SetEncoder))
 
 
 if __name__ == "__main__":
