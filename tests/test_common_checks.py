@@ -6,21 +6,26 @@ import tempfile
 import pytest
 
 import libcoveocds.common_checks
+import libcoveocds.config
 import libcoveocds.schema
+
+# Cache for faster tests.
+config = libcoveocds.config.LibCoveOCDSConfig()
+config.config["cache_all_requests"] = True
 
 
 def test_basic_1():
 
-    cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS()
-    json_filename = os.path.join(os.path.dirname(
-        os.path.realpath(__file__)), 'fixtures', 'common_checks', 'basic_1.json'
+    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
+    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
+    json_filename = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "basic_1.json"
     )
     with open(json_filename) as fp:
         json_data = json.load(fp)
 
     context = {
-        'file_type': 'json',
+        "file_type": "json",
     }
 
     try:
@@ -35,21 +40,21 @@ def test_basic_1():
     finally:
         shutil.rmtree(cove_temp_folder)
 
-    assert results['version_used'] == '1.1'
+    assert results["version_used"] == "1.1"
 
 
 def test_dupe_ids_1():
 
-    cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS()
-    json_filename = os.path.join(os.path.dirname(
-        os.path.realpath(__file__)), 'fixtures', 'common_checks', 'dupe_ids_1.json'
+    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
+    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
+    json_filename = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "dupe_ids_1.json"
     )
     with open(json_filename) as fp:
         json_data = json.load(fp)
 
     context = {
-        'file_type': 'json',
+        "file_type": "json",
     }
 
     try:
@@ -65,34 +70,34 @@ def test_dupe_ids_1():
         shutil.rmtree(cove_temp_folder)
 
     # https://github.com/OpenDataServices/cove/issues/782 Defines how we want this error shown
-    assert len(results['validation_errors'][0][1]) == 2
+    assert len(results["validation_errors"][0][1]) == 2
     # test paths
-    assert results['validation_errors'][0][1][0]['path'] == 'releases'
-    assert results['validation_errors'][0][1][1]['path'] == 'releases'
+    assert results["validation_errors"][0][1][0]["path"] == "releases"
+    assert results["validation_errors"][0][1][1]["path"] == "releases"
     # test values
     # we don't know what order they will come out in, so fix the order ourselves
     values = [
-        results['validation_errors'][0][1][0]['value'],
-        results['validation_errors'][0][1][1]['value'],
+        results["validation_errors"][0][1][0]["value"],
+        results["validation_errors"][0][1][1]["value"],
     ]
     values.sort()
-    assert values[0] == 'ocds-213czf-000-00001-01-planning'
-    assert values[1] == 'ocds-213czf-000-00001-02-planning'
+    assert values[0] == "ocds-213czf-000-00001-01-planning"
+    assert values[1] == "ocds-213czf-000-00001-02-planning"
 
 
 @pytest.mark.parametrize(
-    "package_schema_filename,filename,schema_subdir,validation_error_jsons_expected",
+    "record_pkg,filename,schema_subdir,validation_error_jsons_expected",
     [
-        ("release-package-schema.json", "releases_no_validation_errors.json", "", []),
-        ("record-package-schema.json", "records_no_validation_errors.json", "", []),
+        (False, "releases_no_validation_errors.json", "", []),
+        (True, "records_no_validation_errors.json", "", []),
         (
-            "record-package-schema.json",
+            True,
             "records_invalid_releases.json",
             "",
             [
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -105,7 +110,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -121,7 +126,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'initiationType' is missing but required within 'releases'",
-                    "message_safe": "<code>initiationType</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;initiationType&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -134,7 +139,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'ocid' is missing but required within 'releases'",
-                    "message_safe": "<code>ocid</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -147,7 +152,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'releases' is not a JSON array",
-                    "message_safe": "<code>releases</code> is not a JSON array",
+                    "message_safe": "&#x27;releases&#x27; is not a JSON array",
                     "validator": "type",
                     "assumption": "linked_releases",
                     "message_type": "array",
@@ -164,7 +169,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'tag' is missing but required within 'releases'",
-                    "message_safe": "<code>tag</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;tag&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -177,7 +182,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'url' is missing but required within 'releases'",
-                    "message_safe": "<code>url</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;url&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -189,8 +194,8 @@ def test_dupe_ids_1():
                     "values": [{"path": "records/1/releases/0"}],
                 },
                 {
-                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.", # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.", # noqa
+                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
@@ -206,7 +211,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).", # noqa
+                    "message_safe": "[] is too short",
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -216,17 +221,18 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": None,
                     "values": [{"path": "records/0/releases"}],
+                    "instance": "[]",
                 },
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_invalid_releases.json",
             "1-0",
             [
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -239,7 +245,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'date' is missing but required within 'releases'",
-                    "message_safe": "<code>date</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;date&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -255,7 +261,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'initiationType' is missing but required within 'releases'",
-                    "message_safe": "<code>initiationType</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;initiationType&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -268,7 +274,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'ocid' is missing but required within 'releases'",
-                    "message_safe": "<code>ocid</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -281,7 +287,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'releases' is not a JSON array",
-                    "message_safe": "<code>releases</code> is not a JSON array",
+                    "message_safe": "&#x27;releases&#x27; is not a JSON array",
                     "validator": "type",
                     "assumption": "linked_releases",
                     "message_type": "array",
@@ -298,7 +304,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'tag' is missing but required within 'releases'",
-                    "message_safe": "<code>tag</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;tag&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "embedded_releases",
                     "message_type": "required",
@@ -311,7 +317,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "'url' is missing but required within 'releases'",
-                    "message_safe": "<code>url</code> is missing but required within <code>releases</code>",
+                    "message_safe": "&#x27;url&#x27; is missing but required within &#x27;releases&#x27;",
                     "validator": "required",
                     "assumption": "linked_releases",
                     "message_type": "required",
@@ -323,8 +329,8 @@ def test_dupe_ids_1():
                     "values": [{"path": "records/1/releases/0"}],
                 },
                 {
-                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.", # noqa
-                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.", # noqa
+                    "message": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an 'id' whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
+                    "message_safe": "This array should contain either entirely embedded releases or linked releases. Embedded releases contain an &#x27;id&#x27; whereas linked releases do not. Your releases contain a mixture.",  # noqa: E501
                     "validator": "oneOf",
                     "assumption": None,
                     "message_type": "oneOf",
@@ -340,7 +346,7 @@ def test_dupe_ids_1():
                 },
                 {
                     "message": "[] is too short",
-                    "message_safe": "<code>[]</code> is too short. You must supply at least one value, or remove the item entirely (unless it’s required).", # noqa
+                    "message_safe": "[] is too short",
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -350,11 +356,12 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": None,
                     "values": [{"path": "records/0/releases"}],
+                    "instance": "[]",
                 },
             ],
         ),
         (
-            "release-package-schema.json",
+            False,
             "releases_non_unique.json",
             "",
             [
@@ -377,7 +384,7 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_non_unique.json",
             "",
             [
@@ -400,13 +407,13 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "release-package-schema.json",
+            False,
             "releases_non_unique_no_id.json",
             "",
             [
                 {
                     "message": "'id' is missing but required",
-                    "message_safe": "<code>id</code> is missing but required",
+                    "message_safe": "&#x27;id&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
@@ -433,13 +440,13 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_non_unique_no_ocid.json",
             "",
             [
                 {
                     "message": "'ocid' is missing but required",
-                    "message_safe": "<code>ocid</code> is missing but required",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
@@ -468,13 +475,13 @@ def test_dupe_ids_1():
         # Check that we handle unique arrays correctly also
         # (e.g. that we don't incorrectly claim they are not unique)
         (
-            "release-package-schema.json",
+            False,
             "releases_unique.json",
             "",
             [
                 {
                     "message": "'id' is missing but required",
-                    "message_safe": "<code>id</code> is missing but required",
+                    "message_safe": "&#x27;id&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
@@ -488,13 +495,13 @@ def test_dupe_ids_1():
             ],
         ),
         (
-            "record-package-schema.json",
+            True,
             "records_unique.json",
             "",
             [
                 {
                     "message": "'ocid' is missing but required",
-                    "message_safe": "<code>ocid</code> is missing but required",
+                    "message_safe": "&#x27;ocid&#x27; is missing but required",
                     "validator": "required",
                     "assumption": None,
                     "message_type": "required",
@@ -509,9 +516,7 @@ def test_dupe_ids_1():
         ),
     ],
 )
-def test_validation_release_or_record_package(
-    package_schema_filename, filename, validation_error_jsons_expected, schema_subdir
-):
+def test_validation_release_or_record_package(record_pkg, filename, validation_error_jsons_expected, schema_subdir):
     schema_host = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
         "fixtures",
@@ -522,13 +527,10 @@ def test_validation_release_or_record_package(
     with open(os.path.join(schema_host, filename)) as fp:
         json_data = json.load(fp)
 
-    cove_temp_folder = tempfile.mkdtemp(prefix='libcoveocds-tests-', dir=tempfile.gettempdir())
-    if package_schema_filename == 'record-package-schema.json':
-        schema = libcoveocds.schema.SchemaOCDS(record_pkg=True)
-    else:
-        schema = libcoveocds.schema.SchemaOCDS(record_pkg=False)
+    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
+    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config, record_pkg=record_pkg)
     context = {
-        'file_type': 'json',
+        "file_type": "json",
     }
 
     results = libcoveocds.common_checks.common_checks_ocds(
@@ -538,7 +540,7 @@ def test_validation_release_or_record_package(
         schema,
     )
 
-    validation_errors = results['validation_errors']
+    validation_errors = results["validation_errors"]
 
     validation_error_jsons = []
     for validation_error_json, values in validation_errors:

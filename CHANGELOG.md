@@ -11,6 +11,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - libcoveocds commandline fails for record packages https://github.com/open-contracting/lib-cove-ocds/issues/39
 
+## [0.9.1] - 2020-09-07
+
+### Fixed
+
+- Bump version number in setup.py
+
+## [0.9.0] - 2020-09-07
+
+### Added
+
+- Add Unique IDs count to aggregates
+- Added many options to CLI: convert, output-dir, schema-version, delete, exclude-file
+
+### Changed
+
+- Cache all requests in the tests https://github.com/OpenDataServices/lib-cove/pull/59
+
 ## [0.8.0] - 2020-08-26
 
 ### Changed
