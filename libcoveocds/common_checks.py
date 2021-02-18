@@ -47,6 +47,8 @@ def oneOf_draft4(validator, oneOf, instance, schema):
       can can test more easily
     - Yield all the individual errors for linked or embedded releases within a
       record.
+    - Return more information on the ValidationError object, to allow us to
+      replace the translation with a message in cove-ocds
     """
     subschemas = enumerate(oneOf)
     all_errors = []
@@ -95,17 +97,22 @@ def oneOf_draft4(validator, oneOf, instance, schema):
 
         all_errors.extend(errs)
     else:
-        yield ValidationError(
+        err = ValidationError(
             "%s is not valid under any of the given schemas"
             % (json.dumps(instance, sort_keys=True, default=decimal_default),),
             context=all_errors,
         )
+        err.error_id = "oneOf_any"
+        yield err
 
     more_valid = [s for i, s in subschemas if validator.is_valid(instance, s)]
     if more_valid:
         more_valid.append(first_valid)
         reprs = ", ".join(repr(schema) for schema in more_valid)
-        yield ValidationError("%r is valid under each of %s" % (instance, reprs))
+        err = ValidationError("%r is valid under each of %s" % (instance, reprs))
+        err.error_id = "oneOf_each"
+        err.reprs = reprs
+        yield err
 
 
 validator.VALIDATORS["uniqueItems"] = unique_ids_or_ocids
