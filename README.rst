@@ -37,8 +37,8 @@ Other code (in ``libcore``, ``lib``, etc.) should not be used by external users 
    :target: https://pypi.org/project/libcoveocds/
 .. |Build Status| image:: https://github.com/open-contracting/lib-cove-ocds/workflows/CI/badge.svg
 .. |Lint Status| image:: https://github.com/open-contracting/lib-cove-ocds/workflows/Lint/badge.svg
-.. |Coverage Status| image:: https://coveralls.io/repos/github/open-contracting/lib-cove-ocds/badge.svg?branch=master
-   :target: https://coveralls.io/github/open-contracting/lib-cove-ocds?branch=master
+.. |Coverage Status| image:: https://coveralls.io/repos/github/open-contracting/lib-cove-ocds/badge.svg?branch=main
+   :target: https://coveralls.io/github/open-contracting/lib-cove-ocds?branch=main
 .. |Python Version| image:: https://img.shields.io/pypi/pyversions/libcoveocds.svg
    :target: https://pypi.org/project/libcoveocds/
 
