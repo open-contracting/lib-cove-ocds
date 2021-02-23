@@ -10,8 +10,8 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     "schema_host": None,
     "schema_version_choices": OrderedDict(
         (  # {version: (display, url)}
-            ("1.0", ("1.0", "https://standard.open-contracting.org/schema/1__0__3/")),
-            ("1.1", ("1.1", "https://standard.open-contracting.org/schema/1__1__5/")),
+            ("1.0", ("1.0", "https://standard.open-contracting.org/1.0/en/")),
+            ("1.1", ("1.1", "https://standard.open-contracting.org/1.1/en/")),
         )
     ),
     "schema_codelists": OrderedDict(
