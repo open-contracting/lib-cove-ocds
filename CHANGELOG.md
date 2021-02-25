@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.10.0] - 2021-02-25
+
+## Changed
+
+- `common_checks_ocds` returns more fields on each error dictionary, so that we can [replace the message with a translation in cove-ocds](https://github.com/open-contracting/cove-ocds/pull/149)
+
 ### Fixed
 
 - libcoveocds commandline fails for record packages https://github.com/open-contracting/lib-cove-ocds/issues/39
