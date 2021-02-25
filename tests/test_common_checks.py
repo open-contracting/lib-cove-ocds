@@ -561,9 +561,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
     def strip_nones(list_of_dicts):
         out = []
         for a_dict in list_of_dicts:
-            out.append(
-                {key: value for key, value in a_dict.items() if value is not None}
-            )
+            out.append({key: value for key, value in a_dict.items() if value is not None})
         return out
 
     assert strip_nones(validation_error_jsons) == strip_nones(validation_error_jsons_expected)
