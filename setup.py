@@ -14,7 +14,7 @@ setup(
     packages=find_packages(exclude=["tests", "tests.*"]),
     long_description=long_description,
     install_requires=[
-        "libcove>=0.19.0",
+        "libcove>=0.22.0",
         "bleach",
         "cached-property",
         "CommonMark",
