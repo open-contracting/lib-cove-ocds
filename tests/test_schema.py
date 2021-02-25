@@ -29,8 +29,8 @@ def test_basic_1(record_pkg):
         assert schema.schema_name == "release-schema.json"
         assert schema.pkg_schema_name == "release-package-schema.json"
     assert schema.default_version == "1.1"
-    assert schema.default_schema_host == "https://standard.open-contracting.org/schema/1__1__5/"
-    assert schema.schema_host == "https://standard.open-contracting.org/schema/1__1__5/"
+    assert schema.default_schema_host == "https://standard.open-contracting.org/1.1/en/"
+    assert schema.schema_host == "https://standard.open-contracting.org/1.1/en/"
     assert not schema.config.config["cache_all_requests"]
 
 
@@ -59,8 +59,8 @@ def test_pass_config_1(record_pkg):
         assert schema.schema_name == "release-schema.json"
         assert schema.pkg_schema_name == "release-package-schema.json"
     assert schema.default_version == "1.0"
-    assert schema.default_schema_host == "https://standard.open-contracting.org/schema/1__0__3/"
-    assert schema.schema_host == "https://standard.open-contracting.org/schema/1__0__3/"
+    assert schema.default_schema_host == "https://standard.open-contracting.org/1.0/en/"
+    assert schema.schema_host == "https://standard.open-contracting.org/1.0/en/"
     assert not schema.config.config["cache_all_requests"]
 
 
