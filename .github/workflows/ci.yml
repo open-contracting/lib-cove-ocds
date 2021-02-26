@@ -26,5 +26,5 @@ jobs:
     - run: pip install .[test]
     - run: pytest --cov libcoveocds
     - env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: coveralls
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: coveralls --service=github
