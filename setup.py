@@ -19,6 +19,7 @@ setup(
         "CommonMark",
         "Django",
         "json-merge-patch",
+        "jsonschema",
         "requests",
         "click",
     ],
