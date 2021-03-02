@@ -14,11 +14,7 @@ from libcoveocds.lib.common_checks import (
     lookup_schema,
 )
 
-# This is so it can work with commonmark v0.8.1 and up (commonmark only!) and 0.7.5 and down (CommonMark only!)
-try:
-    import commonmark
-except ImportError:
-    import CommonMark as commonmark
+import commonmark
 
 validation_error_lookup = {
     "date-time": mark_safe(
