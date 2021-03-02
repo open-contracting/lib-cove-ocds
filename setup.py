@@ -16,7 +16,6 @@ setup(
     install_requires=[
         "libcove>=0.19.0",
         "bleach",
-        "cached-property",
         "CommonMark",
         "Django",
         "json-merge-patch",
