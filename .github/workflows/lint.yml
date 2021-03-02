@@ -20,3 +20,5 @@ jobs:
     - run: pip install black .
     - run: curl -s -S --retry 3 $BASEDIR/tests/script.sh | bash -
     - run: black --check .
+    - run: pip install .[test]
+    - run: pytest /tmp/test_requirements.py
