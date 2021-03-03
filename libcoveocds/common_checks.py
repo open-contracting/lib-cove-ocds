@@ -1,6 +1,7 @@
 import json
 
 import bleach
+import commonmark
 from django.utils.html import conditional_escape, escape, format_html, mark_safe
 from jsonschema.exceptions import ValidationError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
@@ -13,8 +14,6 @@ from libcoveocds.lib.common_checks import (
     get_releases_aggregates,
     lookup_schema,
 )
-
-import commonmark
 
 validation_error_lookup = {
     "date-time": mark_safe(
