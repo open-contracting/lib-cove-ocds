@@ -221,7 +221,7 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": None,
                     "values": [{"path": "records/0/releases"}],
-                    "instance": "[]",
+                    "instance": [],
                 },
             ],
         ),
@@ -356,7 +356,7 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": None,
                     "values": [{"path": "records/0/releases"}],
-                    "instance": "[]",
+                    "instance": [],
                 },
             ],
         ),
@@ -558,4 +558,12 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
             del validation_error_json["schema_title"]
         validation_error_jsons.append(validation_error_json)
 
-    assert validation_error_jsons == validation_error_jsons_expected
+    def strip_nones(list_of_dicts):
+        out = []
+        for a_dict in list_of_dicts:
+            out.append(
+                {key: value for key, value in a_dict.items() if value is not None}
+            )
+        return out
+
+    assert strip_nones(validation_error_jsons) == strip_nones(validation_error_jsons_expected)
