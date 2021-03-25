@@ -5,7 +5,7 @@ with open("README.rst") as f:
 
 setup(
     name="libcoveocds",
-    version="0.9.1",
+    version="0.10.0",
     author="Open Data Services",
     author_email="data@open-contracting.org",
     url="https://github.com/open-contracting/lib-cove-ocds",
@@ -14,7 +14,7 @@ setup(
     packages=find_packages(exclude=["tests", "tests.*"]),
     long_description=long_description,
     install_requires=[
-        "libcove>=0.19.0",
+        "libcove>=0.22.0",
         "bleach",
         "CommonMark",
         "Django",
