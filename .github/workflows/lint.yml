@@ -23,3 +23,5 @@ jobs:
       - run: black --check .
       - run: pip install .[test]
       - run: pytest /tmp/test_requirements.py
+      - run: pip install check-manifest
+      - run: check-manifest
