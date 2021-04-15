@@ -1,11 +1,11 @@
 import json
 
 import bleach
-import commonmark
 from django.utils.html import conditional_escape, escape, format_html, mark_safe
 from jsonschema.exceptions import ValidationError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
 from libcove.lib.tools import decimal_default
+from markdown_it import MarkdownIt
 
 from libcoveocds.lib.additional_checks import TEST_CLASSES, run_additional_checks
 from libcoveocds.lib.common_checks import (
@@ -14,6 +14,8 @@ from libcoveocds.lib.common_checks import (
     get_releases_aggregates,
     lookup_schema,
 )
+
+md = MarkdownIt()
 
 validation_error_lookup = {
     "date-time": mark_safe(
@@ -139,7 +141,7 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
                 error["schema_title"] = escape(schema_block.get("title", ""))
                 error["schema_description_safe"] = mark_safe(
                     bleach.clean(
-                        commonmark.commonmark(schema_block["description"]), tags=bleach.sanitizer.ALLOWED_TAGS + ["p"]
+                        md.render(schema_block["description"]), tags=bleach.sanitizer.ALLOWED_TAGS + ["p"]
                     )
                 )
             if ref_info:

@@ -17,10 +17,10 @@ setup(
     install_requires=[
         "libcove>=0.22.0",
         "bleach",
-        "CommonMark",
-        "Django",
+        "django",
         "json-merge-patch",
         "jsonschema",
+        "markdown-it-py",
         "requests",
         "click",
     ],
