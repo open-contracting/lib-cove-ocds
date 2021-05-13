@@ -48,8 +48,9 @@ def ocds_json_output(
                 except ValueError:
                     raise APIException("The file looks like invalid json")
 
-        schema_ocds = SchemaOCDS(schema_version, json_data, lib_cove_ocds_config=lib_cove_ocds_config,
-                                 record_pkg=record_pkg)
+        schema_ocds = SchemaOCDS(
+            schema_version, json_data, lib_cove_ocds_config=lib_cove_ocds_config, record_pkg=record_pkg
+        )
 
         if schema_ocds.invalid_version_data:
             msg = "\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m"
