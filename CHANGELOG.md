@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [0.11.0] - 2021-05-20
+
 ### Changed
 
 - Check the combination of `ocid` and `id` is unique in releases, instead of just `id` https://github.com/open-contracting/cove-ocds/issues/127
