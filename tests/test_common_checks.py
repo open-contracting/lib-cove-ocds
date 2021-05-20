@@ -81,8 +81,8 @@ def test_dupe_ids_1():
         results["validation_errors"][0][1][1]["value"],
     ]
     values.sort()
-    assert values[0] == "ocds-213czf-000-00001-01-planning"
-    assert values[1] == "ocds-213czf-000-00001-02-planning"
+    assert values[0] == "ocds-213czf-000-00001, ocds-213czf-000-00001-01-planning"
+    assert values[1] == "ocds-213czf-000-00001, ocds-213czf-000-00001-02-planning"
 
 
 @pytest.mark.parametrize(
@@ -366,8 +366,8 @@ def test_dupe_ids_1():
             "",
             [
                 {
-                    "message": "Non-unique id values",
-                    "message_safe": "Non-unique id values",
+                    "message": "Non-unique combination of ocid, id values",
+                    "message_safe": "Non-unique combination of ocid, id values",
                     "validator": "uniqueItems",
                     "assumption": None,
                     "message_type": "uniqueItems",
@@ -375,14 +375,15 @@ def test_dupe_ids_1():
                     "header": "releases",
                     "header_extra": "releases",
                     "null_clause": "",
-                    "error_id": "uniqueItems_with_id",
+                    "error_id": "uniqueItems_with_ocid__id",
                     "values": [
-                        {"path": "releases", "value": "EXAMPLE-1-1"},
-                        {"path": "releases", "value": "EXAMPLE-1-2"},
+                        {"path": "releases", "value": "EXAMPLE-1, EXAMPLE-1-1"},
+                        {"path": "releases", "value": "EXAMPLE-1, EXAMPLE-1-2"},
                     ],
                 }
             ],
         ),
+        (False, "releases_unique_ocids_but_not_ids.json", "", []),
         (
             True,
             "records_non_unique.json",

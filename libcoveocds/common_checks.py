@@ -29,9 +29,11 @@ def unique_ids_or_ocids(validator, ui, instance, schema):
     # we look out for this $ref — this may change if the way the schema files
     # are structured changes.
     if schema.get("items") == {"$ref": "#/definitions/record"}:
-        return unique_ids(validator, ui, instance, schema, id_name="ocid")
+        return unique_ids(validator, ui, instance, schema, id_names=["ocid"])
+    elif "$ref" in schema.get("items", {}) and schema["items"]["$ref"].endswith("release-schema.json"):
+        return unique_ids(validator, ui, instance, schema, id_names=["ocid", "id"])
     else:
-        return unique_ids(validator, ui, instance, schema, id_name="id")
+        return unique_ids(validator, ui, instance, schema, id_names=["id"])
 
 
 def oneOf_draft4(validator, oneOf, instance, schema):
