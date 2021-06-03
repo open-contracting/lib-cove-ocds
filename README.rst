@@ -61,51 +61,70 @@ Property (key) name		      Type                  Value
 ``records_aggregates``                object                See records_aggregates_
 ``additional_closed_codelist_values`` object                A mapping from from codelist path to an `additional codelist object`_.
 ``additional_open_codelist_values``   object                A mapping from from codelist path to an `additional codelist object`_.
-``additional_checks``                 object                A mapping from additional check type (e.g. ``empty_field``) to a list of additional check objects, see below.
+``additional_checks``                 object                A mapping from an additional check type (currently only ``empty_field``) to a list of `additional check objects <additional check object_>`_
 ``conformance_errors``                object                See conformance_errors_
-``additional_fields``                 array[object]         See additional_fields_
-``all_additional_fields``             array[object]         See all_additional_fields_
+``additional_fields``                 array[object]         Just the top level additional fields, see additional_fields_
+``all_additional_fields``             array[object]         All additional fields, including children of other additional fields, see all_additional_fields_
 ``ocds_prefixes_bad_format``          array[]               This is a bug, and is always an empty array. See conformance_errors_ for where this property is actually populated.
 ===================================== ===================== ==============
 
-_`extensions`
-^^^^^^^^^^^^^
+Note that wherever a schema is used, it is the extended schema (if extensions exist).
 
-============================= ==================== ==============
-Property (key) name	      Type                 Value
-============================= ==================== ==============
-``extensions``                array[object] 
-``invalid_extensions``        array[array[string]]
-``extended_schema_url``       string
-``is_extended_schema``        boolean
-============================= ==================== ==============
+extensions
+^^^^^^^^^^
 
-_`validation_errors`
-^^^^^^^^^^^^^^^^^^^^
+============================= ===================== ==============
+Property (key) name	      Type                  Value
+============================= ===================== ==============
+``extensions``                array[object]         See `extensions/extensions`_
+``invalid_extensions``        array[array[string]]  An array of pairs representing the extension url, and the error message, e.g. ``[["http://etc", "404: not found"]]``
+``extended_schema_url``       string                The file the extended schema will be written to, if an output directory has been set, e.g. ``extended_schema.json``           
+``is_extended_schema``        boolean               Has the schema been extended?
+============================= ===================== ==============
 
-============================= ==================== ==============
-Property (key) name	      Type                 Value
-============================= ==================== ==============
-``type``                      string
-``field``                     string
-``description``               string
-``path``                      string
-``value``                     any
-============================= ==================== ==============
+extensions/extensions
+^^^^^^^^^^^^^^^^^^^^^
 
-_`deprecated_fields`
-^^^^^^^^^^^^^^^^^^^^
+======================= =============== ============
+Property (key) name     Type            Value
+======================= =============== ============
+``url``                 string          The url of the extension's extension.json, e.g. ``https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json``
+``schema_url``          string          The url of the extension's schema json e.g. ``https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/release-schema.json``
+``description``         string          Taken from the extension.json
+``name``                string          Taken from the extension.json
+``documentationUrl``    string          Taken from the extension.json
+``failed_codelists``    object          A mapping from extended codelist name (prefixed with ``+`` or ``-`` if appropriate) to human readable strings describing the error.
+``codelists``           array[string]   Taken from the extension.json
+======================= =============== ============
+
+validation_errors
+^^^^^^^^^^^^^^^^^
+
+Note that this list will exclude codelists, which instead appear in ``additional_closed_codelist_values``.
+
+======================= =========== ========
+Property (key) name     Type        Value
+======================= =========== ========
+``type``                string      The JSON schema keyword that caused the validation error, e.g. ``minLength`` (`full list in the jsonschema lib <https://github.com/Julian/jsonschema/blob/9b6a9f5a4b7341cdbfc3cbee32d66bc190e4ced8/jsonschema/validators.py#L321-L345>`_), unless the schema keyword was ``type`` or ``format``, in which case this value is the relevant `type <https://datatracker.ietf.org/doc/html/draft-zyp-json-schema-04#section-3.5>`_ or `format <https://datatracker.ietf.org/doc/html/draft-fge-json-schema-validation-00#section-7.3>`_) e.g. ``array`` or ``date-time``
+``field``               string      Like ``path``, but with array indices removed e.g. ``releases/tender/items``
+``description``         string      A human readable message about the error, e.g. ``'id' is missing but required within 'items'``
+``path``                string      The JSON Pointer to the erroneous data e.g. ``releases/0/tender/items/0``
+``value``               any         The value in the data that was erroneous, or `""` if not applicable.
+======================= =========== ========
+
+deprecated_fields
+^^^^^^^^^^^^^^^^^
 
 ======================================= =========================== ==============
 Property (key) name	                Type                        Value
 ======================================= =========================== ==============
-``paths``                               array[string]
-``explanation``                         array[string]               A 2 item array with deprecated version, and then an explanation.
-``field``                               string
+``paths``                               array[string]               JSON Pointers to the parent object with some deprecated data e.g. ``["releases/0/tender"]``
+``explanation``                         array[string]               A 2 item array with deprecated version, and then an explanation., e.g. ``["1.1", "Some explanation text"]``
+``field``                               string                      The field within the parent object that is deprecated, e.g. ``amendment``
 ======================================= =========================== ==============
 
-_`releases_aggregates`
-^^^^^^^^^^^^^^^^^^^^^^
+releases_aggregates
+^^^^^^^^^^^^^^^^^^^
 
 ======================================= =========================== ==============
 Property (key) name	                Type                        Value
@@ -179,8 +198,8 @@ Property (key) name	                Type                        Value
 ``contracts_without_awards``            array                       An array of contract objects (from the data) that don't have awards.
 ======================================= =========================== ==============
 
-_`records_aggregates`
-^^^^^^^^^^^^^^^^^^^^^
+records_aggregates
+^^^^^^^^^^^^^^^^^^
 
 ============================= ==================== ==============
 Property (key) name	      Type                 Value
@@ -189,67 +208,67 @@ Property (key) name	      Type                 Value
 ``unique_ocids``              array*               A list of all ocids, deduplicated.
 ============================= ==================== ==============
 
-_`additional codelist object`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-=========================== ===================== ==============
-Property (key) name	    Type                  Value
-=========================== ===================== ==============
-``path``                    string
-``field``                   string
-``codelist``                string
-``codelist_url``            string
-``codelist_amend_urls``     array[array[string]]
-``isopen``                  boolean
-``values``                  array*
-``extension_codelist``      boolean
-=========================== ===================== ==============
-
-_`additional check object`
+additional codelist object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+=========================== ======================= ============
+Property (key) name	    Type                    Value
+=========================== ======================= ============
+``path``                    string                  The path of the parent object, e.g. ``releases/tender/documents``
+``field``                   string                  The JSON property name, e.g. ``documentType`` 
+``codelist``                string                  The csv file containing the codelist, e.g. ``documentType.csv``
+``codelist_url``            string                  A url that the codelist csv is accessible at, e.g. ``https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/documentType.csv``
+``codelist_amend_urls``     array[array[string]     urls of codelist csvs in extensions that amend the codelist. Structure is an array of pairs of ``+`` or ``-`` and the url. e.g. ``[["+", "https://raw.githubusercontent.com/open-contracting-extensions/ocds_tariffs_extension/d9df2969030b0a555c24c7db685262c714b4da24/codelists/+documentType.csv"]]``
+``isopen``                  boolean                 Is this an open codelist?
+``values``                  array*                  Values in the data that were not on the codelist
+``extension_codelist``      boolean                 Was the codelist added by an extension? (Not just modified).
+=========================== ======================= ============
+
+additional check object
+^^^^^^^^^^^^^^^^^^^^^^^
+
 =========================== ===================== ==============
 Property (key) name	    Type                  Value
 =========================== ===================== ==============
-``json_location``           string                e.g. ``releases/0/buyer``
+``json_location``           string                A JSON Pointer to the data that was problematic e.g. ``releases/0/buyer``
 =========================== ===================== ==============
 
 
-_`conformance_errors`
+conformance_errors
+^^^^^^^^^^^^^^^^^^
+
+=============================== ======================= =====
+Property (key) name	        Type                    Value
+=============================== ======================= =====
+``ocds_prefixes_bad_format``    array[array[string]]    An array of pairs of the bad ocid value, and the JSON Pointer to it, e.g. ``["MY-ID", "releases/0/ocid"]``
+``ocid_description``            string                  The descriptive text about ocids in the schema.
+``ocid_info_url``               string                  The url to the information about identifiers in the reference docs
+=============================== ======================= =====
+
+additional_fields
+^^^^^^^^^^^^^^^^^
+
+============================= ========= ==============
+Property (key) name	      Type      Value
+============================= ========= ==============
+``path``                      string    The path of the parent object, e.g. ``/publisher``
+``field``                     string    The JSON property name, e.g. ``myField``
+``usage_count``               integer   How many times this additional field appears
+============================= ========= ==============
+
+all_additional_fields
 ^^^^^^^^^^^^^^^^^^^^^
 
-============================= ============= ==============
-Property (key) name	      Type          Value
-============================= ============= ==============
-``ocds_prefixes_bad_format``
-``ocid_description``          string
-``ocid_info_url``             string
-============================= ============= ==============
-
-_`additional_fields`
-^^^^^^^^^^^^^^^^^^^^
-
-============================= ==================== ==============
-Property (key) name	      Type                 Value
-============================= ==================== ==============
-``path``                      string
-``field``                     string
-``usage_count``               integer
-============================= ==================== ==============
-
-_`all_additional_fields`
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-=================================== ==================== ==============
-Property (key) name	            Type                 Value
-=================================== ==================== ==============
-``count``                           integer
-``examples``                        array*
-``root_additional_field``           boolean
-``additional_field_descendance``    object
-``path``                            string
-``field_name``                      string
-=================================== ==================== ==============
+=================================== =========== ==============
+Property (key) name	            Type        Value
+=================================== =========== ==============
+``count``                           integer     How many times this additional field appears
+``examples``                        array*      An array of values for this field
+``root_additional_field``           boolean     Is this the first additional field we find descending into this bit of the shcema? ie. is the parent in the schema?
+``additional_field_descendance``    object      Only appears if ``root_additional_field`` is true. A mapping from paths, to objects like those in all_additional_fields_, for each of the additional fields that can be found by descending into the data from this field.
+``path``                            string      The path of the parent object, e.g. ``/publisher``
+``field_name``                      string      The JSON property name, e.g. ``myField``
+=================================== =========== ==============
 
 array\*
 ^^^^^^^
