@@ -53,19 +53,19 @@ Property (key) name		      Type                  Value
 ``file_type``                         string                The type of the file supplied, e.g. ``json``
 ``version_used``                      string                The version of the OCDS schemas used, e.g. ``1.1``
 ``schema_url``                        string                The url to the package schema used, e.g. ``https://standard.open-contracting.org/1.1/en/release-package-schema.json``
-``extensions``                        object                See extensions_
-``validation_errors``                 array[object]         See validation_errors_
+``extensions``                        object                An extensions_ object
+``validation_errors``                 array[object]         An array of validation_errors_ objects
 ``common_error_types``                array[]               Always an empty array.
-``deprecated_fields``                 array[object]         See deprecated_fields_
-``releases_aggregates``               object                See releases_aggregates_
-``records_aggregates``                object                See records_aggregates_
+``deprecated_fields``                 array[object]         An array of deprecated_fields_ objects
+``releases_aggregates``               object                A releases_aggregates_ object
+``records_aggregates``                object                A records_aggregates_ object
 ``additional_closed_codelist_values`` object                A mapping from from codelist path to an `additional codelist object`_.
 ``additional_open_codelist_values``   object                A mapping from from codelist path to an `additional codelist object`_.
-``additional_checks``                 object                A mapping from an additional check type (currently only ``empty_field``) to a list of `additional check objects <additional check object_>`_
+``additional_checks``                 object                A mapping from an additional check type (currently only ``empty_field``) to an array of `additional check objects <additional check object_>`_
 ``conformance_errors``                object                See conformance_errors_
 ``additional_fields``                 array[object]         Just the top level additional fields, see additional_fields_
 ``all_additional_fields``             array[object]         All additional fields, including children of other additional fields, see all_additional_fields_
-``ocds_prefixes_bad_format``          array[]               This is a bug, and is always an empty array. See conformance_errors_ for where this property is actually populated.
+``ocds_prefixes_bad_format``          array[]               Always an empty array. This is a bug, see conformance_errors_ for where this property is actually populated.
 ===================================== ===================== ==============
 
 Note that wherever a schema is used, it is the extended schema (if extensions exist).
@@ -76,8 +76,8 @@ extensions
 ============================= ===================== ==============
 Property (key) name	      Type                  Value
 ============================= ===================== ==============
-``extensions``                array[object]         See `extensions/extensions`_
-``invalid_extensions``        array[array[string]]  An array of pairs representing the extension url, and the error message, e.g. ``[["http://etc", "404: not found"]]``
+``extensions``                array[object]         An `extensions/extensions`_ object
+``invalid_extensions``        array[array[string]]  An array of pairs representing the extension url, and a human readable error message, e.g. ``[["http://etc", "404: not found"]]``
 ``extended_schema_url``       string                The file the extended schema will be written to, if an output directory has been set, e.g. ``extended_schema.json``           
 ``is_extended_schema``        boolean               Has the schema been extended?
 ============================= ===================== ==============
@@ -100,7 +100,7 @@ Property (key) name     Type            Value
 validation_errors
 ^^^^^^^^^^^^^^^^^
 
-Note that this list will exclude codelists, which instead appear in ``additional_closed_codelist_values``.
+Note that this list will exclude codelist errors, which instead appear in ``additional_closed_codelist_values``.
 
 ======================= =========== ========
 Property (key) name     Type        Value
@@ -118,8 +118,8 @@ deprecated_fields
 ======================================= =========================== ==============
 Property (key) name	                Type                        Value
 ======================================= =========================== ==============
-``paths``                               array[string]               JSON Pointers to the parent object with some deprecated data e.g. ``["releases/0/tender"]``
-``explanation``                         array[string]               A 2 item array with deprecated version, and then an explanation., e.g. ``["1.1", "Some explanation text"]``
+``paths``                               array[string]               An array of JSON Pointers to parent objects with some deprecated data e.g. ``["releases/0/tender"]``
+``explanation``                         array[string]               A pair of deprecated version, and a human readable explanation., e.g. ``["1.1", "Some explanation text"]``
 ``field``                               string                      The field within the parent object that is deprecated, e.g. ``amendment``
 ======================================= =========================== ==============
 
@@ -130,7 +130,7 @@ releases_aggregates
 Property (key) name	                Type                        Value
 ======================================= =========================== ==============
 ``release_count``                       integer                     The number of items in the releases array 
-``unique_ocids``                        array*                      A list of all ocids, deduplicated.
+``unique_ocids``                        array*                      An array of all ocids, deduplicated.
 ``unique_initation_type``               array*
 ``duplicate_release_ids``               array*
 ``tags``                                object
@@ -160,10 +160,10 @@ Property (key) name	                Type                        Value
 ``unique_procuring_name_no_id``         array*
 ``unique_tenderers_identifier``         object                      A mapping from identifier to name
 ``unique_tenderers_name_no_id``         array*
-``unique_buyers``                       array[string]               A list of organisation names, with the identifier in brackets if it exists
-``unique_suppliers``                    array[string]               A list of organisation names, with the identifier in brackets if it exists
-``unique_procuring``                    array[string]               A list of organisation names, with the identifier in brackets if it exists
-``unique_tenderers``                    array[string]               A list of organisation names, with the identifier in brackets if it exists
+``unique_buyers``                       array[string]               An array of organisation names, with the identifier in brackets if it exists
+``unique_suppliers``                    array[string]               An array of organisation names, with the identifier in brackets if it exists
+``unique_procuring``                    array[string]               An array of organisation names, with the identifier in brackets if it exists
+``unique_tenderers``                    array[string]               An array of organisation names, with the identifier in brackets if it exists
 ``unique_buyers_count``                 integer
 ``unique_suppliers_count``              integer
 ``unique_procuring_count``              integer
@@ -205,7 +205,7 @@ records_aggregates
 Property (key) name	      Type                 Value
 ============================= ==================== ==============
 ``count``                     integer              The number of items in the records array
-``unique_ocids``              array*               A list of all ocids, deduplicated.
+``unique_ocids``              array*               An array of all ocids, deduplicated.
 ============================= ==================== ==============
 
 additional codelist object
@@ -218,10 +218,10 @@ Property (key) name	    Type                    Value
 ``field``                   string                  The JSON property name, e.g. ``documentType`` 
 ``codelist``                string                  The csv file containing the codelist, e.g. ``documentType.csv``
 ``codelist_url``            string                  A url that the codelist csv is accessible at, e.g. ``https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/documentType.csv``
-``codelist_amend_urls``     array[array[string]     urls of codelist csvs in extensions that amend the codelist. Structure is an array of pairs of ``+`` or ``-`` and the url. e.g. ``[["+", "https://raw.githubusercontent.com/open-contracting-extensions/ocds_tariffs_extension/d9df2969030b0a555c24c7db685262c714b4da24/codelists/+documentType.csv"]]``
+``codelist_amend_urls``     array[array[string]     Urls to codelist csvs from extensions that amend the codelist. Structure is an array of pairs of ``+`` or ``-`` and the url. e.g. ``[["+", "https://raw.githubusercontent.com/open-contracting-extensions/ocds_tariffs_extension/d9df2969030b0a555c24c7db685262c714b4da24/codelists/+documentType.csv"]]``
 ``isopen``                  boolean                 Is this an open codelist?
 ``values``                  array*                  Values in the data that were not on the codelist
-``extension_codelist``      boolean                 Was the codelist added by an extension? (Not just modified).
+``extension_codelist``      boolean                 Was the codelist added by an extension? (Not just modified by it).
 =========================== ======================= ============
 
 additional check object
@@ -241,7 +241,7 @@ conformance_errors
 Property (key) name	        Type                    Value
 =============================== ======================= =====
 ``ocds_prefixes_bad_format``    array[array[string]]    An array of pairs of the bad ocid value, and the JSON Pointer to it, e.g. ``["MY-ID", "releases/0/ocid"]``
-``ocid_description``            string                  The descriptive text about ocids in the schema.
+``ocid_description``            string                  The descriptive text about ocids taken from the schema.
 ``ocid_info_url``               string                  The url to the information about identifiers in the reference docs
 =============================== ======================= =====
 
@@ -264,7 +264,7 @@ Property (key) name	            Type        Value
 =================================== =========== ==============
 ``count``                           integer     How many times this additional field appears
 ``examples``                        array*      An array of values for this field
-``root_additional_field``           boolean     Is this the first additional field we find descending into this bit of the shcema? ie. is the parent in the schema?
+``root_additional_field``           boolean     Is this the first additional field we find descending into this bit of the schema? ie. is the parent in the schema?
 ``additional_field_descendance``    object      Only appears if ``root_additional_field`` is true. A mapping from paths, to objects like those in all_additional_fields_, for each of the additional fields that can be found by descending into the data from this field.
 ``path``                            string      The path of the parent object, e.g. ``/publisher``
 ``field_name``                      string      The JSON property name, e.g. ``myField``
@@ -273,4 +273,4 @@ Property (key) name	            Type        Value
 array\*
 ^^^^^^^
 
-An array marked with an asterisk is populated from fields in the data, so could be any type if the data doesn't conform to the schema.
+An array marked with an asterisk is populated from fields in the data, so could be any type (if the data doesn't conform to the schema).
