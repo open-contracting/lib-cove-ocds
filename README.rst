@@ -65,7 +65,7 @@ Property (key) name		      Type                  Value
 ``conformance_errors``                object                See conformance_errors_
 ``additional_fields``                 array[object]         Just the top level additional fields, see additional_fields_
 ``all_additional_fields``             array[object]         All additional fields, including children of other additional fields, see all_additional_fields_
-``ocds_prefixes_bad_format``          array[]               Always an empty array. This is a bug, see conformance_errors_ for where this property is actually populated.
+``ocds_prefixes_bad_format``          array[]               Always an empty array. This is `a bug <https://github.com/open-contracting/lib-cove-ocds/issues/94>`_, see conformance_errors_ for where this property is actually populated.
 ===================================== ===================== ==============
 
 Note that wherever a schema is used, it is the extended schema (if extensions exist).
