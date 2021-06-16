@@ -50,22 +50,22 @@ The output is an object with the following properties:
 ===================================== ===================== ==============
 Property (key) name		      Type                  Value
 ===================================== ===================== ==============
-``file_type``                         string                The type of the file supplied, e.g. ``json``
-``version_used``                      string                The version of the OCDS schemas used, e.g. ``1.1``
+``file_type``                         string                The type of the file supplied, one of ``json``, ``csv``, ``xlsx`` or ``ods``
+``version_used``                      string                The version of the OCDS schemas used, e.g. ``1.1`` (This is ``1.0`` when no version fields exists)
 ``schema_url``                        string                The url to the package schema used, e.g. ``https://standard.open-contracting.org/1.1/en/release-package-schema.json``
 ``extensions``                        object                An extensions_ object
 ``validation_errors``                 array[object]         An array of validation_errors_ objects
-``common_error_types``                array[]               Always an empty array.
+``common_error_types``                array[]               Always an empty array
 ``deprecated_fields``                 array[object]         An array of deprecated_fields_ objects
 ``releases_aggregates``               object                A releases_aggregates_ object
 ``records_aggregates``                object                A records_aggregates_ object
-``additional_closed_codelist_values`` object                A mapping from from codelist path to an `additional codelist object`_.
-``additional_open_codelist_values``   object                A mapping from from codelist path to an `additional codelist object`_.
+``additional_closed_codelist_values`` object                A mapping from a codelist JSON Pointer (with array indices removed, e.g. ``releases/tender/documents/documentType``), to an `additional codelist object`_
+``additional_open_codelist_values``   object                A mapping from a codelist JSON Pointer (with array indices removed, e.g. ``releases/tender/documents/documentType``), to an `additional codelist object`_
 ``additional_checks``                 object                A mapping from an additional check type (currently only ``empty_field``) to an array of `additional check objects <additional check object_>`_
 ``conformance_errors``                object                A conformance_errors_ object
 ``additional_fields``                 array[object]         The top-level additional fields, as an array of additional_fields_ objects
 ``all_additional_fields``             array[object]         All additional fields, including children of other additional fields, as an array of all_additional_fields_ objects
-``ocds_prefixes_bad_format``          array[]               Always an empty array. This is `a bug <https://github.com/open-contracting/lib-cove-ocds/issues/94>`_. See the ``ocds_prefixes_bad_format`` property in the conformance_errors_ object instead.
+``ocds_prefixes_bad_format``          array[]               Always an empty array. This is `a bug <https://github.com/open-contracting/lib-cove-ocds/issues/94>`_. See the ``ocds_prefixes_bad_format`` property in the conformance_errors_ object instead
 ===================================== ===================== ==============
 
 Note that wherever a schema is used, it is the extended schema (if extensions exist).
@@ -130,7 +130,7 @@ releases_aggregates
 Property (key) name	                Type                        Value
 ======================================= =========================== ==============
 ``release_count``                       integer                     The number of items in the releases array 
-``unique_ocids``                        array*                      An array of all ocids, deduplicated.
+``unique_ocids``                        array*                      An array of all ocids, deduplicated
 ``unique_initation_type``               array*
 ``duplicate_release_ids``               array*
 ``tags``                                object
@@ -188,14 +188,14 @@ Property (key) name	                Type                        Value
 ``contract_doc_count``                  integer
 ``implementation_doc_count``            integer
 ``implementation_milestones_doc_count`` integer
-``planning_doctype``                    object                      A mapping from ``documentType``, to the number of occurrences.
-``tender_doctype``                      object                      A mapping from ``documentType``, to the number of occurrences.
-``tender_milestones_doctype``           object                      A mapping from ``documentType``, to the number of occurrences.
-``award_doctype``                       object                      A mapping from ``documentType``, to the number of occurrences.
-``contract_doctype``                    object                      A mapping from ``documentType``, to the number of occurrences.
-``implementation_doctype``              object                      A mapping from ``documentType``, to the number of occurrences.
-``implementation_milestones_doctype``   object                      A mapping from ``documentType``, to the number of occurrences.
-``contracts_without_awards``            array                       An array of contract objects (from the data) that don't have awards.
+``planning_doctype``                    object                      A mapping from ``documentType``, to the number of occurrences
+``tender_doctype``                      object                      A mapping from ``documentType``, to the number of occurrences
+``tender_milestones_doctype``           object                      A mapping from ``documentType``, to the number of occurrences
+``award_doctype``                       object                      A mapping from ``documentType``, to the number of occurrences
+``contract_doctype``                    object                      A mapping from ``documentType``, to the number of occurrences
+``implementation_doctype``              object                      A mapping from ``documentType``, to the number of occurrences
+``implementation_milestones_doctype``   object                      A mapping from ``documentType``, to the number of occurrences
+``contracts_without_awards``            array                       An array of contract objects (from the data) that don't have awards
 ======================================= =========================== ==============
 
 records_aggregates
@@ -205,7 +205,7 @@ records_aggregates
 Property (key) name	      Type                 Value
 ============================= ==================== ==============
 ``count``                     integer              The number of items in the records array
-``unique_ocids``              array*               An array of all ocids, deduplicated.
+``unique_ocids``              array*               An array of all ocids, deduplicated
 ============================= ==================== ==============
 
 additional codelist object
@@ -214,7 +214,7 @@ additional codelist object
 =========================== ======================= ============
 Property (key) name	    Type                    Value
 =========================== ======================= ============
-``path``                    string                  The path of the parent object, e.g. ``releases/tender/documents``
+``path``                    string                  The JSON Pointer to the parent object, with array indices removed, e.g. ``releases/tender/documents``
 ``field``                   string                  The name of the codelist field, e.g. ``documentType`` 
 ``codelist``                string                  The filename of the codelist, e.g. ``documentType.csv``
 ``codelist_url``            string                  The URL of the codelist, e.g. ``https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/documentType.csv``
@@ -241,7 +241,7 @@ conformance_errors
 Property (key) name	        Type                    Value
 =============================== ======================= =====
 ``ocds_prefixes_bad_format``    array[array[string]]    An array of pairs of a bad ``ocid`` value and the JSON Pointer to it, e.g. ``["MY-ID", "releases/0/ocid"]``
-``ocid_description``            string                  The descriptive text about ocids taken from the schema.
+``ocid_description``            string                  The descriptive text about ocids taken from the schema
 ``ocid_info_url``               string                  The URL to the identifiers content in the OCDS documentation
 =============================== ======================= =====
 
@@ -251,7 +251,7 @@ additional_fields
 ============================= ========= ==============
 Property (key) name	      Type      Value
 ============================= ========= ==============
-``path``                      string    The path of the parent object, e.g. ``/publisher``
+``path``                      string    The JSON Pointer to the parent object, with array indices removed, e.g. ``/releases/tender``
 ``field``                     string    The name of the additional field, e.g. ``myField``
 ``usage_count``               integer   The number of times the additional field is set
 ============================= ========= ==============
@@ -263,10 +263,10 @@ all_additional_fields
 Property (key) name	            Type        Value
 =================================== =========== ==============
 ``count``                           integer     The number of times the additional field is set
-``examples``                        array*      An array of values for this field
+``examples``                        array*      A sample of up to 3 values of the field
 ``root_additional_field``           boolean     Is the parent object described by the schema?
-``additional_field_descendance``    object      Only appears if ``root_additional_field`` is true. A mapping from paths, to objects like those in all_additional_fields_, for each of the additional fields that can be found by descending into the data from this field.
-``path``                            string      The path of the parent object, e.g. ``/publisher``
+``additional_field_descendance``    object      Is only set if ``root_additional_field`` is true. A mapping from JSON Pointers without array indices to objects, like those in all_additional_fields_, for each of the additional fields that can be found by descending into the data from this field
+``path``                            string      The JSON Pointer to the parent object, with array indices removed, e.g. ``/releases/tender``
 ``field_name``                      string      The name of the additional field, e.g. ``myField``
 =================================== =========== ==============
 
