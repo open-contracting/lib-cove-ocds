@@ -108,7 +108,7 @@ Property (key) name     Type        Value
 ``type``                string      The JSON Schema keyword that caused the validation error, e.g. ``minLength`` (`full list in the jsonschema lib <https://github.com/Julian/jsonschema/blob/9b6a9f5a4b7341cdbfc3cbee32d66bc190e4ced8/jsonschema/validators.py#L321-L345>`_), unless the keyword is ``type`` or ``format``, in which case this is the relevant `type <https://datatracker.ietf.org/doc/html/draft-zyp-json-schema-04#section-3.5>`_ or `format <https://datatracker.ietf.org/doc/html/draft-fge-json-schema-validation-00#section-7.3>`_, e.g. ``array`` or ``date-time``
 ``field``               string      The JSON Pointer to the erroneous data, with array indices removed, e.g. ``releases/tender/items``
 ``description``         string      A human-readable error message, e.g. ``'id' is missing but required within 'items'``
-``path``                string      The JSON Pointer to the erroneous data e.g. ``releases/0/tender/items/0``
+``path``                string      The JSON Pointer to the erroneous data, e.g. ``releases/0/tender/items/0``
 ``value``               any         The value in the data that was erroneous, or ``""`` if not applicable
 ======================= =========== ========
 
