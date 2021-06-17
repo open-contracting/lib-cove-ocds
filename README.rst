@@ -52,7 +52,7 @@ Property (key) name		      Type                  Value
 ===================================== ===================== ==============
 ``file_type``                         string                The type of the file supplied, one of ``json``, ``csv``, ``xlsx`` or ``ods``
 ``version_used``                      string                The version of the OCDS schemas used, e.g. ``1.1`` (This is ``1.0`` when no version fields exists)
-``schema_url``                        string                The url to the package schema used, e.g. ``https://standard.open-contracting.org/1.1/en/release-package-schema.json``
+``schema_url``                        string                The URL to the package schema used, e.g. ``https://standard.open-contracting.org/1.1/en/release-package-schema.json``
 ``extensions``                        object                An extensions_ object
 ``validation_errors``                 array[object]         An array of validation_errors_ objects
 ``common_error_types``                array[]               Always an empty array
