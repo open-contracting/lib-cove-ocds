@@ -59,8 +59,8 @@ Property (key) name		      Type                  Value
 ``deprecated_fields``                 array[object]         An array of deprecated_fields_ objects
 ``releases_aggregates``               object                A releases_aggregates_ object
 ``records_aggregates``                object                A records_aggregates_ object
-``additional_closed_codelist_values`` object                A mapping from a codelist JSON Pointer (with array indices removed, e.g. ``releases/tender/documents/documentType``), to an `additional codelist object`_
-``additional_open_codelist_values``   object                A mapping from a codelist JSON Pointer (with array indices removed, e.g. ``releases/tender/documents/documentType``), to an `additional codelist object`_
+``additional_closed_codelist_values`` object                A mapping from a codelist field's JSON Pointer (with array indices removed, e.g. ``releases/tender/documents/documentType``) to an `additional codelist object`_
+``additional_open_codelist_values``   object                A mapping from a codelist field's JSON Pointer (with array indices removed, e.g. ``releases/tender/documents/documentType``) to an `additional codelist object`_
 ``additional_checks``                 object                A mapping from an additional check type (currently only ``empty_field``) to an array of `additional check objects <additional check object_>`_
 ``conformance_errors``                object                A conformance_errors_ object
 ``additional_fields``                 array[object]         The top-level additional fields, as an array of additional_fields_ objects
@@ -89,7 +89,7 @@ extensions/extensions
 Property (key) name     Type            Value
 ======================= =============== ============
 ``url``                 string          The URL of the extension's metadata file, e.g. ``https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json``
-``schema_url``          string          The url of the extension's schema json e.g. ``https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/release-schema.json``
+``schema_url``          string          The URL of the extension's release schema file, e.g. ``https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/release-schema.json``
 ``description``         string          Extracted from the metadata file
 ``name``                string          Extracted from the metadata file
 ``documentationUrl``    string          Extracted from the metadata file
@@ -241,7 +241,7 @@ conformance_errors
 Property (key) name	        Type                    Value
 =============================== ======================= =====
 ``ocds_prefixes_bad_format``    array[array[string]]    An array of pairs of a bad ``ocid`` value and the JSON Pointer to it, e.g. ``["MY-ID", "releases/0/ocid"]``
-``ocid_description``            string                  The descriptive text about ocids taken from the schema
+``ocid_description``            string                  The description of the ``ocid`` field from the OCDS schema
 ``ocid_info_url``               string                  The URL to the identifiers content in the OCDS documentation
 =============================== ======================= =====
 
@@ -265,7 +265,7 @@ Property (key) name	            Type        Value
 ``count``                           integer     The number of times the additional field is set
 ``examples``                        array*      A sample of up to 3 values of the field
 ``root_additional_field``           boolean     Is the parent object described by the schema?
-``additional_field_descendance``    object      Is only set if ``root_additional_field`` is true. A mapping from JSON Pointers without array indices to objects, like those in all_additional_fields_, for each of the additional fields that can be found by descending into the data from this field
+``additional_field_descendance``    object      The additional fields that are descendants of this field. Is only set if ``root_additional_field`` is true. A mapping from an additional field's JSON Pointer (with array indices removed) to an all_additional_fields_ object in which ``root_additional_field`` is false
 ``path``                            string      The JSON Pointer to the parent object, with array indices removed, e.g. ``/releases/tender``
 ``field_name``                      string      The name of the additional field, e.g. ``myField``
 =================================== =========== ==============
