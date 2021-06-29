@@ -61,8 +61,7 @@ def get_additional_checks_results(test_instances):
 
         for output in test_instance.output:
             type = output["type"]
-            if type not in results:
-                results[type] = []
+            results.setdefault(type, [])
             output.pop("type", None)
             results[type].append(output)
 
