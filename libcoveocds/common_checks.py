@@ -92,7 +92,7 @@ def oneOf_draft4(validator, oneOf, instance, schema):
                 )
                 err.error_id = "releases_both_embedded_and_linked"
                 yield err
-                break
+                return
 
         all_errors.extend(errs)
     else:
