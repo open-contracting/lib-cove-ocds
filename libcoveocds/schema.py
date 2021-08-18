@@ -204,6 +204,8 @@ class SchemaOCDS(SchemaJsonMixin):
         if not self.extensions:
             return
         for extensions_descriptor_url in self.extensions.keys():
+            if not extensions_descriptor_url:
+                continue
 
             try:
                 response = get_request(extensions_descriptor_url, config=self.config)
