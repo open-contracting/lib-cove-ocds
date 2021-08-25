@@ -439,9 +439,10 @@ def add_conformance_rule_errors(context, json_data, schema_obj):
 
     if ocds_prefixes_bad_format:
         ocid_schema_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
-        ocid_info_index = ocid_schema_description.index("For more information")
+        # XXX: The last sentence is assumed to be a link to guidance in all versions of OCDS.
+        ocid_info_index = ocid_schema_description.rindex(". ") + 1
         ocid_description = ocid_schema_description[:ocid_info_index]
-        ocid_info_url = ocid_schema_description[ocid_info_index:].split("[")[1].split("]")[1][1:-1]
+        ocid_info_url = re.search(r"\((\S+)\)", ocid_schema_description[ocid_info_index:]).group(1)
         context["conformance_errors"] = {
             "ocds_prefixes_bad_format": ocds_prefixes_bad_format,
             "ocid_description": ocid_description,
