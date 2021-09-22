@@ -25,6 +25,38 @@ In some modes, it will also leave directory of data behind. The following option
 
 (If none of these are specified, it will not leave any files behind)
 
+Library
+-------
+
+To use this as a python library as part of a python script for validating multiple files or testing, you need to:
+
+1. Install the library with pip:
+
+   ::
+
+      pip install libcoveocds
+
+2. Use it in your python code, for example:
+
+   .. code-block:: python
+
+      import os
+      import tempfile
+
+      from libcoveocds.api import ocds_json_output
+      cove_temp_folder = tempfile.mkdtemp(dir=tempfile.gettempdir())
+      jsons_path = 'your-directory-with-json-files'
+      for file_name in os.listdir(jsons_path):
+         json_filename = os.path.join(jsons_path, file_name)
+         results = ocds_json_output(cove_temp_folder, json_filename, convert=False, 
+                                    schema_version="")
+         if not results['validation_errors']:
+            print(f'No validation errors found for {json_filename}')
+         else:
+            # do something if the file has validation errors
+            for error in results['validation_errors']:
+                  print(f'Validation error {error} found in file {json_filename}')
+
 Code for use by external users
 ------------------------------
 
