@@ -28,15 +28,15 @@ In some modes, it will also leave directory of data behind. The following option
 Library
 -------
 
-To use this as a python library as part of a python script for validating multiple files or testing, you need to:
+To use this as a Python library as part of a Python script for validating multiple files or testing, you need to:
 
 1. Install the library with pip:
 
-   ::
+   .. code-block:: bash
 
       pip install libcoveocds
 
-2. Use it in your python code, for example:
+2. Use it in your Python code, for example:
 
    .. code-block:: python
 
@@ -44,18 +44,26 @@ To use this as a python library as part of a python script for validating multip
       import tempfile
 
       from libcoveocds.api import ocds_json_output
-      cove_temp_folder = tempfile.mkdtemp(dir=tempfile.gettempdir())
-      jsons_path = 'your-directory-with-json-files'
-      for file_name in os.listdir(jsons_path):
-         json_filename = os.path.join(jsons_path, file_name)
-         results = ocds_json_output(cove_temp_folder, json_filename, convert=False, 
-                                    schema_version="")
-         if not results['validation_errors']:
-            print(f'No validation errors found for {json_filename}')
-         else:
-            # do something if the file has validation errors
-            for error in results['validation_errors']:
-                  print(f'Validation error {error} found in file {json_filename}')
+
+
+      data_directory = 'path/to/your/directory/with/json/files'
+      temporary_directory = tempfile.mkdtemp(dir=tempfile.gettempdir())
+
+      for file_name in os.listdir(data_directory):
+          file_path = os.path.join(data_directory, file_name)
+          result = ocds_json_output(
+              temporary_directory,
+              file_path,
+              schema_version='',
+              convert=False
+          )
+
+          # Do something with the result. For example:
+          if result['validation_errors']:
+              for error in result['validation_errors']:
+                  print(f'Validation error {error} found in file {file_path}')
+          else:
+              print(f'No validation errors found for {file_path}')
 
 Code for use by external users
 ------------------------------
