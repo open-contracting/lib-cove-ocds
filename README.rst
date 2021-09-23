@@ -41,6 +41,7 @@ To use this as a Python library as part of a Python script for validating multip
    .. code-block:: python
 
       import os
+      import shutil
       import tempfile
 
       from libcoveocds.api import ocds_json_output
@@ -51,12 +52,17 @@ To use this as a Python library as part of a Python script for validating multip
 
       for file_name in os.listdir(data_directory):
           file_path = os.path.join(data_directory, file_name)
-          result = ocds_json_output(
-              temporary_directory,
-              file_path,
-              schema_version='',
-              convert=False
-          )
+          try:
+              result = ocds_json_output(
+                  temporary_directory,
+                  file_path,
+                  schema_version=None,
+                  convert=False,
+                  cache_schema=True, 
+                  file_type='json'
+              )
+         finally:
+             shutil.rmtree(temporary_directory)
 
           # Do something with the result. For example:
           if result['validation_errors']:
