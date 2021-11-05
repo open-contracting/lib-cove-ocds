@@ -126,7 +126,7 @@ class SchemaOCDS(SchemaJsonMixin):
                 except UnicodeDecodeError:
                     extension_detail["failed_codelists"][codelist] = "Unicode Error, codelists need to be in UTF-8"
                 except Exception as e:
-                    extension_detail["failed_codelists"][codelist] = "Unknown Exception, {}".format(str(e))
+                    extension_detail["failed_codelists"][codelist] = f"Unknown Exception, {e}"
                     continue
 
                 if not codelist_map:
@@ -139,7 +139,7 @@ class SchemaOCDS(SchemaJsonMixin):
                     if codelist_extension not in self.extended_codelists:
                         extension_detail["failed_codelists"][
                             codelist
-                        ] = "Extension error, Trying to extend non existing codelist {}".format(codelist_extension)
+                        ] = f"Extension error, Trying to extend non existing codelist {codelist_extension}"
                         continue
 
                 if codelist[0] == "+":
@@ -150,7 +150,7 @@ class SchemaOCDS(SchemaJsonMixin):
                         if not value:
                             extension_detail["failed_codelists"][
                                 codelist
-                            ] = "Codelist error, Trying to remove non existing codelist value {}".format(code)
+                            ] = f"Codelist error, Trying to remove non existing codelist value {code}"
                 else:
                     self.extended_codelists[codelist] = codelist_map
 
@@ -211,16 +211,16 @@ class SchemaOCDS(SchemaJsonMixin):
                 response = get_request(extensions_descriptor_url, config=self.config)
                 if not response.ok:
                     # extension descriptor is required to proceed
-                    self.invalid_extension[extensions_descriptor_url] = "{}: {}".format(
-                        response.status_code, response.reason.lower()
-                    )
+                    self.invalid_extension[
+                        extensions_descriptor_url
+                    ] = f"{response.status_code}: {response.reason.lower()}"
                     continue
             except requests.exceptions.RequestException:
                 self.invalid_extension[extensions_descriptor_url] = "fetching failed"
                 continue
 
             i = extensions_descriptor_url.rfind("/")
-            url = "{}/{}".format(extensions_descriptor_url[:i], "release-schema.json")
+            url = f"{extensions_descriptor_url[:i]}/release-schema.json"
 
             try:
                 extension = get_request(url, config=self.config)
@@ -237,9 +237,9 @@ class SchemaOCDS(SchemaJsonMixin):
                 url = None
                 extension_data = {}
             else:
-                self.invalid_extension[extensions_descriptor_url] = "{}: {}".format(
-                    extension.status_code, extension.reason.lower()
-                )
+                self.invalid_extension[
+                    extensions_descriptor_url
+                ] = f"{extension.status_code}: {extension.reason.lower()}"
                 continue
 
             schema_obj = json_merge_patch.merge(schema_obj, extension_data)

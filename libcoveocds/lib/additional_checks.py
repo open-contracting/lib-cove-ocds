@@ -7,18 +7,18 @@ def flatten_dict(data, path=""):
     for key, value in sorted(data.items()):
         if isinstance(value, list):
             if len(value) == 0:
-                yield ("{}/{}".format(path, key), value)
+                yield (f"{path}/{key}", value)
             for num, item in enumerate(value):
                 if isinstance(item, dict):
-                    yield from flatten_dict(item, "{}/{}/{}".format(path, key, num))
+                    yield from flatten_dict(item, f"{path}/{key}/{num}")
                 else:
-                    yield ("{}/{}/{}".format(path, key, num), item)
+                    yield (f"{path}/{key}/{num}", item)
         elif isinstance(value, dict):
             if len(value) == 0:
-                yield ("{}/{}".format(path, key), value)
-            yield from flatten_dict(value, "{}/{}".format(path, key))
+                yield (f"{path}/{key}", value)
+            yield from flatten_dict(value, f"{path}/{key}")
         else:
-            yield ("{}/{}".format(path, key), value)
+            yield (f"{path}/{key}", value)
 
 
 class AdditionalCheck:
@@ -85,6 +85,6 @@ def run_additional_checks(json_data, test_classes):
 
     for num, data in enumerate(json_data[file_type]):
         for test_instance in test_instances:
-            test_instance.process(data, "{}/{}".format(file_type, num))
+            test_instance.process(data, f"{file_type}/{num}")
 
     return get_additional_checks_results(test_instances)

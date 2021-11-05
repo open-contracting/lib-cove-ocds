@@ -32,9 +32,7 @@ def process(filename, output_dir, convert, schema_version, delete, exclude_file)
         lib_cove_ocds_config = LibCoveOCDSConfig()
         version_choices = lib_cove_ocds_config.config.get("schema_version_choices")
         if schema_version not in version_choices:
-            print(
-                "Value for schema version option is not valid. Accepted values: {}".format(", ".join(version_choices))
-            )
+            print(f"Value for schema version option is not valid. Accepted values: {', '.join(version_choices)}")
             sys.exit(1)
 
     # Do we have output on disk? We only do in certain modes
@@ -47,7 +45,7 @@ def process(filename, output_dir, convert, schema_version, delete, exclude_file)
             if delete:
                 shutil.rmtree(output_dir)
             else:
-                print("Directory {} already exists".format(output_dir))
+                print(f"Directory {output_dir} already exists")
                 sys.exit(1)
         os.makedirs(output_dir)
 
