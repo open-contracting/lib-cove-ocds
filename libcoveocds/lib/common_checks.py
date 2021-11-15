@@ -406,7 +406,7 @@ def get_bad_ocds_prefixes(json_data):
                 continue
             ocid = release.get("ocid", "")
             if ocid and isinstance(ocid, str) and not prefix_regex.match(ocid):
-                bad_prefixes.append((ocid, "releases/%s/ocid" % n_rel))
+                bad_prefixes.append((ocid, f"releases/{n_rel}/ocid"))
 
     elif records and isinstance(records, list):
         for n_rec, record in enumerate(records):
@@ -414,21 +414,21 @@ def get_bad_ocds_prefixes(json_data):
                 continue
             ocid = record.get("ocid", "")
             if ocid and not prefix_regex.match(ocid):
-                bad_prefixes.append((ocid, "records/%s/ocid" % (n_rec)))
+                bad_prefixes.append((ocid, f"records/{n_rec}/ocid"))
 
             for n_rel, release in enumerate(record.get("releases") or {}):
                 if not isinstance(release, dict):
                     continue
                 ocid = release.get("ocid", "")
                 if ocid and not prefix_regex.match(ocid):
-                    bad_prefixes.append((ocid, "records/%s/releases/%s/ocid" % (n_rec, n_rel)))
+                    bad_prefixes.append((ocid, f"records/{n_rec}/releases/{n_rel}/ocid"))
 
             compiled_release = record.get("compiledRelease", {})
             if compiled_release and isinstance(compiled_release, dict):
                 ocid = compiled_release.get("ocid", "")
                 if ocid and not prefix_regex.match(ocid):
-                    bad_prefixes.append((ocid, "records/%s/compiledRelease/ocid" % n_rec))
-                    bad_prefixes.append((ocid, "records/%s/compiledRelease/ocid" % n_rec))
+                    bad_prefixes.append((ocid, f"records/{n_rec}/compiledRelease/ocid"))
+                    bad_prefixes.append((ocid, f"records/{n_rec}/compiledRelease/ocid"))
 
     return bad_prefixes
 

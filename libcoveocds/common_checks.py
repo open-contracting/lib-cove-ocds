@@ -98,8 +98,9 @@ def oneOf_draft4(validator, oneOf, instance, schema):
         all_errors.extend(errs)
     else:
         err = ValidationError(
-            "%s is not valid under any of the given schemas"
-            % (json.dumps(instance, sort_keys=True, default=decimal_default),),
+            "{} is not valid under any of the given schemas".format(
+                json.dumps(instance, sort_keys=True, default=decimal_default)
+            ),
             context=all_errors,
         )
         err.error_id = "oneOf_any"
@@ -109,7 +110,7 @@ def oneOf_draft4(validator, oneOf, instance, schema):
     if more_valid:
         more_valid.append(first_valid)
         reprs = ", ".join(repr(schema) for schema in more_valid)
-        err = ValidationError("%r is valid under each of %s" % (instance, reprs))
+        err = ValidationError(f"{instance!r} is valid under each of {reprs}")
         err.error_id = "oneOf_each"
         err.reprs = reprs
         yield err
