@@ -5,12 +5,12 @@ import tempfile
 
 from click.testing import CliRunner
 
-from libcoveocds.cli.__main__ import process
+from libcoveocds.cli.__main__ import main
 
 
 def test_basic():
     runner = CliRunner()
-    result = runner.invoke(process, os.path.join("tests", "fixtures", "common_checks", "basic_1.json"))
+    result = runner.invoke(main, os.path.join("tests", "fixtures", "common_checks", "basic_1.json"))
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert "1.1" == data.get("version_used")
@@ -18,7 +18,7 @@ def test_basic():
 
 def test_old_schema():
     runner = CliRunner()
-    result = runner.invoke(process, "-s 1.0 " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json"))
+    result = runner.invoke(main, "-s 1.0 " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json"))
     print(result.output)
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -32,7 +32,7 @@ def test_set_output_dir():
     )
     runner = CliRunner()
     result = runner.invoke(
-        process, " -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
+        main, " -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
     )
     # This will fail because tempfile.mkdtemp already will make the directory, and so it already exists
     assert result.exit_code == 1
@@ -48,7 +48,7 @@ def test_set_output_dir_and_delete():
     )
     runner = CliRunner()
     result = runner.invoke(
-        process, " -d -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
+        main, " -d -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
     )
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -66,7 +66,7 @@ def test_set_output_dir_and_delete_and_exclude():
     )
     runner = CliRunner()
     result = runner.invoke(
-        process, " -d -e -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
+        main, " -d -e -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
     )
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -84,7 +84,7 @@ def test_set_output_dir_and_convert():
     )
     runner = CliRunner()
     result = runner.invoke(
-        process, " -c -d -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
+        main, " -c -d -o " + output_dir + " " + os.path.join("tests", "fixtures", "common_checks", "basic_1.json")
     )
     assert result.exit_code == 0
     data = json.loads(result.output)
