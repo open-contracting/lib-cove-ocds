@@ -98,9 +98,8 @@ def oneOf_draft4(validator, oneOf, instance, schema):
         all_errors.extend(errs)
     else:
         err = ValidationError(
-            "{} is not valid under any of the given schemas".format(
-                json.dumps(instance, sort_keys=True, default=decimal_default)
-            ),
+            f"{json.dumps(instance, sort_keys=True, default=decimal_default)} "
+            "is not valid under any of the given schemas",
             context=all_errors,
         )
         err.error_id = "oneOf_any"
