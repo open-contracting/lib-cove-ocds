@@ -63,7 +63,7 @@ def ocds_json_output(
 
         if convert:
             with warnings.catch_warnings():
-                warnings.filterwarnings('ignore')  # flattentool uses UserWarning, so we can't set a specific category
+                warnings.filterwarnings("ignore")  # flattentool uses UserWarning, so we can't set a specific category
 
                 context.update(
                     convert_json(output_dir, "", file, lib_cove_ocds_config, schema_url=url, flatten=True, cache=False)
