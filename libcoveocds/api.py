@@ -1,5 +1,6 @@
 import json
 import os
+import warnings
 from collections import OrderedDict
 
 from libcove.lib.common import get_spreadsheet_meta_data
@@ -61,9 +62,12 @@ def ocds_json_output(
         url = schema_ocds.extended_schema_file or schema_ocds.schema_url
 
         if convert:
-            context.update(
-                convert_json(output_dir, "", file, lib_cove_ocds_config, schema_url=url, flatten=True, cache=False)
-            )
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore')  # flattentool uses UserWarning, so we can't set a specific category
+
+                context.update(
+                    convert_json(output_dir, "", file, lib_cove_ocds_config, schema_url=url, flatten=True, cache=False)
+                )
 
     else:
         metatab_schema_url = SchemaOCDS(select_version="1.1", lib_cove_ocds_config=lib_cove_ocds_config).pkg_schema_url
