@@ -26,7 +26,9 @@ jobs:
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
       - run: pip install .[test]
-      - run: pytest --cov libcoveocds
+      - env:
+          PYTHONWARNINGS: error
+        run: pytest --cov libcoveocds
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: coveralls --service=github
