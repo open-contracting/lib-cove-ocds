@@ -7,27 +7,34 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-## [0.11.0] - 2021-05-20
+## 0.11.1 (2022-06-20)
+
+### Fixed
+
+- Extract the description of the `ocid` field in all languages.
+- Label an extension as invalid if the extension metadata URL is empty or the release schema patch is not valid JSON.
+
+## 0.11.0 (2021-05-20)
 
 ### Changed
 
 - Check the combination of `ocid` and `id` is unique in releases, instead of just `id` https://github.com/open-contracting/cove-ocds/issues/127
 
-## [0.10.2] - 2021-05-13
+## 0.10.2 (2021-05-13)
 
 ### Fixed
 
--  Add a `record_pkg` keyword argument to the `ocds_json_output` function. Since 0.8.0 ([#44](https://github.com/open-contracting/lib-cove-ocds/pull/44)), the `ocds_json_output` function would check record packages against the release package schema.
+- Add a `record_pkg` keyword argument to the `ocds_json_output` function. Since 0.8.0 ([#44](https://github.com/open-contracting/lib-cove-ocds/pull/44)), the `ocds_json_output` function would check record packages against the release package schema.
 
-## [0.10.1] - 2021-04-10
+## 0.10.1 (2021-04-10)
 
 ### Added
 
 - Add Python wheels distribution.
 
-## [0.10.0] - 2021-02-25
+## 0.10.0 (2021-02-25)
 
-## Changed
+### Changed
 
 - `common_checks_ocds` returns more fields on each error dictionary, so that we can [replace the message with a translation in cove-ocds](https://github.com/open-contracting/cove-ocds/pull/149)
 - Update the default config to use branch urls instead of tag urls for the schema. This means patch fixes will automatically be pulled in.
@@ -36,13 +43,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - libcoveocds commandline fails for record packages https://github.com/open-contracting/lib-cove-ocds/issues/39
 
-## [0.9.1] - 2020-09-07
+## 0.9.1 (2020-09-07)
 
 ### Fixed
 
 - Bump version number in setup.py
 
-## [0.9.0] - 2020-09-07
+## 0.9.0 (2020-09-07)
 
 ### Added
 
@@ -53,21 +60,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Cache all requests in the tests https://github.com/OpenDataServices/lib-cove/pull/59
 
-## [0.8.0] - 2020-08-26
+## 0.8.0 (2020-08-26)
 
 ### Changed
 
 - Move OCDS specific code here from lib-cove https://github.com/open-contracting/lib-cove-ocds/pull/44
 
-## [0.7.6] - 2020-08-21
+## 0.7.6 (2020-08-21)
 
 - Upgrade to OCDS 1.1.5. Fix URL for codelists.
 
-## [0.7.5] - 2020-08-20
+## 0.7.5 (2020-08-20)
 
 - Upgrade to OCDS 1.1.5.
 
-## [0.7.4] - 2019-10-31
+## 0.7.4 (2019-10-31)
 
 ### Fixed
 
@@ -76,50 +83,50 @@ Put back Python Dependencies until we can properly review which ones can be remo
 https://github.com/open-contracting/lib-cove-ocds/issues/31
 - Don't error when looking up a path on a empty schema (e.g. due to broken refs)
 
-## [0.7.3] - 2019-09-23
+## 0.7.3 (2019-09-23)
 
 - Fix package: Indicate readme's encoding in setup.py.
 
-## [0.7.2] - 2019-09-18
+## 0.7.2 (2019-09-18)
 
 - Fix package: Declare dependencies in setup.py.
 
-## [0.7.1] - 2019-08-21
+## 0.7.1 (2019-08-21)
 
 ### Changed
 
 - get_bad_ocds_prefixes no longer tests for hyphens after OCID prefixes, and no longer allows uppercase letters in OCID prefixes.
 
-## [0.7.0] - 2019-06-26
+## 0.7.0 (2019-06-26)
 
 ### Changed
 
 - OCDS Version 1.1.4 has been released! Changed default config to match
 - The standard site is now available over SSL
 
-## [0.6.1] - 2019-06-14
+## 0.6.1 (2019-06-14)
 
 ### Changed
 
 - Load data in ordered to get consistant output
 
-## [0.6.0] - 2019-06-10
+## 0.6.0 (2019-06-10)
 
 ### Changed
 
 - Add handling of new additional fields context
 
-## [0.5.1] - 2019-05-31
+## 0.5.1 (2019-05-31)
 
 ### Fixed
 
 - When cache_all_requests was on, some requests were not being cached
 
-## [0.5.0] - 2019-05-09
+## 0.5.0 (2019-05-09)
 
 - Add additional check EmptyFieldCheck for records.
 
-## [0.4.0] - 2019-04-17
+## 0.4.0 (2019-04-17)
 
 ### Added
 
@@ -132,7 +139,7 @@ https://github.com/open-contracting/lib-cove-ocds/issues/31
 - The cache_schema option to SchemaOCDS and ocds_json_output is now deprecated; but for now it just sets the new cache_all_requests option
 
 
-## [0.3.0] - 2019-04-01
+## 0.3.0 (2019-04-01)
 
 ### Changed
 
@@ -143,19 +150,19 @@ https://github.com/open-contracting/lib-cove-ocds/issues/31
 - Record ocid now picked up when checking bad ocid prefix.
 - Will not error if compiledRelease is not a object.  
 
-## [0.2.2] - 2018-11-14
+## 0.2.2 (2018-11-14)
 
 ### Fixed
 
 - get_file_type() - could not detect JSON file if extension was not "JSON" and filename had upper case letters in it
 
-## [0.2.1] - 2018-11-13
+## 0.2.1 (2018-11-13)
 
 ### Fixed
 
 - Corrected name of key broken in initial creation
 
-## [0.2.0] - 2018-11-13
+## 0.2.0 (2018-11-13)
 
 ### Changed
 
@@ -163,7 +170,7 @@ https://github.com/open-contracting/lib-cove-ocds/issues/31
 - Add config option for disable_local_refs mode in flatten-tool, default to on.
 - Add config option for remove_empty_schema_columns mode in flatten-tool, default to on.
 
-## [0.1.0] - 2018-11-02
+## 0.1.0 (2018-11-02)
 
 ### Added
 
