@@ -45,7 +45,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "libcoveocds = libcoveocds.cli.__main__:main",
+            "libcoveocds = libcoveocds.__main__:main",
         ],
     },
 )

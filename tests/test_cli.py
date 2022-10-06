@@ -5,7 +5,7 @@ import tempfile
 
 from click.testing import CliRunner
 
-from libcoveocds.cli.__main__ import main
+from libcoveocds.__main__ import main
 
 
 def test_basic():
