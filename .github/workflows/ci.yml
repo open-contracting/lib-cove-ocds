@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest]  # libcove doesn't support Windows https://github.com/OpenDataServices/lib-cove/issues/53
-        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']  # jsonschema has a pypy-3.7 bug https://github.com/Julian/jsonschema/issues/828
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10', '3.11']  # jsonschema has a pypy-3.7 bug https://github.com/Julian/jsonschema/issues/828
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
