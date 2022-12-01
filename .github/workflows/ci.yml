@@ -19,6 +19,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
+      - if: matrix.os == 'windows-latest'
+        run: vcpkg install libxml2:x64-windows-static-md
       - run: pip install .[test]
       - run: pytest -W error --cov libcoveocds
       - env:
