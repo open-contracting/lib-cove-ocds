@@ -8,6 +8,10 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         python-version: [3.7, 3.8, 3.9, '3.10', '3.11']  # jsonschema has a pypy-3.7 bug https://github.com/Julian/jsonschema/issues/828
+      exclude:
+        # https://www.lfd.uci.edu/~gohlke/pythonlibs/ has no permalinks (for libxml2).
+        - os: windows-latest
+          python-version: '3.11'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -19,13 +23,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
-      - if: matrix.os == 'windows-latest'
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.LOCALAPPDATA }}\vcpkg\archives
-          key: ${{ matrix.os }}-vcpkg
-      - if: matrix.os == 'windows-latest'
-        run: vcpkg install libxml2
       - run: pip install .[test]
       - run: pytest -W error --cov libcoveocds
       - env:
