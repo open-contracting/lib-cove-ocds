@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-- Bump version number in setup.py
+- Fix package: Correct version number.
 
 ## 0.9.0 (2020-09-07)
 
@@ -89,11 +89,11 @@ https://github.com/open-contracting/lib-cove-ocds/issues/31
 
 ## 0.7.3 (2019-09-23)
 
-- Fix package: Indicate readme's encoding in setup.py.
+- Fix package: Indicate readme's encoding.
 
 ## 0.7.2 (2019-09-18)
 
-- Fix package: Declare dependencies in setup.py.
+- Fix package: Declare package dependencies.
 
 ## 0.7.1 (2019-08-21)
 
