@@ -83,7 +83,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Needed dependencies were removed. 
-Put back Python Dependencies until we can properly review which ones can be removed and which cant.
+Put back Python Dependencies until we can properly review which ones can be removed and which can't.
 https://github.com/open-contracting/lib-cove-ocds/issues/31
 - Don't error when looking up a path on a empty schema (e.g. due to broken refs)
 
@@ -112,7 +112,7 @@ https://github.com/open-contracting/lib-cove-ocds/issues/31
 
 ### Changed
 
-- Load data in ordered to get consistant output
+- Load data in ordered to get consistent output
 
 ## 0.6.0 (2019-06-10)
 
