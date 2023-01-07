@@ -31,13 +31,13 @@ def get_releases_aggregates(json_data):
     award_dates = []
     contract_dates = []
 
-    unique_buyers_identifier = dict()
+    unique_buyers_identifier = {}
     unique_buyers_name_no_id = set()
-    unique_suppliers_identifier = dict()
+    unique_suppliers_identifier = {}
     unique_suppliers_name_no_id = set()
-    unique_procuring_identifier = dict()
+    unique_procuring_identifier = {}
     unique_procuring_name_no_id = set()
-    unique_tenderers_identifier = dict()
+    unique_tenderers_identifier = {}
     unique_tenderers_name_no_id = set()
 
     unique_organisation_schemes = set()
@@ -277,76 +277,78 @@ def get_releases_aggregates(json_data):
 
     get_currencies(json_data)
 
-    return dict(
-        release_count=release_count,
-        unique_ocids=sorted(unique_ocids, key=lambda x: str(x)),
-        unique_initation_type=sorted(unique_initation_type, key=lambda x: str(x)),
-        duplicate_release_ids=sorted(duplicate_release_ids, key=lambda x: str(x)),
-        tags=dict(tags),
-        unique_lang=sorted(unique_lang, key=lambda x: str(x)),
-        unique_award_id=sorted(unique_award_id, key=lambda x: str(x)),
-        planning_count=len(planning_ocids),
-        tender_count=len(tender_ocids),
-        award_count=len(awardid_ocids),
-        processes_award_count=len(award_ocids),
-        contract_count=len(contractid_ocids),
-        processes_contract_count=len(contract_ocids),
-        implementation_count=len(implementation_contractid_ocids),
-        processes_implementation_count=len(implementation_ocids),
-        min_release_date=min(release_dates) if release_dates else "",
-        max_release_date=max(release_dates) if release_dates else "",
-        min_tender_date=min(tender_dates) if tender_dates else "",
-        max_tender_date=max(tender_dates) if tender_dates else "",
-        min_award_date=min(award_dates) if award_dates else "",
-        max_award_date=max(award_dates) if award_dates else "",
-        min_contract_date=min(contract_dates) if contract_dates else "",
-        max_contract_date=max(contract_dates) if contract_dates else "",
-        unique_buyers_identifier=unique_buyers_identifier,
-        unique_buyers_name_no_id=sorted(unique_buyers_name_no_id, key=lambda x: str(x)),
-        unique_suppliers_identifier=unique_suppliers_identifier,
-        unique_suppliers_name_no_id=sorted(unique_suppliers_name_no_id, key=lambda x: str(x)),
-        unique_procuring_identifier=unique_procuring_identifier,
-        unique_procuring_name_no_id=sorted(unique_procuring_name_no_id, key=lambda x: str(x)),
-        unique_tenderers_identifier=unique_tenderers_identifier,
-        unique_tenderers_name_no_id=sorted(unique_tenderers_name_no_id, key=lambda x: str(x)),
-        unique_buyers=sorted(set(unique_buyers)),
-        unique_suppliers=sorted(set(unique_suppliers)),
-        unique_procuring=sorted(set(unique_procuring)),
-        unique_tenderers=sorted(set(unique_tenderers)),
-        unique_buyers_count=unique_buyers_count,
-        unique_suppliers_count=unique_suppliers_count,
-        unique_procuring_count=unique_procuring_count,
-        unique_tenderers_count=unique_tenderers_count,
-        unique_org_identifier_count=unique_org_identifier_count,
-        unique_org_name_count=unique_org_name_count,
-        unique_org_count=unique_org_count,
-        unique_organisation_schemes=sorted(unique_organisation_schemes, key=lambda x: str(x)),
-        organisations_with_address=len(organisation_identifier_address) + len(organisation_name_no_id_address),
-        organisations_with_contact_point=len(organisation_identifier_contact_point)
+    return {
+        "release_count": release_count,
+        "unique_ocids": sorted(unique_ocids, key=lambda x: str(x)),
+        "unique_initation_type": sorted(unique_initation_type, key=lambda x: str(x)),
+        "duplicate_release_ids": sorted(duplicate_release_ids, key=lambda x: str(x)),
+        "tags": dict(tags),
+        "unique_lang": sorted(unique_lang, key=lambda x: str(x)),
+        "unique_award_id": sorted(unique_award_id, key=lambda x: str(x)),
+        "planning_count": len(planning_ocids),
+        "tender_count": len(tender_ocids),
+        "award_count": len(awardid_ocids),
+        "processes_award_count": len(award_ocids),
+        "contract_count": len(contractid_ocids),
+        "processes_contract_count": len(contract_ocids),
+        "implementation_count": len(implementation_contractid_ocids),
+        "processes_implementation_count": len(implementation_ocids),
+        "min_release_date": min(release_dates) if release_dates else "",
+        "max_release_date": max(release_dates) if release_dates else "",
+        "min_tender_date": min(tender_dates) if tender_dates else "",
+        "max_tender_date": max(tender_dates) if tender_dates else "",
+        "min_award_date": min(award_dates) if award_dates else "",
+        "max_award_date": max(award_dates) if award_dates else "",
+        "min_contract_date": min(contract_dates) if contract_dates else "",
+        "max_contract_date": max(contract_dates) if contract_dates else "",
+        "unique_buyers_identifier": unique_buyers_identifier,
+        "unique_buyers_name_no_id": sorted(unique_buyers_name_no_id, key=lambda x: str(x)),
+        "unique_suppliers_identifier": unique_suppliers_identifier,
+        "unique_suppliers_name_no_id": sorted(unique_suppliers_name_no_id, key=lambda x: str(x)),
+        "unique_procuring_identifier": unique_procuring_identifier,
+        "unique_procuring_name_no_id": sorted(unique_procuring_name_no_id, key=lambda x: str(x)),
+        "unique_tenderers_identifier": unique_tenderers_identifier,
+        "unique_tenderers_name_no_id": sorted(unique_tenderers_name_no_id, key=lambda x: str(x)),
+        "unique_buyers": sorted(set(unique_buyers)),
+        "unique_suppliers": sorted(set(unique_suppliers)),
+        "unique_procuring": sorted(set(unique_procuring)),
+        "unique_tenderers": sorted(set(unique_tenderers)),
+        "unique_buyers_count": unique_buyers_count,
+        "unique_suppliers_count": unique_suppliers_count,
+        "unique_procuring_count": unique_procuring_count,
+        "unique_tenderers_count": unique_tenderers_count,
+        "unique_org_identifier_count": unique_org_identifier_count,
+        "unique_org_name_count": unique_org_name_count,
+        "unique_org_count": unique_org_count,
+        "unique_organisation_schemes": sorted(unique_organisation_schemes, key=lambda x: str(x)),
+        "organisations_with_address": len(organisation_identifier_address) + len(organisation_name_no_id_address),
+        "organisations_with_contact_point": len(organisation_identifier_contact_point)
         + len(organisation_name_no_id_contact_point),
-        total_item_count=len(release_tender_item_ids) + len(release_award_item_ids) + len(release_contract_item_ids),
-        tender_item_count=len(release_tender_item_ids),
-        award_item_count=len(release_award_item_ids),
-        contract_item_count=len(release_contract_item_ids),
-        unique_item_ids_count=len(unique_item_ids),
-        item_identifier_schemes=sorted(item_identifier_schemes, key=lambda x: str(x)),
-        unique_currency=sorted(unique_currency, key=lambda x: str(x)),
-        planning_doc_count=planning_doc_count,
-        tender_doc_count=tender_doc_count,
-        tender_milestones_doc_count=tender_milestones_doc_count,
-        award_doc_count=award_doc_count,
-        contract_doc_count=contract_doc_count,
-        implementation_doc_count=implementation_doc_count,
-        implementation_milestones_doc_count=implementation_milestones_doc_count,
-        planning_doctype=dict(planning_doctype),
-        tender_doctype=dict(tender_doctype),
-        tender_milestones_doctype=dict(tender_milestones_doctype),
-        award_doctype=dict(award_doctype),
-        contract_doctype=dict(contract_doctype),
-        implementation_doctype=dict(implementation_doctype),
-        implementation_milestones_doctype=dict(implementation_milestones_doctype),
-        contracts_without_awards=contracts_without_awards,
-    )
+        "total_item_count": len(release_tender_item_ids)
+        + len(release_award_item_ids)
+        + len(release_contract_item_ids),
+        "tender_item_count": len(release_tender_item_ids),
+        "award_item_count": len(release_award_item_ids),
+        "contract_item_count": len(release_contract_item_ids),
+        "unique_item_ids_count": len(unique_item_ids),
+        "item_identifier_schemes": sorted(item_identifier_schemes, key=lambda x: str(x)),
+        "unique_currency": sorted(unique_currency, key=lambda x: str(x)),
+        "planning_doc_count": planning_doc_count,
+        "tender_doc_count": tender_doc_count,
+        "tender_milestones_doc_count": tender_milestones_doc_count,
+        "award_doc_count": award_doc_count,
+        "contract_doc_count": contract_doc_count,
+        "implementation_doc_count": implementation_doc_count,
+        "implementation_milestones_doc_count": implementation_milestones_doc_count,
+        "planning_doctype": dict(planning_doctype),
+        "tender_doctype": dict(tender_doctype),
+        "tender_milestones_doctype": dict(tender_milestones_doctype),
+        "award_doctype": dict(award_doctype),
+        "contract_doctype": dict(contract_doctype),
+        "implementation_doctype": dict(implementation_doctype),
+        "implementation_milestones_doctype": dict(implementation_milestones_doctype),
+        "contracts_without_awards": contracts_without_awards,
+    }
 
 
 def _lookup_schema(schema, path, ref_info=None):
