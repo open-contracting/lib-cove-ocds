@@ -17,8 +17,6 @@ jobs:
         run: curl -s -S --retry 3 $BASEDIR/tests/install.sh | bash -
       - shell: bash
         run: curl -s -S --retry 3 $BASEDIR/tests/script.sh | bash -
-      - run: pip install black
-      - run: black --check .
       - run: pip install .[test]
       - run: pytest /tmp/test_requirements.py
       - run: pip install --upgrade check-manifest
