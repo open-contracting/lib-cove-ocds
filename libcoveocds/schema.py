@@ -96,6 +96,8 @@ class SchemaOCDS(SchemaJsonMixin):
         self.schema_url = urljoin(self.schema_host, self.schema_name)
         self.pkg_schema_url = urljoin(self.schema_host, self.pkg_schema_name)
 
+    # We can't call super() to use the new `SchemaJsonMixin.process_codelists` method, as it has small differences.
+    # https://github.com/OpenDataServices/lib-cove/pull/109
     def process_codelists(self):
         self.core_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=False)
         self.extended_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=True)
