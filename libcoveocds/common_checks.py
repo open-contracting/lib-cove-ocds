@@ -105,7 +105,7 @@ def oneOf_draft4(validator, oneOf, instance, schema):
         err.error_id = "oneOf_any"
         yield err
 
-    more_valid = [s for i, s in subschemas if validator.is_valid(instance, s)]
+    more_valid = [s for i, s in subschemas if validator.evolve(schema=s).is_valid(instance)]
     if more_valid:
         more_valid.append(first_valid)
         reprs = ", ".join(repr(schema) for schema in more_valid)
