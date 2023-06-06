@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.7, 3.8, 3.9, '3.10', '3.11']  # jsonschema has a pypy-3.7 bug https://github.com/Julian/jsonschema/issues/828
+        python-version: [3.7, 3.8, 3.9, '3.10', '3.11']  # Add pypy-3.9 once 4.18.0 released https://github.com/Julian/jsonschema/issues/828
         exclude:
           # https://www.lfd.uci.edu/~gohlke/pythonlibs/ has no permalinks (for libxml2).
           - os: windows-latest
@@ -19,7 +19,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: setup.cfg
-      - if: matrix.os == 'ubuntu-latest' && matrix.python-version == 'pypy-3.7'
+      - if: matrix.os == 'ubuntu-latest' && matrix.python-version == 'pypy-3.9'
         run: |
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
