@@ -1,7 +1,6 @@
 import json
 import os
 import warnings
-from collections import OrderedDict
 
 from libcove.lib.common import get_spreadsheet_meta_data
 from libcove.lib.converters import convert_json, convert_spreadsheet
@@ -45,7 +44,7 @@ def ocds_json_output(
         if not json_data:
             with open(file, encoding="utf-8") as fp:
                 try:
-                    json_data = json.load(fp, object_pairs_hook=OrderedDict)
+                    json_data = json.load(fp)
                 except ValueError:
                     raise APIException("The file looks like invalid json")
 
@@ -97,7 +96,7 @@ def ocds_json_output(
         )
 
         with open(context["converted_path"], encoding="utf-8") as fp:
-            json_data = json.load(fp, object_pairs_hook=OrderedDict)
+            json_data = json.load(fp)
 
     context = context_api_transform(
         common_checks_ocds(context, output_dir, json_data, schema_ocds, api=True, cache=False)

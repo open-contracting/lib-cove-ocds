@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 LIB_COVE_OCDS_CONFIG_DEFAULT = {
     "app_name": "cove_ocds",
     "app_base_template": "cove_ocds/base.html",
@@ -8,17 +6,15 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     "schema_name": {"release": "release-package-schema.json", "record": "record-package-schema.json"},
     "schema_item_name": "release-schema.json",
     "schema_host": None,
-    "schema_version_choices": OrderedDict(
-        (  # {version: (display, url)}
-            ("1.0", ("1.0", "https://standard.open-contracting.org/1.0/en/")),
-            ("1.1", ("1.1", "https://standard.open-contracting.org/1.1/en/")),
-        )
-    ),
-    "schema_codelists": OrderedDict(
-        (  # {version: codelist_dir}
-            ("1.1", "https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/"),
-        )
-    ),
+    "schema_version_choices": {
+        # version: (display, url),
+        "1.0": ("1.0", "https://standard.open-contracting.org/1.0/en/"),
+        "1.1": ("1.1", "https://standard.open-contracting.org/1.1/en/"),
+    },
+    "schema_codelists": {
+        # version: codelist_dir,
+        "1.1": "https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/",
+    },
     "root_list_path": "releases",
     "root_id": "ocid",
     "convert_titles": False,

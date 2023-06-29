@@ -1,6 +1,5 @@
 import json
 import os
-from collections import OrderedDict
 from copy import deepcopy
 from urllib.parse import urljoin
 
@@ -80,7 +79,7 @@ class SchemaOCDS(SchemaJsonMixin):
         if hasattr(release_data, "get"):
             data_extensions = release_data.get("extensions", {})
             if data_extensions:
-                self.extensions = OrderedDict((ext, ()) for ext in data_extensions if type(ext) == str)
+                self.extensions = {ext: () for ext in data_extensions if type(ext) == str}
             if not select_version:
                 release_version = release_data and release_data.get("version")
                 if release_version:

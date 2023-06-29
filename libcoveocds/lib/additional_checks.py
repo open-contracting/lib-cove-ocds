@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import libcove.lib.tools as tools
 
 
@@ -38,7 +36,7 @@ class EmptyFieldCheck(AdditionalCheck):
         self.output.append({"type": "empty_field", "json_location": path_prefix + key})
 
     def process(self, data, path_prefix):
-        flattened_data = OrderedDict(flatten_dict(data))
+        flattened_data = dict(flatten_dict(data))
 
         for key, value in flattened_data.items():
             if isinstance(value, str) and len(value.strip()) == 0:
