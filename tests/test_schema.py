@@ -34,12 +34,6 @@ def test_basic_1(record_pkg):
     assert not schema.config.config["cache_all_requests"]
 
 
-def test_deprecated_cache_schema_1():
-    schema = libcoveocds.schema.SchemaOCDS(cache_schema=True)
-    # cache_schema is deprecated but it should still set the new option.
-    assert schema.config.config["cache_all_requests"]
-
-
 @pytest.mark.parametrize("record_pkg", [False, True])
 def test_pass_config_1(record_pkg):
 

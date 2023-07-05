@@ -13,7 +13,7 @@ import libcoveocds.config
 
 class SchemaOCDS(SchemaJsonMixin):
     def __init__(
-        self, select_version=None, release_data=None, cache_schema=False, lib_cove_ocds_config=None, record_pkg=False
+        self, select_version=None, release_data=None, lib_cove_ocds_config=None, record_pkg=False
     ):
         """Build the schema object using an specific OCDS schema version
 
@@ -32,7 +32,6 @@ class SchemaOCDS(SchemaJsonMixin):
             self.release_schema = SchemaOCDS(
                 select_version=select_version,
                 release_data=release_data,
-                cache_schema=cache_schema,
                 lib_cove_ocds_config=lib_cove_ocds_config,
                 record_pkg=False,
             )
@@ -42,10 +41,6 @@ class SchemaOCDS(SchemaJsonMixin):
 
         self.version = self.default_version
         self.schema_host = self.default_schema_host
-
-        # cache_schema is a deprecated option - now set cache_all_requests in the config instead.
-        if cache_schema:
-            self.config.config["cache_all_requests"] = True
 
         # Missing package is only for original json data
         self.missing_package = False

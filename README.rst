@@ -54,10 +54,14 @@ To use this as a Python library as part of a Python script for validating multip
       import tempfile
 
       from libcoveocds.api import ocds_json_output
+      from libcoveocds.config import LibCoveOCDSConfig
 
 
       data_directory = 'path/to/your/directory/with/json/files'
       temporary_directory = tempfile.mkdtemp(dir=tempfile.gettempdir())
+
+      config = LibCoveOCDSConfig()
+      config.config['cache_all_requests'] = True
 
       for file_name in os.listdir(data_directory):
           file_path = os.path.join(data_directory, file_name)
@@ -67,8 +71,8 @@ To use this as a Python library as part of a Python script for validating multip
                   file_path,
                   schema_version=None,
                   convert=False,
-                  cache_schema=True, 
-                  file_type='json'
+                  file_type='json',
+                  lib_cove_ocds_config=config
               )
          finally:
              shutil.rmtree(temporary_directory)

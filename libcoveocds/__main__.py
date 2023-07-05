@@ -28,9 +28,11 @@ class SetEncoder(json.JSONEncoder):
 @click.option("-e", "--exclude-file", is_flag=True, help="Do not include the file in the output directory")
 def main(filename, output_dir, convert, schema_version, delete, exclude_file):
 
+    config = LibCoveOCDSConfig()
+    config.config["cache_all_requests"] = True
+
     if schema_version:
-        lib_cove_ocds_config = LibCoveOCDSConfig()
-        version_choices = lib_cove_ocds_config.config.get("schema_version_choices")
+        version_choices = config.config.get("schema_version_choices")
         if schema_version not in version_choices:
             print(f"Value for schema version option is not valid. Accepted values: {', '.join(version_choices)}")
             sys.exit(1)
@@ -60,7 +62,7 @@ def main(filename, output_dir, convert, schema_version, delete, exclude_file):
 
     try:
         result = libcoveocds.api.ocds_json_output(
-            output_dir, filename, schema_version, convert=convert, cache_schema=True, file_type="json"
+            output_dir, filename, schema_version, convert=convert, file_type="json", lib_cove_ocds_config=config
         )
     finally:
         if not has_disk_output:

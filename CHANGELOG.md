@@ -10,9 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Improve performance in API context:
+  - Add `skip_aggregates` keyword argument to `common_checks_ocds` and `ocds_json_output` to skip "releases_aggregates" and "records_aggregates" (default `False`).
   - Skip Markdown formatting, HTML escaping and adding fields to validation errors that are then ignored by ``context_api_transform()``.
-- Add `skip_aggregates` keyword argument to `common_checks_ocds` and `ocds_json_output` to skip "releases_aggregates" and "records_aggregates" (default `False`).
+  - Improve ``context_api_transform()`` performance.
 - flattentool is optional.
+
+### Removed
+
+- The deprecated `cache_schema` keyword argument to `ocds_json_output()` and `SchemaOCDS()` is removed.
 
 ## 0.11.3 (2023-03-16)
 

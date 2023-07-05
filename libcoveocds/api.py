@@ -25,7 +25,6 @@ def ocds_json_output(
     file,
     schema_version,
     convert,
-    cache_schema=False,
     file_type=None,
     json_data=None,
     lib_cove_ocds_config=None,
@@ -40,10 +39,6 @@ def ocds_json_output(
 
     if not lib_cove_ocds_config:
         lib_cove_ocds_config = LibCoveOCDSConfig()
-
-    # cache_schema is a deprecated option - now set cache_all_requests in the config instead.
-    if cache_schema:
-        lib_cove_ocds_config.config["cache_all_requests"] = True
 
     context = {}
     if not file_type:
