@@ -133,41 +133,44 @@ def common_checks_ocds(
 
     validation_errors = common_checks["context"]["validation_errors"]
 
-    new_validation_errors = []
-    for (json_key, values) in validation_errors:
-        error = json.loads(json_key)
-        new_message = validation_error_lookup.get(error["message_type"])
-        if new_message:
-            error["message_safe"] = conditional_escape(new_message)
-        else:
-            if "message_safe" in error:
-                error["message_safe"] = mark_safe(error["message_safe"])
+    # Skip Markdown formatting, HTML escaping, and new keys ("schema_title", "schema_description_safe", "docs_ref")
+    # if called in an API context. (The new keys are not returned in an API context.)
+    if not api:
+        new_validation_errors = []
+        for (json_key, values) in validation_errors:
+            error = json.loads(json_key)
+            new_message = validation_error_lookup.get(error["message_type"])
+            if new_message:
+                error["message_safe"] = conditional_escape(new_message)
             else:
-                error["message_safe"] = conditional_escape(error["message"])
-
-        schema_block, ref_info = lookup_schema(schema_obj.get_pkg_schema_obj(deref=True), error["path_no_number"])
-        if schema_block and error["message_type"] != "required":
-            if "description" in schema_block:
-                error["schema_title"] = escape(schema_block.get("title", ""))
-                error["schema_description_safe"] = mark_safe(
-                    bleach.clean(md.render(schema_block["description"]), tags=bleach.sanitizer.ALLOWED_TAGS | {"p"})
-                )
-            if ref_info:
-                ref = ref_info["reference"]["$ref"]
-                if ref.endswith("release-schema.json"):
-                    ref = ""
+                if "message_safe" in error:
+                    error["message_safe"] = mark_safe(error["message_safe"])
                 else:
-                    ref = ref.strip("#")
-                ref_path = "/".join(ref_info["path"])
-                schema = "release-schema.json"
-            else:
-                ref = ""
-                ref_path = error["path_no_number"]
-                schema = "release-package-schema.json"
-            error["docs_ref"] = format_html("{},{},{}", schema, ref, ref_path)
+                    error["message_safe"] = conditional_escape(error["message"])
 
-        new_validation_errors.append([json.dumps(error, sort_keys=True), values])
-    common_checks["context"]["validation_errors"] = new_validation_errors
+            schema_block, ref_info = lookup_schema(schema_obj.get_pkg_schema_obj(deref=True), error["path_no_number"])
+            if schema_block and error["message_type"] != "required":
+                if "description" in schema_block:
+                    error["schema_title"] = escape(schema_block.get("title", ""))
+                    error["schema_description_safe"] = mark_safe(
+                        bleach.clean(md.render(schema_block["description"]), tags=bleach.sanitizer.ALLOWED_TAGS | {"p"})
+                    )
+                if ref_info:
+                    ref = ref_info["reference"]["$ref"]
+                    if ref.endswith("release-schema.json"):
+                        ref = ""
+                    else:
+                        ref = ref.strip("#")
+                    ref_path = "/".join(ref_info["path"])
+                    schema = "release-schema.json"
+                else:
+                    ref = ""
+                    ref_path = error["path_no_number"]
+                    schema = "release-package-schema.json"
+                error["docs_ref"] = format_html("{},{},{}", schema, ref, ref_path)
+
+            new_validation_errors.append([json.dumps(error, sort_keys=True), values])
+        common_checks["context"]["validation_errors"] = new_validation_errors
 
     context.update(common_checks["context"])
 

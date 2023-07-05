@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+- Improve performance in API context:
+  - Skip Markdown formatting, HTML escaping and adding fields to validation errors that are then ignored by ``context_api_transform()``.
 - Add `skip_aggregates` keyword argument to `common_checks_ocds` and `ocds_json_output` to skip "releases_aggregates" and "records_aggregates" (default `False`).
 - flattentool is optional.
 

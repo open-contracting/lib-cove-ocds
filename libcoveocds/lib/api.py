@@ -19,6 +19,7 @@ def context_api_transform(context):
        -  ``description`` (``message`` from the JSON text, repeated for each item in the list of dicts)
        -  ``path`` from the list of dicts
        -  ``value`` from the list of dicts
+       -  Ignore other keys
 
     -  Reformat ``extensions``:
 
