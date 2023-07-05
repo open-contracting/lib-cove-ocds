@@ -21,6 +21,8 @@ def test_context_api_transform_validation_additional_fields():
         "additional_fields": {"path_to_d": {"some_info": "some_value"}},
         "additional_fields_count": 6,
         "validation_errors_count": 3,
+        "deprecated_fields": {},
+        "extensions": {},
     }
     expected_context = {
         "additional_fields": [
@@ -127,8 +129,9 @@ def test_context_api_transform_extensions():
         "validation_errors_count": 0,
         "additional_fields_count": 0,
         "data_only": [],
-        "additional_fields": [],
-        "deprecated_fields": [],
+        "validation_errors": [],
+        "additional_fields": {},
+        "deprecated_fields": {},
     }
 
     transformed_ext_context = context_api_transform(context)["extensions"]
@@ -164,7 +167,7 @@ def test_context_api_transform_deprecations():
         "validation_errors": [],
         "validation_errors_count": 0,
         "data_only": [],
-        "additional_fields": [],
+        "additional_fields": {},
         "additional_fields_count": 0,
         "extensions": {},
     }

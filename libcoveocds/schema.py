@@ -79,6 +79,7 @@ class SchemaOCDS(SchemaJsonMixin):
         if hasattr(release_data, "get"):
             data_extensions = release_data.get("extensions", {})
             if data_extensions:
+                # The value becomes a dict in apply_extensions().
                 self.extensions = {ext: () for ext in data_extensions if type(ext) == str}
             if not select_version:
                 release_version = release_data and release_data.get("version")
