@@ -2,14 +2,18 @@ import json
 import os
 import warnings
 
-from libcove.lib.common import get_spreadsheet_meta_data
-from libcove.lib.converters import convert_json, convert_spreadsheet
 from libcove.lib.tools import get_file_type
 
 from libcoveocds.common_checks import common_checks_ocds
 from libcoveocds.config import LibCoveOCDSConfig
 from libcoveocds.lib.api import context_api_transform
 from libcoveocds.schema import SchemaOCDS
+
+try:
+    from libcove.lib.common import get_spreadsheet_meta_data
+    from libcove.lib.converters import convert_json, convert_spreadsheet
+except ImportError:
+    pass
 
 
 class APIException(Exception):
@@ -27,6 +31,9 @@ def ocds_json_output(
     lib_cove_ocds_config=None,
     record_pkg=False,
 ):
+    """
+    If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
+    """
 
     if not lib_cove_ocds_config:
         lib_cove_ocds_config = LibCoveOCDSConfig()
@@ -99,6 +106,7 @@ def ocds_json_output(
             json_data = json.load(fp)
 
     context = context_api_transform(
+        # This `cache` writes the results to a file, which is only relevant in the context of repetitive web requests.
         common_checks_ocds(context, output_dir, json_data, schema_ocds, api=True, cache=False)
     )
 
