@@ -119,11 +119,18 @@ validator.VALIDATORS["uniqueItems"] = unique_ids_or_ocids
 validator.VALIDATORS["oneOf"] = oneOf_draft4
 
 
-def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, cache=True):
+def common_checks_ocds(
+    context, upload_dir, json_data, schema_obj, api=False, cache=True, skip_aggregates: bool = False
+):
+    """
+    param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
+    """
+
     schema_name = schema_obj.pkg_schema_name
     common_checks = common_checks_context(
         upload_dir, json_data, schema_obj, schema_name, context, fields_regex=True, api=api, cache=cache
     )
+
     validation_errors = common_checks["context"]["validation_errors"]
 
     new_validation_errors = []
@@ -165,7 +172,8 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
     context.update(common_checks["context"])
 
     if schema_name == "record-package-schema.json":
-        context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=bool(validation_errors))
+        if not skip_aggregates:
+            context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=bool(validation_errors))
         # Do this for records, as there's no record-schema.json (this probably
         # causes problems for flatten-tool)
         context["schema_url"] = schema_obj.pkg_schema_url
@@ -176,13 +184,10 @@ def common_checks_ocds(context, upload_dir, json_data, schema_obj, api=False, ca
         }
         open_codelist_values = {key: value for key, value in additional_codelist_values.items() if value["isopen"]}
 
-        context.update(
-            {
-                "releases_aggregates": get_releases_aggregates(json_data, ignore_errors=bool(validation_errors)),
-                "additional_closed_codelist_values": closed_codelist_values,
-                "additional_open_codelist_values": open_codelist_values,
-            }
-        )
+        if not skip_aggregates:
+            context["releases_aggregates"] = get_releases_aggregates(json_data, ignore_errors=bool(validation_errors))
+        context["additional_closed_codelist_values"] = closed_codelist_values
+        context["additional_open_codelist_values"] = open_codelist_values
 
     additional_checks = run_additional_checks(
         json_data, TEST_CLASSES["additional"], ignore_errors=True, return_on_error=None

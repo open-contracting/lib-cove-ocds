@@ -30,9 +30,12 @@ def ocds_json_output(
     json_data=None,
     lib_cove_ocds_config=None,
     record_pkg=False,
+    skip_aggregates: bool = False,
 ):
     """
     If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
+
+    :param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
     """
 
     if not lib_cove_ocds_config:
@@ -107,7 +110,9 @@ def ocds_json_output(
 
     context = context_api_transform(
         # This `cache` writes the results to a file, which is only relevant in the context of repetitive web requests.
-        common_checks_ocds(context, output_dir, json_data, schema_ocds, api=True, cache=False)
+        common_checks_ocds(
+            context, output_dir, json_data, schema_ocds, api=True, cache=False, skip_aggregates=skip_aggregates
+        )
     )
 
     if file_type == "xlsx":

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 0.12.0
+
+### Changed
+
+- Add `skip_aggregates` keyword argument to `common_checks_ocds` and `ocds_json_output` to skip "releases_aggregates" and "records_aggregates" (default `False`).
+- flattentool is optional.
+
 ## 0.11.3 (2023-03-16)
 
 ### Changed
