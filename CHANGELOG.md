@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Skip Markdown formatting, HTML escaping and adding fields to validation errors that are then ignored by ``context_api_transform()``.
   - Improve ``context_api_transform()`` performance.
 - flattentool is optional.
+- Drop support for Python 3.7.
 
 ### Removed
 
