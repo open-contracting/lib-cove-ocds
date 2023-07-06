@@ -352,23 +352,21 @@ def get_releases_aggregates(json_data):
 
 
 def _lookup_schema(schema, path, ref_info=None):
-    if len(path) == 0:
+    if not path:
         return schema, ref_info
+
     if hasattr(schema, "__reference__"):
-        ref_info = {
-            "path": path,
-            "reference": schema.__reference__,
-        }
-    path_item, *child_path = path
+        ref_info = {"path": path, "reference": schema.__reference__}
+
     if "items" in schema:
         return _lookup_schema(schema["items"], path, ref_info)
-    elif "properties" in schema:
-        if path_item in schema["properties"]:
-            return _lookup_schema(schema["properties"][path_item], child_path, ref_info)
-        else:
-            return None, None
-    else:
-        return None, None
+
+    if "properties" in schema:
+        head, *tail = path
+        if head in schema["properties"]:
+            return _lookup_schema(schema["properties"][head], tail, ref_info)
+
+    return None, None
 
 
 def lookup_schema(schema, path):
