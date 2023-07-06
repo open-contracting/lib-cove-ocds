@@ -237,7 +237,7 @@ def test_get_releases_aggregates():
     assert actual == {}
 
 
-def test_release_bad_ocds_prefixes():
+def test_release_bad_ocid_prefixes():
     file_name = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
         "fixtures",
@@ -265,7 +265,7 @@ def test_release_bad_ocds_prefixes():
     assert get_bad_ocid_prefixes(user_data) == results
 
 
-def test_record_bad_ocds_prefixes_with_bad_compiled_release():
+def test_record_bad_ocid_prefixes_with_bad_compiled_release():
     file_name = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "record_check_ocids.json"
     )
