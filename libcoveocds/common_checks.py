@@ -1,4 +1,5 @@
 import json
+import re
 
 import bleach
 from django.utils.html import conditional_escape, escape, format_html, mark_safe
@@ -9,7 +10,7 @@ from markdown_it import MarkdownIt
 
 from libcoveocds.lib.additional_checks import TEST_FUNCTIONS, run_additional_checks
 from libcoveocds.lib.common_checks import (
-    add_conformance_rule_errors,
+    get_bad_ocid_prefixes,
     get_records_aggregates,
     get_releases_aggregates,
     lookup_schema,
@@ -132,9 +133,20 @@ def common_checks_ocds(
     )
     ignore_errors = bool(common_checks["context"]["validation_errors"])
 
+    ocds_prefixes_bad_format = get_bad_ocid_prefixes(json_data)
+    if ocds_prefixes_bad_format:
+        context["conformance_errors"] = {"ocds_prefixes_bad_format": ocds_prefixes_bad_format}
+
     # Skip Markdown formatting, HTML escaping, and new keys ("schema_title", "schema_description_safe", "docs_ref")
     # if called in an API context. (The new keys are not returned in an API context.)
     if not api:
+        if "conformance_errors" in context:
+            ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
+            # XXX: The last sentence is assumed to be a link to guidance in all versions of OCDS.
+            index = ocid_schema_description.rindex(". ") + 1
+            context["conformance_errors"]["ocid_description"] = ocid_description[:index]
+            context["conformance_errors"]["ocid_info_url"] = re.search(r"\((\S+)\)", ocid_description[index:]).group(1)
+
         new_validation_errors = []
         for (json_key, values) in common_checks["context"]["validation_errors"]:
             error = json.loads(json_key)
@@ -198,7 +210,5 @@ def common_checks_ocds(
     context["additional_checks"] = run_additional_checks(
         json_data, TEST_FUNCTIONS, ignore_errors=True, return_on_error=None
     )
-
-    context = add_conformance_rule_errors(context, json_data, schema_obj)
 
     return context

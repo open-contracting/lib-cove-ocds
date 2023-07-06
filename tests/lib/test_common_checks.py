@@ -1,7 +1,7 @@
 import json
 import os
 
-from libcoveocds.lib.common_checks import get_bad_ocds_prefixes, get_releases_aggregates
+from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_releases_aggregates
 
 EMPTY_RELEASE_AGGREGATE = {
     "award_doc_count": 0,
@@ -262,7 +262,7 @@ def test_release_bad_ocds_prefixes():
 
     assert len(user_data_ocids) == 7  # 1 good, 6 bad ocds prefixes
     assert "ocds-00good-000003" in user_data_ocids  # good ocds prefix
-    assert get_bad_ocds_prefixes(user_data) == results
+    assert get_bad_ocid_prefixes(user_data) == results
 
 
 def test_record_bad_ocds_prefixes_with_bad_compiled_release():
@@ -276,4 +276,4 @@ def test_record_bad_ocds_prefixes_with_bad_compiled_release():
     with open(os.path.join(file_name)) as fp:
         user_data = json.load(fp)
 
-    assert get_bad_ocds_prefixes(user_data) == results
+    assert get_bad_ocid_prefixes(user_data) == results
