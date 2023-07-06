@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Add `skip_aggregates` keyword argument to `common_checks_ocds` and `ocds_json_output` to skip "releases_aggregates" and "records_aggregates" (default `False`).
   - Skip Markdown formatting, HTML escaping and adding fields to validation errors that are then ignored by ``context_api_transform()``.
   - Skip adding the field description and reference URL of the `ocid` field for incorrectly formatted OCID prefixes.
+  - Skip sorting the JSON locations of additional checks.
   - Improve ``context_api_transform()`` performance.
 - flattentool is optional.
 - Drop support for Python 3.7.

@@ -8,7 +8,7 @@ from libcove.lib.common import common_checks_context, get_additional_codelist_va
 from libcove.lib.tools import decimal_default
 from markdown_it import MarkdownIt
 
-from libcoveocds.lib.additional_checks import TEST_FUNCTIONS, run_additional_checks
+from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
 from libcoveocds.lib.common_checks import (
     get_bad_ocid_prefixes,
     get_records_aggregates,
@@ -137,8 +137,10 @@ def common_checks_ocds(
     if ocds_prefixes_bad_format:
         context["conformance_errors"] = {"ocds_prefixes_bad_format": ocds_prefixes_bad_format}
 
-    # Skip Markdown formatting, HTML escaping, and new keys ("schema_title", "schema_description_safe", "docs_ref")
-    # if called in an API context. (The new keys are not returned in an API context.)
+    # If called in an API context:
+    # - Skip the schema description and reference URL for OCID prefix conformance errors.
+    # - Skip Markdown formatting and HTML escaping, and new keys ("schema_title", "schema_description_safe", "docs_ref")
+    #   for validation errors. (The new keys are not returned in an API context.)
     if not api:
         if "conformance_errors" in context:
             ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
@@ -207,8 +209,6 @@ def common_checks_ocds(
             key: value for key, value in additional_codelist_values.items() if value["isopen"]
         }
 
-    context["additional_checks"] = run_additional_checks(
-        json_data, TEST_FUNCTIONS, ignore_errors=True, return_on_error=None
-    )
+    context["additional_checks"] = run_additional_checks(json_data, CHECKS, ignore_errors=True, return_on_error=[])
 
     return context

@@ -4,7 +4,7 @@ import libcove.lib.tools as tools
 
 
 def flatten_dict(data, path=""):
-    for key, value in sorted(data.items()):
+    for key, value in data.items():
         if not value:
             yield (f"{path}/{key}", value)
         elif isinstance(value, dict):
@@ -27,7 +27,7 @@ def empty_field(data, path_prefix):
             yield {"json_location": f"{path_prefix}{key}"}
 
 
-TEST_FUNCTIONS = [empty_field]
+CHECKS = [empty_field]
 
 
 @tools.ignore_errors
@@ -46,4 +46,6 @@ def run_additional_checks(data, functions):
             for output in function(data, f"{key}/{i}"):
                 results[function.__name__].append(output)
 
+    # https://stackoverflow.com/a/12842716/244258
+    results.default_factory = None
     return results
