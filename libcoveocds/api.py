@@ -39,10 +39,9 @@ def ocds_json_output(
 
     if not lib_cove_ocds_config:
         lib_cove_ocds_config = LibCoveOCDSConfig()
-
-    context = {}
     if not file_type:
         file_type = get_file_type(file)
+
     context = {"file_type": file_type}
 
     if file_type == "json":

@@ -1,13 +1,13 @@
 import json
 
-from libcoveocds.lib.additional_checks import TEST_CLASSES, run_additional_checks
+from libcoveocds.lib.additional_checks import TEST_FUNCTIONS, run_additional_checks
 
 
 def test_empty_fields_releases_basic():
     with open("./tests/fixtures/additional_checks/empty_fields_releases.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
-    additional_checks = run_additional_checks(data, TEST_CLASSES["additional"])
+    additional_checks = run_additional_checks(data, TEST_FUNCTIONS)
     result = {
         "empty_field": [
             {"json_location": "releases/0/parties/0/address"},
@@ -23,7 +23,7 @@ def test_empty_fields_records_basic():
     with open("./tests/fixtures/additional_checks/empty_fields_records.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
-    additional_checks = run_additional_checks(data, TEST_CLASSES["additional"])
+    additional_checks = run_additional_checks(data, TEST_FUNCTIONS)
     result = {
         "empty_field": [
             {"json_location": "records/0/compiledRelease/awards/0/documents/0/id"},
@@ -45,7 +45,7 @@ def test_empty_fields_empty_string():
         ]
     }
 
-    assert run_additional_checks(data, TEST_CLASSES["additional"]) == {
+    assert run_additional_checks(data, TEST_FUNCTIONS) == {
         "empty_field": [{"json_location": "releases/0/date"}]
     }
 
@@ -53,7 +53,7 @@ def test_empty_fields_empty_string():
 def test_empty_fields_empty_dict():
     data = {"releases": [{"buyer": {}}]}
 
-    assert run_additional_checks(data, TEST_CLASSES["additional"]) == {
+    assert run_additional_checks(data, TEST_FUNCTIONS) == {
         "empty_field": [{"json_location": "releases/0/buyer"}]
     }
 
@@ -61,7 +61,7 @@ def test_empty_fields_empty_dict():
 def test_empty_fields_empty_list():
     data = {"releases": [{"parties": []}]}
 
-    assert run_additional_checks(data, TEST_CLASSES["additional"]) == {
+    assert run_additional_checks(data, TEST_FUNCTIONS) == {
         "empty_field": [{"json_location": "releases/0/parties"}]
     }
 
@@ -70,9 +70,9 @@ def test_empty_fields_all_fine():
     with open("./tests/fixtures/additional_checks/basic_releases.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
-    assert run_additional_checks(data, TEST_CLASSES["additional"]) == {}
+    assert run_additional_checks(data, TEST_FUNCTIONS) == {}
 
     with open("./tests/fixtures/additional_checks/full_record.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
-    assert run_additional_checks(data, TEST_CLASSES["additional"]) == {}
+    assert run_additional_checks(data, TEST_FUNCTIONS) == {}

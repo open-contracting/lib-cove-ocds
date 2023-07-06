@@ -12,9 +12,7 @@ import libcoveocds.config
 
 
 class SchemaOCDS(SchemaJsonMixin):
-    def __init__(
-        self, select_version=None, release_data=None, lib_cove_ocds_config=None, record_pkg=False
-    ):
+    def __init__(self, select_version=None, release_data=None, lib_cove_ocds_config=None, record_pkg=False):
         """Build the schema object using an specific OCDS schema version
 
         The version used will be select_version, release_data.get('version') or
@@ -85,8 +83,6 @@ class SchemaOCDS(SchemaJsonMixin):
                         self.schema_host = version_choice[1]
                     else:
                         self.invalid_version_data = True
-        else:
-            pass
 
         self.schema_url = urljoin(self.schema_host, self.schema_name)
         self.pkg_schema_url = urljoin(self.schema_host, self.pkg_schema_name)

@@ -7,7 +7,7 @@ from libcove.lib.common import common_checks_context, get_additional_codelist_va
 from libcove.lib.tools import decimal_default
 from markdown_it import MarkdownIt
 
-from libcoveocds.lib.additional_checks import TEST_CLASSES, run_additional_checks
+from libcoveocds.lib.additional_checks import TEST_FUNCTIONS, run_additional_checks
 from libcoveocds.lib.common_checks import (
     add_conformance_rule_errors,
     get_records_aggregates,
@@ -130,15 +130,15 @@ def common_checks_ocds(
     common_checks = common_checks_context(
         upload_dir, json_data, schema_obj, schema_name, context, fields_regex=True, api=api, cache=cache
     )
-
-    validation_errors = common_checks["context"]["validation_errors"]
+    ignore_errors = bool(common_checks["context"]["validation_errors"])
 
     # Skip Markdown formatting, HTML escaping, and new keys ("schema_title", "schema_description_safe", "docs_ref")
     # if called in an API context. (The new keys are not returned in an API context.)
     if not api:
         new_validation_errors = []
-        for (json_key, values) in validation_errors:
+        for (json_key, values) in common_checks["context"]["validation_errors"]:
             error = json.loads(json_key)
+
             new_message = validation_error_lookup.get(error["message_type"])
             if new_message:
                 error["message_safe"] = conditional_escape(new_message)
@@ -153,7 +153,9 @@ def common_checks_ocds(
                 if "description" in schema_block:
                     error["schema_title"] = escape(schema_block.get("title", ""))
                     error["schema_description_safe"] = mark_safe(
-                        bleach.clean(md.render(schema_block["description"]), tags=bleach.sanitizer.ALLOWED_TAGS | {"p"})
+                        bleach.clean(
+                            md.render(schema_block["description"]), tags=bleach.sanitizer.ALLOWED_TAGS | {"p"}
+                        )
                     )
                 if ref_info:
                     ref = ref_info["reference"]["$ref"]
@@ -176,27 +178,27 @@ def common_checks_ocds(
 
     if schema_name == "record-package-schema.json":
         if not skip_aggregates:
-            context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=bool(validation_errors))
+            context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=ignore_errors)
+
         # Do this for records, as there's no record-schema.json (this probably
         # causes problems for flatten-tool)
         context["schema_url"] = schema_obj.pkg_schema_url
     else:
+        if not skip_aggregates:
+            context["releases_aggregates"] = get_releases_aggregates(json_data, ignore_errors=ignore_errors)
+
         additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
-        closed_codelist_values = {
+        context["additional_closed_codelist_values"] = {
             key: value for key, value in additional_codelist_values.items() if not value["isopen"]
         }
-        open_codelist_values = {key: value for key, value in additional_codelist_values.items() if value["isopen"]}
+        context["additional_open_codelist_values"] = {
+            key: value for key, value in additional_codelist_values.items() if value["isopen"]
+        }
 
-        if not skip_aggregates:
-            context["releases_aggregates"] = get_releases_aggregates(json_data, ignore_errors=bool(validation_errors))
-        context["additional_closed_codelist_values"] = closed_codelist_values
-        context["additional_open_codelist_values"] = open_codelist_values
-
-    additional_checks = run_additional_checks(
-        json_data, TEST_CLASSES["additional"], ignore_errors=True, return_on_error=None
+    context["additional_checks"] = run_additional_checks(
+        json_data, TEST_FUNCTIONS, ignore_errors=True, return_on_error=None
     )
 
-    context.update({"additional_checks": additional_checks})
-
     context = add_conformance_rule_errors(context, json_data, schema_obj)
+
     return context

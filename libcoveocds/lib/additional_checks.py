@@ -1,88 +1,49 @@
+from collections import defaultdict
+
 import libcove.lib.tools as tools
 
 
 def flatten_dict(data, path=""):
     for key, value in sorted(data.items()):
-        if isinstance(value, list):
-            if len(value) == 0:
-                yield (f"{path}/{key}", value)
-            for num, item in enumerate(value):
-                if isinstance(item, dict):
-                    yield from flatten_dict(item, f"{path}/{key}/{num}")
-                else:
-                    yield (f"{path}/{key}/{num}", item)
+        if not value:
+            yield (f"{path}/{key}", value)
         elif isinstance(value, dict):
-            if len(value) == 0:
-                yield (f"{path}/{key}", value)
             yield from flatten_dict(value, f"{path}/{key}")
+        elif isinstance(value, list):
+            for i, item in enumerate(value):
+                if isinstance(item, dict):
+                    yield from flatten_dict(item, f"{path}/{key}/{i}")
+                else:
+                    yield (f"{path}/{key}/{i}", item)
         else:
             yield (f"{path}/{key}", value)
 
 
-class AdditionalCheck:
-    def __init__(self, **kw):
-        self.failed = False
-        self.output = []
-
-    def process(self, data, path_prefix):
-        pass
-
-
-class EmptyFieldCheck(AdditionalCheck):
+def empty_field(data, path_prefix):
     """Identifying when fields, objects and arrays exist but are empty or contain only whitespace"""
 
-    def update_object(self, path_prefix, key):
-        self.failed = True
-        self.output.append({"type": "empty_field", "json_location": path_prefix + key})
-
-    def process(self, data, path_prefix):
-        flattened_data = dict(flatten_dict(data))
-
-        for key, value in flattened_data.items():
-            if isinstance(value, str) and len(value.strip()) == 0:
-                self.update_object(path_prefix, key)
-            elif isinstance(value, dict) and len(value) == 0:
-                self.update_object(path_prefix, key)
-            elif isinstance(value, list) and len(value) == 0:
-                self.update_object(path_prefix, key)
+    for key, value in flatten_dict(data):
+        if isinstance(value, str) and not value.strip() or isinstance(value, (dict, list)) and not value:
+            yield {"json_location": f"{path_prefix}{key}"}
 
 
-TEST_CLASSES = {"additional": [EmptyFieldCheck]}
-
-
-def get_additional_checks_results(test_instances):
-    results = {}
-
-    for test_instance in test_instances:
-        if not test_instance.failed:
-            continue
-
-        for output in test_instance.output:
-            type = output["type"]
-            results.setdefault(type, [])
-            output.pop("type", None)
-            results[type].append(output)
-
-    return results
-
-
-def get_file_type_records_or_releases(json_data):
-    if json_data.get("releases"):
-        return "releases"
-    return "records"
+TEST_FUNCTIONS = [empty_field]
 
 
 @tools.ignore_errors
-def run_additional_checks(json_data, test_classes):
-    if json_data.get("releases") is None and json_data.get("records") is None:
+def run_additional_checks(data, functions):
+    if "records" in data:
+        key = "records"
+    elif "releases" in data:
+        key = "releases"
+    else:
         return []
 
-    file_type = get_file_type_records_or_releases(json_data)
+    results = defaultdict(list)
 
-    test_instances = [test_cls(data=json_data[file_type]) for test_cls in test_classes]
+    for i, data in enumerate(data[key]):
+        for function in functions:
+            for output in function(data, f"{key}/{i}"):
+                results[function.__name__].append(output)
 
-    for num, data in enumerate(json_data[file_type]):
-        for test_instance in test_instances:
-            test_instance.process(data, f"{file_type}/{num}")
-
-    return get_additional_checks_results(test_instances)
+    return results
