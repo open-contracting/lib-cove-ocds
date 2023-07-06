@@ -139,13 +139,13 @@ def common_checks_ocds(
 
     # If called in an API context:
     # - Skip the schema description and reference URL for OCID prefix conformance errors.
-    # - Skip Markdown formatting and HTML escaping, and new keys ("schema_title", "schema_description_safe", "docs_ref")
-    #   for validation errors. (The new keys are not returned in an API context.)
+    # - Skip Markdown formatting and HTML escaping, and new keys for validation errors.
+    #   (The new keys are not returned in an API context.)
     if not api:
         if "conformance_errors" in context:
             ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
             # XXX: The last sentence is assumed to be a link to guidance in all versions of OCDS.
-            index = ocid_schema_description.rindex(". ") + 1
+            index = ocid_description.rindex(". ") + 1
             context["conformance_errors"]["ocid_description"] = ocid_description[:index]
             context["conformance_errors"]["ocid_info_url"] = re.search(r"\((\S+)\)", ocid_description[index:]).group(1)
 
