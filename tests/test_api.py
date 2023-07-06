@@ -39,16 +39,26 @@ def test_basic_record_package():
     assert results["validation_errors"] == []
 
 
-@pytest.mark.parametrize("json_data", ["{[,]}", '{"version": "1.bad"}'])
-def test_ocds_json_output_bad_data(json_data):
-
+@pytest.mark.parametrize(
+    "json_data,expected",
+    [
+        ("{[,]}", "The file looks like invalid json"),
+        (
+            '{"version": "1.bad"}',
+            "\x1b[1;31mThe schema version in your data is not valid. Accepted values: ['1.0', '1.1']\x1b[1;m",
+        ),
+    ],
+)
+def test_ocds_json_output_bad_data(json_data, expected):
     cove_temp_folder = tempfile.mkdtemp(prefix="lib-cove-ocds-tests-", dir=tempfile.gettempdir())
 
     file_path = os.path.join(cove_temp_folder, "bad_data.json")
     with open(file_path, "w") as fp:
         fp.write(json_data)
     try:
-        with pytest.raises(APIException):
+        with pytest.raises(APIException) as excinfo:
             ocds_json_output(cove_temp_folder, file_path, schema_version="", convert=False)
+
+        assert str(excinfo.value) == expected
     finally:
         shutil.rmtree(cove_temp_folder)

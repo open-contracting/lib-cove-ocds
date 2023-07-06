@@ -139,8 +139,7 @@ def common_checks_ocds(
 
     # If called in an API context:
     # - Skip the schema description and reference URL for OCID prefix conformance errors.
-    # - Skip Markdown formatting and HTML escaping, and new keys for validation errors.
-    #   (The new keys are not returned in an API context.)
+    # - Skip the formatted message, schema title, schema description and reference URL for validation errors.
     if not api:
         if "conformance_errors" in context:
             ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
