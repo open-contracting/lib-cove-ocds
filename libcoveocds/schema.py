@@ -4,10 +4,8 @@ import warnings
 from copy import deepcopy
 from urllib.parse import urljoin
 
-import json_merge_patch
 import requests
 from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists
-from libcove.lib.tools import get_request
 from ocdsextensionregistry.exceptions import ExtensionWarning
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 
@@ -257,9 +255,9 @@ class SchemaOCDS(SchemaJsonMixin):
                     extension_description[field] = language_map.get(language, language_map.get("en", ""))
             except requests.HTTPError as e:
                 self.invalid_extension[metadata_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
-            except requests.RequestException as e:
+            except requests.RequestException:
                 self.invalid_extension[metadata_url] = "fetching failed"
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 self.invalid_extension[metadata_url] = "extension metadata is not valid JSON"
 
     def create_extended_schema_file(self, upload_dir, upload_url, api=False):
@@ -279,7 +277,7 @@ class SchemaOCDS(SchemaJsonMixin):
             return
 
         with open(filepath, "w") as fp:
-            json.dump(schema, f, ensure_ascii=False, indent=2)
+            json.dump(schema, fp, ensure_ascii=False, indent=2)
             fp.write("\n")
 
         self.extended_schema_file = filepath
