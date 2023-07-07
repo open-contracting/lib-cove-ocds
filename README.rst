@@ -150,6 +150,8 @@ validation_errors
 
 Note that this list will exclude codelist errors, which instead appear in ``additional_closed_codelist_values``.
 
+lib-cove-ocds uses the ``jsonschema`` module's ``uniqueItems`` validator to check for unique OCIDs and IDs.
+
 ======================= =========== ========
 Property (key) name     Type        Value
 ======================= =========== ========
@@ -180,7 +182,7 @@ Property (key) name	                Type                        Value
 ``release_count``                       integer                     The number of items in the releases array 
 ``unique_ocids``                        array*                      An array of all ocids, deduplicated
 ``unique_initation_type``               array*
-``duplicate_release_ids``               array*
+``duplicate_release_ids``               array*                      **This is an OCDS implementation error.**
 ``tags``                                object
 ``unique_lang``                         array*
 ``unique_award_id``                     array*
@@ -243,7 +245,7 @@ Property (key) name	                Type                        Value
 ``contract_doctype``                    object                      A mapping from ``documentType``, to the number of occurrences
 ``implementation_doctype``              object                      A mapping from ``documentType``, to the number of occurrences
 ``implementation_milestones_doctype``   object                      A mapping from ``documentType``, to the number of occurrences
-``contracts_without_awards``            array                       An array of contract objects (from the data) that don't have awards
+``contracts_without_awards``            array                       An array of contract objects that don't have awards. **This is an OCDS implementation error.**
 ======================================= =========================== ==============
 
 records_aggregates
