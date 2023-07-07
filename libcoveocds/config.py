@@ -1,10 +1,8 @@
 LIB_COVE_OCDS_CONFIG_DEFAULT = {
     "app_name": "cove_ocds",
     "app_base_template": "cove_ocds/base.html",
-    "app_verbose_name": "Open Contracting Data Standard Validator",
-    "app_strapline": "Validate and Explore your data.",
-    "schema_name": {"release": "release-package-schema.json", "record": "record-package-schema.json"},
-    "schema_item_name": "release-schema.json",
+    "app_verbose_name": "Open Contracting Data Review Tool",
+    "app_strapline": "Review your OCDS data.",
     "schema_host": None,
     "schema_version_choices": {
         # version: (display, url, tag),

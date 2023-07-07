@@ -11,11 +11,15 @@ config.config["cache_all_requests"] = True
 
 DEFAULT_OCDS_VERSION = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version"]
 METRICS_EXT = "https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json"  # noqa: E501
+API_EXT = "https://chilecompracl.visualstudio.com/a6a3f587-5f23-42f6-9255-ac5852fae1e7/_apis/git/repositories/fb91c43b-011b-434b-901d-9d36ec50c586/items?path=%2Fextension.json&versionDescriptor%5BversionOptions%5D=0&versionDescriptor%5BversionType%5D=0&versionDescriptor%5Bversion%5D=master&resolveLfs=true&%24format=octetStream&api-version=5.0"  # noqa: E501
 CODELIST_EXT = "https://raw.githubusercontent.com/INAImexico/ocds_extendedProcurementCategory_extension/0ed54770c85500cf21f46e88fb06a30a5a2132b1/extension.json"  # noqa: E501
-UNKNOWN_URL_EXT = "http://bad-url-for-extensions.com/extension.json"
-NO_METADATA_URL_EXT = "https://gist.githubusercontent.com/jpmckinney/af0db955a527c8d0ac7296c913b36631/raw/1801168408776283cc2de2f8d81b2fc2cfb903a5/extension.json"  # noqa: E501
-INVALID_METADATA_URL_EXT = "https://gist.githubusercontent.com/jpmckinney/f2bbd32e142a328cfe069a58edcdf864/raw/19a2988860525207bff5db21043b4fb600426a40/extension.json"  # noqa: E501
-NOT_FOUND_URL_EXT = "https://standard.open-contracting.org/this-file-is-not-found-404.json/en"
+UNSUPPORTED_PROTOCOL_EXT = "protocol://example.com/extension.json"
+UNRESOLVABLE_HOST_EXT = "http://bad-url-for-extensions.com/extension.json"
+NO_EXTENSION_EXT = "https://example.com/not-found"
+OTHER_BASENAME_EXT = "https://example.com/not-found/other.json"
+NO_FILES_EXT = "https://example.com/not-found/extension.json"
+NO_METADATA_EXT = "https://gist.githubusercontent.com/jpmckinney/af0db955a527c8d0ac7296c913b36631/raw/1801168408776283cc2de2f8d81b2fc2cfb903a5/extension.json"  # noqa: E501
+INVALID_METADATA_EXT = "https://gist.githubusercontent.com/jpmckinney/f2bbd32e142a328cfe069a58edcdf864/raw/19a2988860525207bff5db21043b4fb600426a40/extension.json"  # noqa: E501
 
 
 @pytest.mark.parametrize("record_pkg", [False, True])
@@ -23,15 +27,11 @@ def test_basic_1(record_pkg):
     schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg)
 
     assert schema.version == "1.1"
+    assert schema.schema_url == "https://standard.open-contracting.org/1.1/en/release-schema.json"
     if record_pkg:
-        # Ignore schema.schema_name for records, as there's no
-        # record-schema.json (this probably causes problems for flatten-tool)
-        assert schema.pkg_schema_name == "record-package-schema.json"
+        assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.1/en/record-package-schema.json"
     else:
-        assert schema.schema_name == "release-schema.json"
-        assert schema.pkg_schema_name == "release-package-schema.json"
-    assert schema.default_version == "1.1"
-    assert schema.default_schema_host == "https://standard.open-contracting.org/1.1/en/"
+        assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.1/en/release-package-schema.json"
     assert schema.schema_host == "https://standard.open-contracting.org/1.1/en/"
     assert not schema.config.config["cache_all_requests"]
 
@@ -47,21 +47,17 @@ def test_pass_config_1(record_pkg):
     schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=lib_cove_ocds_config, record_pkg=record_pkg)
 
     assert schema.version == "1.0"
+    assert schema.schema_url == "https://standard.open-contracting.org/1.0/en/release-schema.json"
     if record_pkg:
-        # Ignore schema.schema_name for records, as there's no
-        # record-schema.json (this probably causes problems for flatten-tool)
-        assert schema.pkg_schema_name == "record-package-schema.json"
+        assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.0/en/record-package-schema.json"
     else:
-        assert schema.schema_name == "release-schema.json"
-        assert schema.pkg_schema_name == "release-package-schema.json"
-    assert schema.default_version == "1.0"
-    assert schema.default_schema_host == "https://standard.open-contracting.org/1.0/en/"
+        assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.0/en/release-package-schema.json"
     assert schema.schema_host == "https://standard.open-contracting.org/1.0/en/"
     assert not schema.config.config["cache_all_requests"]
 
 
 @pytest.mark.parametrize(
-    ("select_version", "release_data", "version", "invalid_version_argument", "invalid_version_data", "extensions"),
+    ("select_version", "package_data", "version", "invalid_version_argument", "invalid_version_data", "extensions"),
     [
         (None, None, DEFAULT_OCDS_VERSION, False, False, {}),
         ("1.0", None, "1.0", False, False, {}),
@@ -76,15 +72,13 @@ def test_pass_config_1(record_pkg):
     ],
 )
 def test_schema_ocds_constructor(
-    select_version, release_data, version, invalid_version_argument, invalid_version_data, extensions
+    select_version, package_data, version, invalid_version_argument, invalid_version_data, extensions
 ):
-    schema = libcoveocds.schema.SchemaOCDS(select_version=select_version, release_data=release_data)
-    name = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_name"]["release"]
+    schema = libcoveocds.schema.SchemaOCDS(select_version=select_version, package_data=package_data)
     host = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version_choices"][version][1]
-    url = host + name
+    url = f"{host}release-package-schema.json"
 
     assert schema.version == version
-    assert schema.pkg_schema_name == name
     assert schema.schema_host == host
     assert schema.pkg_schema_url == url
     assert schema.invalid_version_argument == invalid_version_argument
@@ -93,50 +87,72 @@ def test_schema_ocds_constructor(
 
 
 @pytest.mark.parametrize(
-    ("release_data", "extensions", "invalid_extension", "extended", "extends_schema"),
+    ("package_data", "extensions", "invalid_extension", "extended", "extends_schema"),
     [
         (None, {}, {}, False, False),
         ({"version": "1.1", "extensions": [METRICS_EXT]}, {METRICS_EXT: ()}, {}, True, True),
+        ({"version": "1.1", "extensions": [API_EXT]}, {API_EXT: ()}, {}, True, True),
         ({"version": "1.1", "extensions": [CODELIST_EXT]}, {CODELIST_EXT: ()}, {}, True, False),
         (
-            {"version": "1.1", "extensions": [NOT_FOUND_URL_EXT]},
-            {NOT_FOUND_URL_EXT: ()},
-            {NOT_FOUND_URL_EXT: "404: not found"},
+            {"version": "1.1", "extensions": [UNSUPPORTED_PROTOCOL_EXT]},
+            {UNSUPPORTED_PROTOCOL_EXT: ()},
+            {UNSUPPORTED_PROTOCOL_EXT: "fetching failed"},
             False,
             False,
         ),
         (
-            {"version": "1.1", "extensions": [UNKNOWN_URL_EXT]},
-            {UNKNOWN_URL_EXT: ()},
-            {UNKNOWN_URL_EXT: "fetching failed"},
+            {"version": "1.1", "extensions": [UNRESOLVABLE_HOST_EXT]},
+            {UNRESOLVABLE_HOST_EXT: ()},
+            {UNRESOLVABLE_HOST_EXT: "fetching failed"},
             False,
             False,
         ),
         (
-            {"version": "1.1", "extensions": [NO_METADATA_URL_EXT]},
-            {NO_METADATA_URL_EXT: ()},
-            {NO_METADATA_URL_EXT: "404: not found"},
+            {"version": "1.1", "extensions": [NO_EXTENSION_EXT]},
+            {NO_EXTENSION_EXT: ()},
+            {NO_EXTENSION_EXT: "missing extension.json"},
+            False,
+            False,
+        ),
+        (
+            {"version": "1.1", "extensions": [OTHER_BASENAME_EXT]},
+            {OTHER_BASENAME_EXT: ()},
+            {OTHER_BASENAME_EXT: "missing extension.json"},
             True,
             False,
         ),
         (
-            {"version": "1.1", "extensions": [INVALID_METADATA_URL_EXT]},
-            {INVALID_METADATA_URL_EXT: ()},
-            {INVALID_METADATA_URL_EXT: "extension metadata is not valid JSON"},
+            {"version": "1.1", "extensions": [NO_FILES_EXT]},
+            {NO_FILES_EXT: ()},
+            {NO_FILES_EXT: "404: not found"},
             True,
             False,
         ),
         (
-            {"version": "1.1", "extensions": [UNKNOWN_URL_EXT, METRICS_EXT]},
-            {UNKNOWN_URL_EXT: (), METRICS_EXT: ()},
-            {UNKNOWN_URL_EXT: "fetching failed"},
+            {"version": "1.1", "extensions": [NO_METADATA_EXT]},
+            {NO_METADATA_EXT: ()},
+            {NO_METADATA_EXT: "404: not found"},
+            True,
+            False,
+        ),
+        (
+            {"version": "1.1", "extensions": [INVALID_METADATA_EXT]},
+            {INVALID_METADATA_EXT: ()},
+            {INVALID_METADATA_EXT: "extension metadata is not valid JSON"},
+            True,
+            False,
+        ),
+        (
+            {"version": "1.1", "extensions": [UNRESOLVABLE_HOST_EXT, METRICS_EXT]},
+            {UNRESOLVABLE_HOST_EXT: (), METRICS_EXT: ()},
+            {UNRESOLVABLE_HOST_EXT: "fetching failed"},
             True,
             True,
         ),
     ],
 )
-def test_schema_ocds_extensions(release_data, extensions, invalid_extension, extended, extends_schema):
-    schema = libcoveocds.schema.SchemaOCDS(release_data=release_data, lib_cove_ocds_config=config)
+def test_schema_ocds_extensions(package_data, extensions, invalid_extension, extended, extends_schema):
+    schema = libcoveocds.schema.SchemaOCDS(package_data=package_data, lib_cove_ocds_config=config)
     assert schema.extensions == extensions
     assert not schema.extended
 
@@ -144,9 +160,11 @@ def test_schema_ocds_extensions(release_data, extensions, invalid_extension, ext
     assert schema.invalid_extension == invalid_extension
     assert schema.extended == extended
 
-    if extends_schema:
-        assert "Metric" in schema_obj["definitions"].keys()
-        assert schema_obj["definitions"]["Award"]["properties"].get("agreedMetrics")
+    if extends_schema and METRICS_EXT in extensions:
+        assert "Metric" in schema_obj["definitions"]
+        assert "agreedMetrics" in schema_obj["definitions"]["Award"]["properties"]
+    elif extends_schema and API_EXT in extensions:
+        assert "dateCreated" in schema_obj["definitions"]["Contract"]["properties"]
     else:
-        assert "Metric" not in schema_obj["definitions"].keys()
+        assert "Metric" not in schema_obj["definitions"]
         assert not schema_obj["definitions"]["Award"]["properties"].get("agreedMetrics")

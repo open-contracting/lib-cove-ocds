@@ -146,9 +146,9 @@ def common_checks_ocds(
     param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
     """
 
-    schema_name = schema_obj.pkg_schema_name
     common_checks = common_checks_context(
-        upload_dir, json_data, schema_obj, schema_name, context, fields_regex=True, api=api, cache=cache
+        # Pass "-" as the schema name. The associated logic is not required by lib-cove-ocds.
+        upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=api, cache=cache
     )
     ignore_errors = bool(common_checks["context"]["validation_errors"])
 
@@ -211,7 +211,7 @@ def common_checks_ocds(
 
     context.update(common_checks["context"])
 
-    if schema_name == "record-package-schema.json":
+    if schema_obj.record_pkg:
         if not skip_aggregates:
             context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=ignore_errors)
 

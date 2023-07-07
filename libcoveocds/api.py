@@ -56,11 +56,11 @@ def ocds_json_output(
     else:
         metatab_schema_url = SchemaOCDS(select_version="1.1", lib_cove_ocds_config=lib_cove_ocds_config).pkg_schema_url
         metatab_data = get_spreadsheet_meta_data(output_dir, file, metatab_schema_url, file_type=file_type)
-        schema_obj = SchemaOCDS(schema_version, lib_cove_ocds_config=lib_cove_ocds_config, release_data=metatab_data)
+        schema_obj = SchemaOCDS(schema_version, lib_cove_ocds_config=lib_cove_ocds_config, package_data=metatab_data)
 
     if schema_obj.invalid_version_data:
         msg = "\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m"
-        raise APIException(msg.format(str(list(schema_obj.version_choices))))
+        raise APIException(msg.format(str(list(lib_cove_ocds_config.config["schema_version_choices"]))))
     if schema_obj.extensions:
         schema_obj.create_extended_schema_file(output_dir, "", api=True)
     schema_url = schema_obj.extended_schema_file or schema_obj.schema_url

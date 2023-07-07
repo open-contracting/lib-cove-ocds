@@ -12,15 +12,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 **BREAKING CHANGES:**
 
 - `libcoveocds.lib.common_checks`: Rename `get_bad_ocds_prefixes` to `get_bad_ocid_prefixes`.
+- `libcoveocds.schema.SchemaOCDS`:
+  - Rename `release_data` argument to `package_data`.
+  - Remove `pkg_schema_name`, `default_version`, `default_schema_host` attributes.
+- `libcoveocds.config.LibCoveOCDSConfig`:
+  - `schema_version_choices` values are 3-tuples (added tag), instead of 2-tuples.
+  - Remove `schema_name` and `schema_item_name` keys.
 
 Other changes:
 
-- Use ocdsextensionregistry to merge extensions.
-  - Empty extension URLs no longer produce an error message.
-  - Merge an extension even if its metadata is missing or invalid.
-  - Cache all requests made by ocdsextensionregistry by default.
+- `libcoveocds.schema.SchemaOCDS`:
+  - Use ocdsextensionregistry to merge extensions.
+    - Empty extension URLs no longer produce an error message.
+    - Merge an extension even if its metadata is missing or invalid.
+    - Cache all requests made by ocdsextensionregistry by default.
 
-    Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
+      Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
+  - Add `schema_tag` attribute.
 - Improve performance in API context.
   - Add `skip_aggregates` and `skip_additional_checks` keyword arguments to `common_checks_ocds` and `ocds_json_output` (default `False`).
   - Skip the schema description and reference URL for OCID prefix conformance errors.

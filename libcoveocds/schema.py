@@ -13,80 +13,91 @@ import libcoveocds.config
 
 
 class SchemaOCDS(SchemaJsonMixin):
-    def __init__(self, select_version=None, release_data=None, lib_cove_ocds_config=None, record_pkg=False):
+    def _set_schema_version(self, version):
+        schema_version_choice = self.version_choices[version]
+
+        # cove-ocds uses version, e.g. when a user changes the version to validate against.
+        self.version = version
+        # lib-cove uses schema_host in get_schema_validation_errors(). (This is a URL, not a host.)
+        self.schema_host = schema_version_choice[1]
+        # Needed by ProfileBuilder.
+        self.schema_tag = schema_version_choice[2]
+
+    def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, record_pkg=False):
         """Build the schema object using an specific OCDS schema version
 
-        The version used will be select_version, release_data.get('version') or
+        The version used will be select_version, package_data.get('version') or
         default version, in that order. Invalid version choices in select_version or
-        release_data will be skipped and registered as self.invalid_version_argument
+        package_data will be skipped and registered as self.invalid_version_argument
         and self.invalid_version_data respectively.
         """
-
         self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
-        self.schema_name = self.config.config["schema_item_name"]
-        self.pkg_schema_name = self.config.config["schema_name"]["release"]
+
+        # lib-cove uses schema_name in get_schema_validation_errors() if extended is set.
+        self.schema_name = "release-schema.json"
+        # lib-cove uses version_choices in common_checks_context() via getattr().
+        self.version_choices = self.config.config["schema_version_choices"]
+
+        # Report errors in web UI.
+        self.missing_package = False
+        self.invalid_version_argument = False
+        self.invalid_version_data = False
+
+        self._set_schema_version(self.config.config["schema_version"])
+
+        if package_data:
+            if "version" not in package_data:
+                self._set_schema_version("1.0")
+            if "releases" not in package_data and "records" not in package_data:
+                self.missing_package = True
+
+        # The selected version overrides the default version and the data version.
+        if select_version:
+            if select_version in self.version_choices:
+                self._set_schema_version(select_version)
+            else:
+                self.invalid_version_argument = True
+
+                # If invalid, use the "version" field in the data.
+                select_version = None
+
+        self.extensions = {}
+        if package_data and hasattr(package_data, "get"):
+            if not select_version:
+                package_version = package_data.get("version")
+                if package_version:
+                    if package_version in self.version_choices:
+                        self._set_schema_version(package_version)
+                    else:
+                        self.invalid_version_data = True
+
+            extensions = package_data.get("extensions")
+            if extensions:
+                # The value becomes a dict in apply_extensions().
+                self.extensions = {extension: () for extension in extensions if type(extension) == str}
+
+        self.schema_url = urljoin(self.schema_host, "release-schema.json")
+        if record_pkg:
+            basename = "record-package-schema.json"
+        else:
+            basename = "release-package-schema.json"
+        self.pkg_schema_url = urljoin(self.schema_host, basename)
+
         self.record_pkg = record_pkg
         if record_pkg:
-            self.pkg_schema_name = self.config.config["schema_name"]["record"]
             self.release_schema = SchemaOCDS(
                 select_version=select_version,
-                release_data=release_data,
+                package_data=package_data,
                 lib_cove_ocds_config=lib_cove_ocds_config,
                 record_pkg=False,
             )
-        self.version_choices = self.config.config["schema_version_choices"]
-        self.default_version = self.config.config["schema_version"]
-        self.default_schema_host = self.version_choices[self.default_version][1]
 
-        self.version = self.default_version
-        self.schema_host = self.default_schema_host
-
-        # Missing package is only for original json data
-        self.missing_package = False
-        if release_data:
-            if "version" not in release_data:
-                self.version = "1.0"
-                self.schema_host = self.version_choices["1.0"][1]
-            if "releases" not in release_data and "records" not in release_data:
-                self.missing_package = True
-
-        self.invalid_version_argument = False
-        self.invalid_version_data = False
         self.json_deref_error = None
-        self.extensions = {}
         self.invalid_extension = {}
         self.extended = False
         self.extended_schema_file = None
         self.extended_schema_url = None
         self.codelists = self.config.config["schema_codelists"]["1.1"]
-
-        if select_version:
-            try:
-                self.version_choices[select_version]
-            except KeyError:
-                select_version = None
-                self.invalid_version_argument = True
-            else:
-                self.version = select_version
-                self.schema_host = self.version_choices[select_version][1]
-
-        if hasattr(release_data, "get"):
-            data_extensions = release_data.get("extensions", {})
-            if data_extensions:
-                # The value becomes a dict in apply_extensions().
-                self.extensions = {ext: () for ext in data_extensions if type(ext) == str}
-            if not select_version:
-                release_version = release_data and release_data.get("version")
-                if release_version:
-                    version_choice = self.version_choices.get(release_version)
-                    if version_choice:
-                        self.version = release_version
-                        self.schema_host = version_choice[1]
-                    else:
-                        self.invalid_version_data = True
-
-        self.schema_url = urljoin(self.schema_host, self.schema_name)
-        self.pkg_schema_url = urljoin(self.schema_host, self.pkg_schema_name)
 
     # We can't call super() to use the new `SchemaJsonMixin.process_codelists` method, as it has small differences.
     # https://github.com/OpenDataServices/lib-cove/pull/109
@@ -195,9 +206,12 @@ class SchemaOCDS(SchemaJsonMixin):
         return package_schema_obj
 
     def apply_extensions(self, schema_obj, api=False):
-        def extension_to_metadata_url(extension):
+        # This indirection is necessary, because ProfileBuilder encapsulates extension handling.
+        def extension_to_original_url(extension):
             if extension.base_url:
                 return extension.get_url("extension.json")
+            if extension._file_urls:
+                return extension._file_urls.get("extension.json", extension._file_urls["release-schema.json"])
             return extension.download_url
 
         language = self.config.config["current_language"]
@@ -205,7 +219,7 @@ class SchemaOCDS(SchemaJsonMixin):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always", category=ExtensionWarning)
 
-            builder = ProfileBuilder(self.version_choices[self.version][2], list(self.extensions))
+            builder = ProfileBuilder(self.schema_tag, list(self.extensions))
             # schema_obj is modified in-place.
             builder.patched_release_schema(schema=schema_obj)
 
@@ -220,23 +234,29 @@ class SchemaOCDS(SchemaJsonMixin):
                         message = "release schema patch is not valid JSON"
                     else:
                         message = str(exception)
-                    self.invalid_extension[extension_to_metadata_url(warning.message.extension)] = message
+                    self.invalid_extension[extension_to_original_url(warning.message.extension)] = message
 
         self.extended = len(self.invalid_extension) < len(self.extensions)
 
         for extension in builder.extensions():
-            metadata_url = extension_to_metadata_url(extension)
+            original_url = extension_to_original_url(extension)
 
             # process_codelists() needs this dict.
             extension_description = {"failed_codelists": {}}
-            self.extensions[metadata_url] = extension_description
+            self.extensions[original_url] = extension_description
 
             # Skip metadata fields in API context.
             if api:
                 continue
 
-            extension_description["url"] = metadata_url
+            extension_description["url"] = original_url
             extension_description["schema_url"] = None
+
+            # ocdsextensionregistry requires the metadata file to contain extension.json (like the registry). If it
+            # doesn't, base_url is empty, and ocdsextensionregistry can't retrieve it.
+            if not extension.base_url and "extension.json" not in extension._file_urls:
+                self.invalid_extension[original_url] = "missing extension.json"
+                continue
 
             try:
                 metadata = extension.metadata
@@ -254,11 +274,11 @@ class SchemaOCDS(SchemaJsonMixin):
                     language_map = metadata[field]
                     extension_description[field] = language_map.get(language, language_map.get("en", ""))
             except requests.HTTPError as e:
-                self.invalid_extension[metadata_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
+                self.invalid_extension[original_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
             except requests.RequestException:
-                self.invalid_extension[metadata_url] = "fetching failed"
+                self.invalid_extension[original_url] = "fetching failed"
             except json.JSONDecodeError:
-                self.invalid_extension[metadata_url] = "extension metadata is not valid JSON"
+                self.invalid_extension[original_url] = "extension metadata is not valid JSON"
 
     def create_extended_schema_file(self, upload_dir, upload_url, api=False):
         filepath = os.path.join(upload_dir, "extended_schema.json")
