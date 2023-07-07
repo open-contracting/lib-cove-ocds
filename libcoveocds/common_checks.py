@@ -1,24 +1,29 @@
 import json
-import re
 
-import bleach
-from django.utils.html import conditional_escape, escape, format_html, mark_safe
 from jsonschema.exceptions import ValidationError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
 from libcove.lib.tools import decimal_default
-from markdown_it import MarkdownIt
 
 from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
 from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_records_aggregates, get_releases_aggregates
 
-md = MarkdownIt()
+try:
+    import re
 
-validation_error_lookup = {
-    "date-time": mark_safe(
-        "Incorrect date format. Dates should use the form YYYY-MM-DDT00:00:00Z. Learn more about "
-        '<a href="https://standard.open-contracting.org/latest/en/schema/reference/#date">dates in OCDS</a>.'
-    ),
-}
+    import bleach
+    from django.utils.html import conditional_escape, escape, format_html, mark_safe
+    from markdown_it import MarkdownIt
+
+    md = MarkdownIt()
+
+    validation_error_lookup = {
+        "date-time": mark_safe(
+            "Incorrect date format. Dates should use the form YYYY-MM-DDT00:00:00Z. Learn more about "
+            '<a href="https://standard.open-contracting.org/latest/en/schema/reference/#date">dates in OCDS</a>.'
+        ),
+    }
+except ImportError:
+    pass
 
 
 def unique_ids_or_ocids(validator, ui, instance, schema):
