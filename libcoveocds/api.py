@@ -30,6 +30,7 @@ def ocds_json_output(
     lib_cove_ocds_config=None,
     record_pkg=False,
     skip_aggregates: bool = False,
+    skip_additional_checks: bool = False,
 ):
     """
     If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
@@ -99,9 +100,16 @@ def ocds_json_output(
             json_data = json.load(fp)
 
     context = context_api_transform(
-        # This `cache` writes the results to a file, which is only relevant in the context of repetitive web requests.
         common_checks_ocds(
-            context, output_dir, json_data, schema_obj, api=True, cache=False, skip_aggregates=skip_aggregates
+            context,
+            output_dir,
+            json_data,
+            schema_obj,
+            # `cache` writes the results to a file, which is only relevant in the context of repetitive web requests.
+            cache=False,
+            api=True,
+            skip_aggregates=skip_aggregates,
+            skip_additional_checks=skip_additional_checks,
         )
     )
 

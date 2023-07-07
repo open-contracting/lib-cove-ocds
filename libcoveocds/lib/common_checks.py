@@ -351,28 +351,6 @@ def get_releases_aggregates(json_data):
     }
 
 
-def _lookup_schema(schema, path, ref_info=None):
-    if not path:
-        return schema, ref_info
-
-    if hasattr(schema, "__reference__"):
-        ref_info = {"path": path, "reference": schema.__reference__}
-
-    if "items" in schema:
-        return _lookup_schema(schema["items"], path, ref_info)
-
-    if "properties" in schema:
-        head, *tail = path
-        if head in schema["properties"]:
-            return _lookup_schema(schema["properties"][head], tail, ref_info)
-
-    return None, None
-
-
-def lookup_schema(schema, path):
-    return _lookup_schema(schema, path.split("/"))
-
-
 @tools.ignore_errors
 def get_records_aggregates(json_data):
     # Unique ocids

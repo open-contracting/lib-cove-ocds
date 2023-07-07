@@ -13,7 +13,6 @@ from libcoveocds.lib.common_checks import (
     get_bad_ocid_prefixes,
     get_records_aggregates,
     get_releases_aggregates,
-    lookup_schema,
 )
 
 md = MarkdownIt()
@@ -120,8 +119,32 @@ validator.VALIDATORS["uniqueItems"] = unique_ids_or_ocids
 validator.VALIDATORS["oneOf"] = oneOf_draft4
 
 
+# ref_into is used calculate the HTML anchor for the field in the OCDS documentation.
+def _lookup_schema(schema, path, ref_info=None):
+    if not path:
+        return schema, ref_info
+
+    if hasattr(schema, "__reference__"):
+        ref_info = {"path": path, "reference": schema.__reference__}
+
+    if "items" in schema:
+        return _lookup_schema(schema["items"], path, ref_info)
+    if "properties" in schema:
+        head, *tail = path
+        if head in schema["properties"]:
+            return _lookup_schema(schema["properties"][head], tail, ref_info)
+    return None, None
+
+
 def common_checks_ocds(
-    context, upload_dir, json_data, schema_obj, api=False, cache=True, skip_aggregates: bool = False
+    context,
+    upload_dir,
+    json_data,
+    schema_obj,
+    api=False,
+    cache=True,
+    skip_aggregates: bool = False,
+    skip_additional_checks: bool = False,
 ):
     """
     param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
@@ -133,6 +156,7 @@ def common_checks_ocds(
     )
     ignore_errors = bool(common_checks["context"]["validation_errors"])
 
+    # Note: Pelican checks whether the OCID prefix is registered.
     ocds_prefixes_bad_format = get_bad_ocid_prefixes(json_data)
     if ocds_prefixes_bad_format:
         context["conformance_errors"] = {"ocds_prefixes_bad_format": ocds_prefixes_bad_format}
@@ -161,7 +185,9 @@ def common_checks_ocds(
                 else:
                     error["message_safe"] = conditional_escape(error["message"])
 
-            schema_block, ref_info = lookup_schema(schema_obj.get_pkg_schema_obj(deref=True), error["path_no_number"])
+            schema_block, ref_info = _lookup_schema(
+                schema_obj.get_pkg_schema_obj(deref=True), error["path_no_number"].split("/")
+            )
             if schema_block and error["message_type"] != "required":
                 if "description" in schema_block:
                     error["schema_title"] = escape(schema_block.get("title", ""))
@@ -208,6 +234,7 @@ def common_checks_ocds(
             key: value for key, value in additional_codelist_values.items() if value["isopen"]
         }
 
-    context["additional_checks"] = run_additional_checks(json_data, CHECKS, ignore_errors=True, return_on_error=[])
+    if not skip_additional_checks:
+        context["additional_checks"] = run_additional_checks(json_data, CHECKS, ignore_errors=True, return_on_error=[])
 
     return context
