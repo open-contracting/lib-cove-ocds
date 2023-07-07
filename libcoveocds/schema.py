@@ -62,7 +62,7 @@ class SchemaOCDS(SchemaJsonMixin):
                 select_version = None
 
         self.extensions = {}
-        if package_data and hasattr(package_data, "get"):
+        if isinstance(package_data, dict):
             if not select_version:
                 package_version = package_data.get("version")
                 if package_version:
@@ -72,9 +72,8 @@ class SchemaOCDS(SchemaJsonMixin):
                         self.invalid_version_data = True
 
             extensions = package_data.get("extensions")
-            if extensions:
-                # The value becomes a dict in apply_extensions().
-                self.extensions = {extension: () for extension in extensions if type(extension) == str}
+            if isinstance(extensions, list):
+                self.extensions = {extension: {} for extension in extensions if isinstance(extension, str)}
 
         self.schema_url = urljoin(self.schema_host, "release-schema.json")
         if record_pkg:
@@ -99,27 +98,23 @@ class SchemaOCDS(SchemaJsonMixin):
         self.extended_schema_url = None
         self.codelists = self.config.config["schema_codelists"]["1.1"]
 
-    # We can't call super() to use the new `SchemaJsonMixin.process_codelists` method, as it has small differences.
-    # https://github.com/OpenDataServices/lib-cove/pull/109
     def process_codelists(self):
-        self.core_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=False)
+        core_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=False)
         self.extended_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=True)
 
-        core_unique_files = frozenset(value[0] for value in self.core_codelist_schema_paths.values())
+        core_unique_files = frozenset(value[0] for value in core_codelist_schema_paths.values())
         self.core_codelists = load_core_codelists(self.codelists, core_unique_files, config=self.config)
 
         self.extended_codelists = deepcopy(self.core_codelists)
         self.extended_codelist_urls = {}
-        # we do not want to cache if the requests failed.
+
+        # load_core_codelists() returns {} on HTTP error. If so, clear the cache.
         if not self.core_codelists:
             load_core_codelists.cache_clear()
             return
 
-        for extension, extension_detail in self.extensions.items():
-            if not isinstance(extension_detail, dict):
-                continue
-
-            codelist_list = extension_detail.get("codelists")
+        for extension, details in self.extensions.items():
+            codelist_list = details.get("codelists")
             if not codelist_list:
                 continue
 
@@ -129,20 +124,18 @@ class SchemaOCDS(SchemaJsonMixin):
                 try:
                     codelist_map = load_codelist(base_url + codelist, config=self.config)
                 except UnicodeDecodeError:
-                    extension_detail["failed_codelists"][codelist] = "Unicode Error, codelists need to be in UTF-8"
+                    details["failed_codelists"][codelist] = "Unicode Error, codelists need to be in UTF-8"
                 except Exception as e:
-                    extension_detail["failed_codelists"][codelist] = f"Unknown Exception, {e}"
+                    details["failed_codelists"][codelist] = f"Unknown Exception, {e}"
                     continue
 
                 if not codelist_map:
-                    extension_detail["failed_codelists"][
-                        codelist
-                    ] = "Codelist Error, Could not find code field in codelist"
+                    details["failed_codelists"][codelist] = "Codelist Error, Could not find code field in codelist"
 
                 if codelist[0] in ("+", "-"):
                     codelist_extension = codelist[1:]
                     if codelist_extension not in self.extended_codelists:
-                        extension_detail["failed_codelists"][
+                        details["failed_codelists"][
                             codelist
                         ] = f"Extension error, Trying to extend non existing codelist {codelist_extension}"
                         continue
@@ -153,7 +146,7 @@ class SchemaOCDS(SchemaJsonMixin):
                     for code in codelist_map:
                         value = self.extended_codelists[codelist_extension].pop(code, None)
                         if not value:
-                            extension_detail["failed_codelists"][
+                            details["failed_codelists"][
                                 codelist
                             ] = f"Codelist error, Trying to remove non existing codelist value {code}"
                 else:
@@ -207,11 +200,12 @@ class SchemaOCDS(SchemaJsonMixin):
 
     def apply_extensions(self, schema_obj, api=False):
         # This indirection is necessary, because ProfileBuilder encapsulates extension handling.
+        # This does the reverse of ProfileBuilder.extensions().
         def extension_to_original_url(extension):
-            if extension.base_url:
+            if extension.base_url or extension._url_pattern:
                 return extension.get_url("extension.json")
             if extension._file_urls:
-                return extension._file_urls.get("extension.json", extension._file_urls["release-schema.json"])
+                return extension._file_urls["release-schema.json"]
             return extension.download_url
 
         language = self.config.config["current_language"]
@@ -242,19 +236,19 @@ class SchemaOCDS(SchemaJsonMixin):
             original_url = extension_to_original_url(extension)
 
             # process_codelists() needs this dict.
-            extension_description = {"failed_codelists": {}}
-            self.extensions[original_url] = extension_description
+            details = {"failed_codelists": {}}
+            self.extensions[original_url] = details
 
             # Skip metadata fields in API context.
             if api:
                 continue
 
-            extension_description["url"] = original_url
-            extension_description["schema_url"] = None
+            details["url"] = original_url
+            details["schema_url"] = None
 
             # ocdsextensionregistry requires the metadata file to contain extension.json (like the registry). If it
-            # doesn't, base_url is empty, and ocdsextensionregistry can't retrieve it.
-            if not extension.base_url and "extension.json" not in extension._file_urls:
+            # doesn't, ocdsextensionregistry can't determine how to retrieve it.
+            if not extension.base_url and not extension._url_pattern:
                 self.invalid_extension[original_url] = "missing extension.json"
                 continue
 
@@ -264,15 +258,15 @@ class SchemaOCDS(SchemaJsonMixin):
                 # We *could* check its existence via HTTP, but this is for display only anyway.
                 schemas = metadata.get("schemas")
                 if isinstance(schemas, list) and "release_schema.json" in schemas:
-                    extension_description["schema_url"] = extension.get_url("release-schema.json")
+                    details["schema_url"] = extension.get_url("release-schema.json")
 
                 codelists = metadata.get("codelists")
                 if isinstance(codelists, list) and codelists:
-                    extension_description["codelists"] = codelists
+                    details["codelists"] = codelists
 
                 for field in ("name", "description", "documentationUrl"):
                     language_map = metadata[field]
-                    extension_description[field] = language_map.get(language, language_map.get("en", ""))
+                    details[field] = language_map.get(language, language_map.get("en", ""))
             except requests.HTTPError as e:
                 self.invalid_extension[original_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
             except requests.RequestException:
