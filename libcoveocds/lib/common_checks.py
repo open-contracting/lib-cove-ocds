@@ -392,6 +392,9 @@ def get_bad_ocid_prefixes(json_data):
         bad_prefixes = []
         if isinstance(records, list):
             for i, record in enumerate(records):
+                if not isinstance(record, dict):
+                    continue
+
                 if ocid := _is_bad_prefix(record):
                     bad_prefixes.append((ocid, f"records/{i}/ocid"))
 
