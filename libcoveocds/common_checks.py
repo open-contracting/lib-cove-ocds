@@ -9,11 +9,7 @@ from libcove.lib.tools import decimal_default
 from markdown_it import MarkdownIt
 
 from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
-from libcoveocds.lib.common_checks import (
-    get_bad_ocid_prefixes,
-    get_records_aggregates,
-    get_releases_aggregates,
-)
+from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_records_aggregates, get_releases_aggregates
 
 md = MarkdownIt()
 

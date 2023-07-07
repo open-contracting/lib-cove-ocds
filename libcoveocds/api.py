@@ -99,7 +99,8 @@ def ocds_json_output(
         with open(context["converted_path"], encoding="utf-8") as fp:
             json_data = json.load(fp)
 
-    context = context_api_transform(
+    # context is edited in-place.
+    context_api_transform(
         common_checks_ocds(
             context,
             output_dir,

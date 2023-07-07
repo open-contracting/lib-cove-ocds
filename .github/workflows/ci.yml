@@ -24,6 +24,8 @@ jobs:
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
       - run: pip install .[test]
+      # https://github.com/OpenDataServices/lib-cove/pull/123
+      - run: pip install 'libcove[flatten] @ git+https://github.com/jpmckinney/lib-cove.git@hotfix'
       - run: pytest -W error --cov libcoveocds
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

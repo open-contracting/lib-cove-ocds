@@ -272,7 +272,7 @@ class SchemaOCDS(SchemaJsonMixin):
         if not self.extensions:
             return
 
-        schema = self.get_schema_obj(deref=True, api=api)
+        schema = self.get_schema_obj(api=api)
         if not self.extended:
             return
 
