@@ -29,8 +29,8 @@ def ocds_json_output(
     json_data=None,
     lib_cove_ocds_config=None,
     record_pkg=False,
-    skip_aggregates: bool = False,
-    skip_additional_checks: bool = False,
+    skip_aggregates=False,
+    additional_checks=None,
 ):
     """
     If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
@@ -110,7 +110,7 @@ def ocds_json_output(
             cache=False,
             api=True,
             skip_aggregates=skip_aggregates,
-            skip_additional_checks=skip_additional_checks,
+            additional_checks=additional_checks,
         )
     )
 

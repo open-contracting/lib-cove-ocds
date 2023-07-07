@@ -144,8 +144,8 @@ def common_checks_ocds(
     schema_obj,
     api=False,
     cache=True,
-    skip_aggregates: bool = False,
-    skip_additional_checks: bool = False,
+    skip_aggregates=False,
+    additional_checks=None,
 ):
     """
     param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
@@ -235,7 +235,9 @@ def common_checks_ocds(
             key: value for key, value in additional_codelist_values.items() if value["isopen"]
         }
 
-    if not skip_additional_checks:
+    if additional_checks is None:
+        additional_checks = CHECKS
+    if additional_checks:
         context["additional_checks"] = run_additional_checks(json_data, CHECKS, ignore_errors=True, return_on_error=[])
 
     return context

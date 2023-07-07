@@ -30,7 +30,7 @@ Other changes:
       Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
   - Add `schema_tag` attribute.
 - Improve performance in API context.
-  - Add `skip_aggregates` and `skip_additional_checks` keyword arguments to `common_checks_ocds` and `ocds_json_output` (default `False`).
+  - Add `skip_aggregates` (default `False`) and `additional_checks` (default all) keyword arguments to `common_checks_ocds` and `ocds_json_output`.
   - Skip the schema description and reference URL for OCID prefix conformance errors.
   - Skip the formatted message, schema title, schema description and reference URL for validation errors.
   - Skip the metadata fields for OCDS extensions.
