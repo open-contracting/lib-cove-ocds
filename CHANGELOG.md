@@ -15,14 +15,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Other changes:
 
-- Improve performance in API context.
-  - Add `skip_aggregates` keyword argument to `common_checks_ocds` and `ocds_json_output` (default `False`).
-  - Skip the schema description and reference URL for OCID prefix conformance errors.
-  - Skip the formatted message, schema title, schema description and reference URL for validation errors.
-  - Skip sorting the JSON locations of additional checks.
-  - Improve ``context_api_transform()`` performance.
 - Use ocdsextensionregistry to merge extensions.
   - Empty extension URLs no longer produce an error message.
+  - Merge an extension even if its metadata is missing or invalid.
+  - Cache all requests made by ocdsextensionregistry by default.
+
+    Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
+- Improve performance in API context.
+  - Add `skip_aggregates` and `skip_additional_checks` keyword arguments to `common_checks_ocds` and `ocds_json_output` (default `False`).
+  - Skip the schema description and reference URL for OCID prefix conformance errors.
+  - Skip the formatted message, schema title, schema description and reference URL for validation errors.
+  - Skip the metadata fields for OCDS extensions.
+  - Skip sorting the JSON locations of additional checks.
+  - Improve ``context_api_transform()`` performance.
 - flattentool is optional.
 - Drop support for Python 3.7.
 

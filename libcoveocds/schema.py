@@ -1,5 +1,6 @@
 import json
 import os
+import warnings
 from copy import deepcopy
 from urllib.parse import urljoin
 
@@ -7,6 +8,8 @@ import json_merge_patch
 import requests
 from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists
 from libcove.lib.tools import get_request
+from ocdsextensionregistry.exceptions import ExtensionWarning
+from ocdsextensionregistry.profile_builder import ProfileBuilder
 
 import libcoveocds.config
 
@@ -152,14 +155,14 @@ class SchemaOCDS(SchemaJsonMixin):
                 except KeyError:
                     self.extended_codelist_urls[codelist] = [base_url + codelist]
 
-    def get_schema_obj(self, deref=False):
+    def get_schema_obj(self, deref=False, api=False):
         schema_obj = self._schema_obj
         if self.extended_schema_file:
             with open(self.extended_schema_file) as fp:
                 schema_obj = json.load(fp)
         elif self.extensions:
             schema_obj = deepcopy(self._schema_obj)
-            self.apply_extensions(schema_obj)
+            self.apply_extensions(schema_obj, api=api)
         if deref:
             if self.extended:
                 extended_schema_str = json.dumps(schema_obj)
@@ -193,78 +196,73 @@ class SchemaOCDS(SchemaJsonMixin):
                 return self.deref_schema(self.pkg_schema_str)
         return package_schema_obj
 
-    def apply_extensions(self, schema_obj):
-        if not self.extensions:
-            return
-        for extension_metadata_url in self.extensions.keys():
-            if not extension_metadata_url:
-                self.invalid_extension[extension_metadata_url] = "extension metadata URL is empty"
+    def apply_extensions(self, schema_obj, api=False):
+        def extension_to_metadata_url(extension):
+            if extension.base_url:
+                return extension.get_url("extension.json")
+            return extension.download_url
+
+        language = self.config.config["current_language"]
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always", category=ExtensionWarning)
+
+            builder = ProfileBuilder(self.version_choices[self.version][2], list(self.extensions))
+            # schema_obj is modified in-place.
+            builder.patched_release_schema(schema=schema_obj)
+
+            for warning in w:
+                if issubclass(warning.category, ExtensionWarning):
+                    exception = warning.message.exc
+                    if isinstance(exception, requests.HTTPError):
+                        message = f"{exception.response.status_code}: {exception.response.reason.lower()}"
+                    elif isinstance(exception, requests.RequestException):
+                        message = "fetching failed"
+                    elif isinstance(exception, json.JSONDecodeError):
+                        message = "release schema patch is not valid JSON"
+                    else:
+                        message = str(exception)
+                    self.invalid_extension[extension_to_metadata_url(warning.message.extension)] = message
+
+        self.extended = len(self.invalid_extension) < len(self.extensions)
+
+        for extension in builder.extensions():
+            metadata_url = extension_to_metadata_url(extension)
+
+            # process_codelists() needs this dict.
+            extension_description = {"failed_codelists": {}}
+            self.extensions[metadata_url] = extension_description
+
+            # Skip metadata fields in API context.
+            if api:
                 continue
+
+            extension_description["url"] = metadata_url
+            extension_description["schema_url"] = None
 
             try:
-                response = get_request(extension_metadata_url, config=self.config)
-            except requests.exceptions.RequestException:
-                self.invalid_extension[extension_metadata_url] = "fetching failed"
-                continue
-            if response.ok:
-                try:
-                    extension_metadata = response.json()
-                except json.JSONDecodeError:
-                    self.invalid_extension[extension_metadata_url] = "extension metadata is not valid JSON"
-                    continue
-            else:
-                self.invalid_extension[extension_metadata_url] = f"{response.status_code}: {response.reason.lower()}"
-                continue
+                metadata = extension.metadata
 
-            i = extension_metadata_url.rfind("/")
-            release_schema_patch_url = f"{extension_metadata_url[:i]}/release-schema.json"
+                # We *could* check its existence via HTTP, but this is for display only anyway.
+                schemas = metadata.get("schemas")
+                if isinstance(schemas, list) and "release_schema.json" in schemas:
+                    extension_description["schema_url"] = extension.get_url("release-schema.json")
 
-            try:
-                response = get_request(release_schema_patch_url, config=self.config)
-            except requests.exceptions.RequestException:
-                self.invalid_extension[extension_metadata_url] = "failed to get release schema patch"
-                continue
-            if response.ok:
-                try:
-                    release_schema_patch = response.json()
-                except json.JSONDecodeError:
-                    self.invalid_extension[extension_metadata_url] = "release schema patch is not valid JSON"
-                    continue
-            # Codelist-only extensions are allowed.
-            elif response.status_code == 404:
-                release_schema_patch_url = None
-                release_schema_patch = {}
-            else:
-                self.invalid_extension[extension_metadata_url] = f"{response.status_code}: {response.reason.lower()}"
-                continue
+                codelists = metadata.get("codelists")
+                if isinstance(codelists, list) and codelists:
+                    extension_description["codelists"] = codelists
 
-            schema_obj = json_merge_patch.merge(schema_obj, release_schema_patch)
-            current_language = self.config.config["current_language"]
+                for field in ("name", "description", "documentationUrl"):
+                    language_map = metadata[field]
+                    extension_description[field] = language_map.get(language, language_map.get("en", ""))
+            except requests.HTTPError as e:
+                self.invalid_extension[metadata_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
+            except requests.RequestException as e:
+                self.invalid_extension[metadata_url] = "fetching failed"
+            except json.JSONDecodeError as e:
+                self.invalid_extension[metadata_url] = "extension metadata is not valid JSON"
 
-            extension_description = {
-                "url": extension_metadata_url,
-                "schema_url": release_schema_patch_url,
-                "failed_codelists": {},
-            }
-
-            for field in ["description", "name", "documentationUrl"]:
-                field_object = extension_metadata.get(field, {})
-                if isinstance(field_object, str):
-                    field_value = field_object
-                else:
-                    field_value = field_object.get(current_language)
-                    if not field_value:
-                        field_value = field_object.get("en", "")
-                extension_description[field] = field_value
-
-            codelists = extension_metadata.get("codelists")
-            if codelists:
-                extension_description["codelists"] = codelists
-
-            self.extensions[extension_metadata_url] = extension_description
-            self.extended = True
-
-    def create_extended_schema_file(self, upload_dir, upload_url):
+    def create_extended_schema_file(self, upload_dir, upload_url, api=False):
         filepath = os.path.join(upload_dir, "extended_schema.json")
 
         # Always replace any existing extended schema file
@@ -276,13 +274,13 @@ class SchemaOCDS(SchemaJsonMixin):
         if not self.extensions:
             return
 
-        schema_obj = self.get_schema_obj()
+        schema = self.get_schema_obj(deref=True, api=api)
         if not self.extended:
             return
 
         with open(filepath, "w") as fp:
-            schema_str = json.dumps(schema_obj, indent=4)
-            fp.write(schema_str)
+            json.dump(schema, f, ensure_ascii=False, indent=2)
+            fp.write("\n")
 
         self.extended_schema_file = filepath
         self.extended_schema_url = urljoin(upload_url, "extended_schema.json")

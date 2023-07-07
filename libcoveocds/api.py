@@ -62,7 +62,7 @@ def ocds_json_output(
         msg = "\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m"
         raise APIException(msg.format(str(list(schema_obj.version_choices))))
     if schema_obj.extensions:
-        schema_obj.create_extended_schema_file(output_dir, "")
+        schema_obj.create_extended_schema_file(output_dir, "", api=True)
     schema_url = schema_obj.extended_schema_file or schema_obj.schema_url
 
     context = {"file_type": file_type}

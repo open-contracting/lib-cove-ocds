@@ -13,6 +13,8 @@ DEFAULT_OCDS_VERSION = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_v
 METRICS_EXT = "https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json"  # noqa: E501
 CODELIST_EXT = "https://raw.githubusercontent.com/INAImexico/ocds_extendedProcurementCategory_extension/0ed54770c85500cf21f46e88fb06a30a5a2132b1/extension.json"  # noqa: E501
 UNKNOWN_URL_EXT = "http://bad-url-for-extensions.com/extension.json"
+NO_METADATA_URL_EXT = "https://gist.githubusercontent.com/jpmckinney/af0db955a527c8d0ac7296c913b36631/raw/1801168408776283cc2de2f8d81b2fc2cfb903a5/extension.json"  # noqa: E501
+INVALID_METADATA_URL_EXT = "https://gist.githubusercontent.com/jpmckinney/f2bbd32e142a328cfe069a58edcdf864/raw/19a2988860525207bff5db21043b4fb600426a40/extension.json"  # noqa: E501
 NOT_FOUND_URL_EXT = "https://standard.open-contracting.org/this-file-is-not-found-404.json/en"
 
 
@@ -94,6 +96,8 @@ def test_schema_ocds_constructor(
     ("release_data", "extensions", "invalid_extension", "extended", "extends_schema"),
     [
         (None, {}, {}, False, False),
+        ({"version": "1.1", "extensions": [METRICS_EXT]}, {METRICS_EXT: ()}, {}, True, True),
+        ({"version": "1.1", "extensions": [CODELIST_EXT]}, {CODELIST_EXT: ()}, {}, True, False),
         (
             {"version": "1.1", "extensions": [NOT_FOUND_URL_EXT]},
             {NOT_FOUND_URL_EXT: ()},
@@ -108,8 +112,20 @@ def test_schema_ocds_constructor(
             False,
             False,
         ),
-        ({"version": "1.1", "extensions": [METRICS_EXT]}, {METRICS_EXT: ()}, {}, True, True),
-        ({"version": "1.1", "extensions": [CODELIST_EXT]}, {CODELIST_EXT: ()}, {}, True, False),
+        (
+            {"version": "1.1", "extensions": [NO_METADATA_URL_EXT]},
+            {NO_METADATA_URL_EXT: ()},
+            {NO_METADATA_URL_EXT: "404: not found"},
+            True,
+            False,
+        ),
+        (
+            {"version": "1.1", "extensions": [INVALID_METADATA_URL_EXT]},
+            {INVALID_METADATA_URL_EXT: ()},
+            {INVALID_METADATA_URL_EXT: "extension metadata is not valid JSON"},
+            True,
+            False,
+        ),
         (
             {"version": "1.1", "extensions": [UNKNOWN_URL_EXT, METRICS_EXT]},
             {UNKNOWN_URL_EXT: (), METRICS_EXT: ()},

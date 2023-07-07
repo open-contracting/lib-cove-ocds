@@ -7,9 +7,9 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     "schema_item_name": "release-schema.json",
     "schema_host": None,
     "schema_version_choices": {
-        # version: (display, url),
-        "1.0": ("1.0", "https://standard.open-contracting.org/1.0/en/"),
-        "1.1": ("1.1", "https://standard.open-contracting.org/1.1/en/"),
+        # version: (display, url, tag),
+        "1.0": ("1.0", "https://standard.open-contracting.org/1.0/en/", "1__0__3"),
+        "1.1": ("1.1", "https://standard.open-contracting.org/1.1/en/", "1__1__5"),
     },
     "schema_codelists": {
         # version: codelist_dir,
@@ -29,9 +29,7 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
 }
 
 # Set default schema version to the latest version
-LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version"] = list(LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version_choices"].keys())[
-    -1
-]
+LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version"] = list(LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version_choices"])[-1]
 
 
 class LibCoveOCDSConfig:
