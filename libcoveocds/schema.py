@@ -22,6 +22,8 @@ class SchemaOCDS(SchemaJsonMixin):
     def _set_schema_version(self, version):
         schema_version_choice = self.version_choices[version]
 
+        # lib-cove uses version in common_checks_context() via getattr() to determine whether to set
+        # "version_display_choices" and "version_used_display".
         # cove-ocds uses version, e.g. when a user changes the version to validate against.
         self.version = version
         # lib-cove uses schema_host in get_schema_validation_errors() to call CustomRefResolver(). (URL, not host.)
@@ -42,13 +44,17 @@ class SchemaOCDS(SchemaJsonMixin):
 
         # lib-cove uses schema_name in get_schema_validation_errors() to call CustomRefResolver(), if extended is set.
         self.schema_name = "release-schema.json"
-        # lib-cove uses version_choices in common_checks_context(), via getattr().
+        # lib-cove uses codelists in get_additional_codelist_values() to construct "codelist_url".
+        self.codelists = self.config.config["schema_codelists"]["1.1"]
+        # lib-cove uses version_choices in common_checks_context() via getattr() for "version_display_choices" and
+        # "version_used_display". Re-used in this file for convenience.
         self.version_choices = self.config.config["schema_version_choices"]
 
         # Report errors in web UI.
         self.missing_package = False
         self.invalid_version_argument = False
         self.invalid_version_data = False
+        self.json_deref_error = None
 
         self._set_schema_version(self.config.config["schema_version"])
 
@@ -68,6 +74,9 @@ class SchemaOCDS(SchemaJsonMixin):
                 # If invalid, use the "version" field in the data.
                 select_version = None
 
+        # lib-cove uses extensions in common_checks_context() for "extensions"."extensions".
+        # If `self.extensions` is falsy, this logic can be skipped.
+        # cove-ocds uses extensions to render extension-related information.
         self.extensions = {}
         if isinstance(package_data, dict):
             if not select_version:
@@ -105,12 +114,22 @@ class SchemaOCDS(SchemaJsonMixin):
                 record_pkg=False,
             )
 
-        self.json_deref_error = None
-        self.invalid_extension = {}
+        # lib-cove uses extended in common_checks_context() for "extensions"."is_extended_schema".
+        # If `self.extensions` is falsy, this logic can be skipped.
+        # cove-ocds uses is_extended_schema to conditionally display content.
         self.extended = False
-        self.extended_schema_file = None
+        # lib-cove uses invalid_extension in common_checks_context() for "extensions"."invalid_extension".
+        # If `self.extensions` is falsy, this logic can be skipped.
+        # cove-ocds uses invalid_extension to render extension-related errors.
+        self.invalid_extension = {}
+
+        # lib-cove uses extended_schema_url in common_checks_context() for "extensions"."extended_schema_url".
+        # If `self.extensions` is falsy, this logic can be skipped.
+        # cove-ocds uses extended_schema_url to "Get a copy of the schema with extension patches applied".
         self.extended_schema_url = None
-        self.codelists = self.config.config["schema_codelists"]["1.1"]
+        # lib-cove uses extended_schema_file in get_schema_validation_errors() to call CustomRefResolver(), if extended
+        # is set. (lib-)cove-ocds uses extended_schema_file to convert between formats, and falls back to schema_url.
+        self.extended_schema_file = None
 
     @functools.lru_cache
     def _standard_codelists(self):
@@ -153,7 +172,7 @@ class SchemaOCDS(SchemaJsonMixin):
                     # An unreadable metadata file or a malformed extension URL raises an error.
                     extension_codelists = extension.codelists
                 except (requests.RequestException, NotImplementedError):
-                    # apply_extensions() will have recorded the metadata file being unreadable.
+                    # patched_release_schema() will have recorded the metadata file being unreadable.
                     continue
 
                 for warning in w:
