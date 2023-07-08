@@ -1,6 +1,9 @@
 import copy
+import json
+import os.path
 
 import pytest
+from libcove.lib.common import get_additional_codelist_values
 
 import libcoveocds.config
 import libcoveocds.schema
@@ -168,3 +171,36 @@ def test_schema_ocds_extensions(package_data, extensions, invalid_extension, ext
     else:
         assert "Metric" not in schema_obj["definitions"]
         assert not schema_obj["definitions"]["Award"]["properties"].get("agreedMetrics")
+
+
+# https://github.com/OpenDataServices/cove/issues/1054
+@pytest.mark.xfail(reason="lib-cove has a bug")
+def test_get_additional_codelist_values_replaced():
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "fixtures",
+            "common_checks",
+            "get_additional_codelist_values_replaced.json",
+        )
+    ) as f:
+        package_data = json.load(f)
+
+    # tariffs adds to documentType.csv, then ppp replaces documentType.csv, such that the addition has no consequence.
+    # lib-cove's get_additional_codelist_values() determines the correct extension, but the incorrect filename.
+
+    schema_obj = libcoveocds.schema.SchemaOCDS(select_version="1.1", package_data=package_data)
+    schema_obj.get_schema_obj()
+
+    additional_codelist_values = get_additional_codelist_values(schema_obj, package_data)
+
+    assert additional_codelist_values["releases/tender/documents/documentType"] == {
+        "field": "documentType",
+        "codelist": "documentType.csv",
+        "path": "releases/tender/documents",
+        "codelist_url": "https://raw.githubusercontent.com/open-contracting-extensions/ocds_ppp_extension/master/codelists/documentType.csv",  # noqa
+        "extension_codelist": False,
+        "isopen": True,
+        "codelist_amend_urls": [],
+        "values": ["foo"],
+    }
