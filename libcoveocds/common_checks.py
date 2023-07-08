@@ -216,13 +216,9 @@ def common_checks_ocds(
 
     context.update(common_checks["context"])
 
-    if schema_obj.record_pkg:
+    if "records" in json_data:
         if not skip_aggregates:
             context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=ignore_errors)
-
-        # Do this for records, as there's no record-schema.json (this probably
-        # causes problems for flatten-tool)
-        context["schema_url"] = schema_obj.pkg_schema_url
     else:
         if not skip_aggregates:
             context["releases_aggregates"] = get_releases_aggregates(json_data, ignore_errors=ignore_errors)
