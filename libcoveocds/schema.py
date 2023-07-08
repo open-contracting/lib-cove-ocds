@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 
 import requests
 from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists
-from ocdsextensionregistry.exceptions import ExtensionWarning
+from ocdsextensionregistry.exceptions import ExtensionCodelistWarning, ExtensionWarning
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 
 import libcoveocds.config
@@ -143,7 +143,7 @@ class SchemaOCDS(SchemaJsonMixin):
             failed_codelists = self.extensions[input_url]["failed_codelists"]
 
             with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always", category=ExtensionWarning)
+                warnings.simplefilter("always", category=ExtensionCodelistWarning)
 
                 try:
                     # An unreadable metadata file or a malformed extension URL raises an error.
