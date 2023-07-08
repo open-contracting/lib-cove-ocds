@@ -110,7 +110,7 @@ class SchemaOCDS(SchemaJsonMixin):
         self.codelists = self.config.config["schema_codelists"]["1.1"]
 
     @functools.lru_cache
-    def standard_codelists(self):
+    def _standard_codelists(self):
         try:
             # OCDS 1.0 uses "code" column.
             # https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv  # noqa: 501
@@ -122,20 +122,21 @@ class SchemaOCDS(SchemaJsonMixin):
             logger.exception(e)
             return set()
 
+    # lib-cove calls this from get_additional_codelist_values().
     def process_codelists(self):
         # lib-cove uses these in get_additional_codelist_values().
         # - Used to determine whether a field has a codelist, which codelist and whether it is open.
         self.extended_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=True)
         # - Used with the `in` operator, to determine whether a codelist is from an extension.
-        self.core_codelists = self.standard_codelists()
+        self.core_codelists = self._standard_codelists()
         # - Used with get(), and the return value is used with `in`, to determine whether a code is included.
         self.extended_codelists = deepcopy(self.core_codelists)
         # - Used to populate "codelist_url" and "codelist_amend_urls".
         self.extended_codelist_urls = defaultdict(list)
 
-        # standard_codelists() returns an empty set on HTTP error. If so, don't cache this empty set, and return.
+        # _standard_codelists() returns an empty set on HTTP error. If so, don't cache this empty set, and return.
         if not self.core_codelists:
-            self.standard_codelists.cache_clear()
+            self._standard_codelists.cache_clear()
             return
 
         for extension in self.builder_extensions:
@@ -153,7 +154,7 @@ class SchemaOCDS(SchemaJsonMixin):
                     continue
 
                 for warning in w:
-                    if issubclass(warning.category, ExtensionWarning):
+                    if issubclass(warning.category, ExtensionCodelistWarning):
                         exception = warning.message.exc
                         if isinstance(exception, requests.HTTPError):
                             message = f"{exception.response.status_code}: {exception.response.reason}"
@@ -162,7 +163,7 @@ class SchemaOCDS(SchemaJsonMixin):
                         elif isinstance(exception, UnicodeDecodeError):
                             message = "Has non-UTF-8 characters"
                         else:
-                            message = f"Unknown Exception, {e}"
+                            message = f"Unknown error: {e}"
                         failed_codelists[warning.message.codelist] = message
 
             for name, codelist in extension_codelists.items():
