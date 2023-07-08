@@ -28,7 +28,7 @@ def ocds_json_output(
     file_type=None,
     json_data=None,
     lib_cove_ocds_config=None,
-    record_pkg=False,
+    record_pkg=None,
 ):
     """
     If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
@@ -44,6 +44,9 @@ def ocds_json_output(
                 json_data = json.load(fp)
             except ValueError:
                 raise APIException("The file looks like invalid json")
+
+    if record_pkg is None:
+        record_pkg = "records" in json_data
 
     if file_type == "json":
         schema_obj = SchemaOCDS(
