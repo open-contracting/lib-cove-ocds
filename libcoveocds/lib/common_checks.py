@@ -70,6 +70,9 @@ def get_releases_aggregates(json_data):
     implementation_milestones_doc_count = 0
 
     def process_org(org, unique_id, unique_name):
+        if not isinstance(org, dict):
+            return
+
         identifier = org.get("identifier")
         org_id = None
         if identifier:
