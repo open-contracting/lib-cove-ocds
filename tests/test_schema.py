@@ -1,12 +1,12 @@
 import copy
 import json
-import os.path
 
 import pytest
 from libcove.lib.common import get_additional_codelist_values
 
 import libcoveocds.config
 import libcoveocds.schema
+from tests import fixture_path
 
 # Cache for faster tests.
 config = libcoveocds.config.LibCoveOCDSConfig()
@@ -176,14 +176,7 @@ def test_schema_ocds_extensions(package_data, extensions, invalid_extension, ext
 # https://github.com/OpenDataServices/cove/issues/1054
 @pytest.mark.xfail(reason="lib-cove has a bug")
 def test_get_additional_codelist_values_replaced():
-    with open(
-        os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "fixtures",
-            "common_checks",
-            "get_additional_codelist_values_replaced.json",
-        )
-    ) as f:
+    with open(fixture_path("fixtures", "common_checks", "get_additional_codelist_values_replaced.json")) as f:
         package_data = json.load(f)
 
     # tariffs adds to documentType.csv, then ppp replaces documentType.csv, such that the addition has no consequence.

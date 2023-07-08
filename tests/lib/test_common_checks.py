@@ -2,6 +2,7 @@ import json
 import os
 
 from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_releases_aggregates
+from tests import fixture_path
 
 EMPTY_RELEASE_AGGREGATE = {
     "award_doc_count": 0,
@@ -72,7 +73,6 @@ EMPTY_RELEASE_AGGREGATE = {
     "unique_suppliers": [],
     "unique_tenderers": [],
 }
-
 
 EXPECTED_RELEASE_AGGREGATE = {
     "award_count": 2,
@@ -195,11 +195,7 @@ def test_get_releases_aggregates():
     release_aggregate_3_empty["release_count"] = 3
     assert get_releases_aggregates({"releases": [{}, {}, {}]}) == release_aggregate_3_empty
 
-    with open(
-        os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "release_aggregate.json"
-        )
-    ) as fp:
+    with open(fixture_path("lib", "fixtures", "common_checks", "release_aggregate.json")) as fp:
         data = json.load(fp)
 
     assert get_releases_aggregates({"releases": data["releases"]}) == EXPECTED_RELEASE_AGGREGATE
@@ -217,9 +213,7 @@ def test_get_releases_aggregates():
 
     assert actual_cleaned == expected_cleaned
 
-    with open(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "samplerubbish.json")
-    ) as fp:
+    with open(fixture_path("lib", "fixtures", "common_checks", "samplerubbish.json")) as fp:
         data = json.load(fp)
 
     actual = get_releases_aggregates(data)
@@ -227,9 +221,7 @@ def test_get_releases_aggregates():
 
     assert actual_cleaned == EXPECTED_RELEASE_AGGREGATE_RANDOM
 
-    with open(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "badfile.json")
-    ) as fp:
+    with open(fixture_path("lib", "fixtures", "common_checks", "badfile.json")) as fp:
         data = json.load(fp)
 
     actual = get_releases_aggregates(data, ignore_errors=True)
@@ -238,12 +230,7 @@ def test_get_releases_aggregates():
 
 
 def test_release_bad_ocid_prefixes():
-    file_name = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        "fixtures",
-        "common_checks",
-        "tenders_releases_7_releases_check_ocids.json",
-    )
+    file_name = fixture_path("lib", "fixtures", "common_checks", "tenders_releases_7_releases_check_ocids.json")
     results = [
         ("bad-prefix-000001", "releases/0/ocid"),
         ("bad-prefix-000002", "releases/1/ocid"),
@@ -266,9 +253,7 @@ def test_release_bad_ocid_prefixes():
 
 
 def test_record_bad_ocid_prefixes_with_bad_compiled_release():
-    file_name = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "record_check_ocids.json"
-    )
+    file_name = fixture_path("lib", "fixtures", "common_checks", "record_check_ocids.json")
     results = [
         ("bad-prefix-000001", "records/0/ocid"),
     ]

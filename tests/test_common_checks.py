@@ -8,6 +8,7 @@ import pytest
 import libcoveocds.common_checks
 import libcoveocds.config
 import libcoveocds.schema
+from tests import fixture_path
 
 # Cache for faster tests.
 config = libcoveocds.config.LibCoveOCDSConfig()
@@ -18,9 +19,7 @@ def test_basic_1():
 
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
-    json_filename = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "basic_1.json"
-    )
+    json_filename = fixture_path("fixtures", "common_checks", "basic_1.json")
     with open(json_filename) as fp:
         json_data = json.load(fp)
 
@@ -47,9 +46,7 @@ def test_dupe_ids_1():
 
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
-    json_filename = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), "fixtures", "common_checks", "dupe_ids_1.json"
-    )
+    json_filename = fixture_path("fixtures", "common_checks", "dupe_ids_1.json")
     with open(json_filename) as fp:
         json_data = json.load(fp)
 
@@ -518,13 +515,7 @@ def test_dupe_ids_1():
     ],
 )
 def test_validation_release_or_record_package(record_pkg, filename, validation_error_jsons_expected, schema_subdir):
-    schema_host = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        "fixtures",
-        "common_checks",
-        schema_subdir,
-        "",
-    )
+    schema_host = fixture_path("fixtures", "common_checks", schema_subdir, "")
     with open(os.path.join(schema_host, filename)) as fp:
         json_data = json.load(fp)
 
