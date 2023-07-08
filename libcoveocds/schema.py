@@ -9,7 +9,7 @@ from copy import deepcopy
 from urllib.parse import urljoin
 
 import requests
-from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths, load_codelist, load_core_codelists
+from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths
 from ocdsextensionregistry.exceptions import ExtensionCodelistWarning, ExtensionWarning
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 
@@ -24,7 +24,7 @@ class SchemaOCDS(SchemaJsonMixin):
 
         # cove-ocds uses version, e.g. when a user changes the version to validate against.
         self.version = version
-        # lib-cove uses schema_host in get_schema_validation_errors(). (This is a URL, not a host.)
+        # lib-cove uses schema_host in get_schema_validation_errors() to call CustomRefResolver(). (URL, not host.)
         self.schema_host = schema_version_choice[1]
         # Needed by ProfileBuilder.
         self._schema_tag = schema_version_choice[2]
@@ -37,11 +37,12 @@ class SchemaOCDS(SchemaJsonMixin):
         package_data will be skipped and registered as self.invalid_version_argument
         and self.invalid_version_data respectively.
         """
+        # The main configuration object.
         self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
 
-        # lib-cove uses schema_name in get_schema_validation_errors() if extended is set.
+        # lib-cove uses schema_name in get_schema_validation_errors() to call CustomRefResolver(), if extended is set.
         self.schema_name = "release-schema.json"
-        # lib-cove uses version_choices in common_checks_context() via getattr().
+        # lib-cove uses version_choices in common_checks_context(), via getattr().
         self.version_choices = self.config.config["schema_version_choices"]
 
         # Report errors in web UI.
@@ -85,7 +86,7 @@ class SchemaOCDS(SchemaJsonMixin):
         self.builder = ProfileBuilder(
             self._schema_tag, list(self.extensions), standard_base_url=self.config.config["standard_zip"]
         )
-        # Initialize extensions once.
+        # Initialize extensions once and preserve locale caches.
         self.builder_extensions = list(self.builder.extensions())
 
         self.schema_url = urljoin(self.schema_host, "release-schema.json")
@@ -117,7 +118,7 @@ class SchemaOCDS(SchemaJsonMixin):
             # OCDS 1.0 uses "code" column.
             # https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv  # noqa: 501
             return {
-                codelist.name: set(row.get("Code", row.get("code")) for row in codelist.rows)
+                codelist.name: {row.get("Code", row.get("code")) for row in codelist.rows}
                 for codelist in self.builder.standard_codelists()
             }
         except requests.RequestException as e:
@@ -136,7 +137,7 @@ class SchemaOCDS(SchemaJsonMixin):
         # - Used to populate "codelist_url" and "codelist_amend_urls".
         self.extended_codelist_urls = defaultdict(list)
 
-        # _standard_codelists() returns an empty set on HTTP error. If so, don't cache this empty set, and return.
+        # _standard_codelists() returns an empty dict on HTTP error. If so, don't cache this empty dict, and return.
         if not self.core_codelists:
             self._standard_codelists.cache_clear()
             return
@@ -165,7 +166,7 @@ class SchemaOCDS(SchemaJsonMixin):
                         elif isinstance(exception, UnicodeDecodeError):
                             message = "Has non-UTF-8 characters"
                         else:
-                            message = f"Unknown error: {e}"
+                            message = f"Unknown error: {exception}"
                         failed_codelists[warning.message.codelist] = message
 
             for name, codelist in extension_codelists.items():
