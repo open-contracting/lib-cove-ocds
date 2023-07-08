@@ -27,7 +27,7 @@ def empty_field(data, path_prefix):
             yield {"json_location": f"{path_prefix}{key}"}
 
 
-CHECKS = [empty_field]
+CHECKS = {"all": [empty_field], "none": []}
 
 
 @tools.ignore_errors

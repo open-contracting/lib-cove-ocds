@@ -144,12 +144,12 @@ def common_checks_ocds(
     schema_obj,
     api=False,
     cache=True,
-    additional_checks=None,
 ):
     """
     param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
     """
     skip_aggregates = schema_obj.config.config["skip_aggregates"]
+    additional_checks = CHECKS[schema_obj.config.config["additional_checks"]]
 
     # Pass "-" as the schema name. The associated logic is not required by lib-cove-ocds.
     common_checks = common_checks_context(
@@ -235,9 +235,9 @@ def common_checks_ocds(
             key: value for key, value in additional_codelist_values.items() if value["isopen"]
         }
 
-    if additional_checks is None:
-        additional_checks = CHECKS
     if additional_checks:
-        context["additional_checks"] = run_additional_checks(json_data, CHECKS, ignore_errors=True, return_on_error=[])
+        context["additional_checks"] = run_additional_checks(
+            json_data, additional_checks, ignore_errors=True, return_on_error=[]
+        )
 
     return context

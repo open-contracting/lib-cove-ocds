@@ -30,9 +30,10 @@ Other changes:
       Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
   - Add `schema_tag` attribute.
 - Improve performance in API context.
-  - Add `skip_aggregates` (default `False`) to `libcoveocds.config.LibCoveOCDSConfig`.
-  - Add `standard_zip` (default `None`) to `libcoveocds.config.LibCoveOCDSConfig`.
-  - Add `additional_checks` (default all) keyword argument to `common_checks_ocds` and `ocds_json_output`.
+  - Add options to `libcoveocds.config.LibCoveOCDSConfig`:
+    - `additional_checks` (default "all")
+    - `skip_aggregates` (default `False`)
+    - `standard_zip` (default `None`)
   - Skip the schema description and reference URL for OCID prefix conformance errors.
   - Skip the formatted message, schema title, schema description and reference URL for validation errors.
   - Skip the metadata fields for OCDS extensions.
