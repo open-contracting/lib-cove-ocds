@@ -144,12 +144,12 @@ def common_checks_ocds(
     schema_obj,
     api=False,
     cache=True,
-    skip_aggregates=False,
     additional_checks=None,
 ):
     """
     param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
     """
+    skip_aggregates = schema_obj.config.config["skip_aggregates"]
 
     # Pass "-" as the schema name. The associated logic is not required by lib-cove-ocds.
     common_checks = common_checks_context(

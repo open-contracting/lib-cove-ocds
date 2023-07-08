@@ -26,10 +26,20 @@ class SetEncoder(json.JSONEncoder):
 @click.option("-s", "--schema-version", default=None, help="Version of the schema to validate the data, eg '1.0'")
 @click.option("-d", "--delete", is_flag=True, help="Delete existing directory if it exits")
 @click.option("-e", "--exclude-file", is_flag=True, help="Do not include the file in the output directory")
-def main(filename, output_dir, convert, schema_version, delete, exclude_file):
+@click.option("--skip-aggregates", is_flag=True, help="Skip releases_aggregates and records_aggregates")
+@click.option(
+    "--standard-zip",
+    type=click.Path(exists=True, dir_okay=False),
+    help="Path to a ZIP file containing the standard repository",
+)
+def main(filename, output_dir, convert, schema_version, delete, exclude_file, skip_aggregates, standard_zip):
+    if standard_zip:
+        standard_zip = f"file://{standard_zip}"
 
     config = LibCoveOCDSConfig()
     config.config["cache_all_requests"] = True
+    config.config["skip_aggregates"] = skip_aggregates
+    config.config["standard_zip"] = standard_zip
 
     if schema_version:
         version_choices = config.config.get("schema_version_choices")

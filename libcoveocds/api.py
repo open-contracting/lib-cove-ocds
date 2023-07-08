@@ -29,13 +29,10 @@ def ocds_json_output(
     json_data=None,
     lib_cove_ocds_config=None,
     record_pkg=False,
-    skip_aggregates=False,
     additional_checks=None,
 ):
     """
     If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
-
-    :param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
     """
 
     if not lib_cove_ocds_config:
@@ -109,7 +106,6 @@ def ocds_json_output(
             # `cache` writes the results to a file, which is only relevant in the context of repetitive web requests.
             cache=False,
             api=True,
-            skip_aggregates=skip_aggregates,
             additional_checks=additional_checks,
         )
     )

@@ -24,6 +24,8 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
         "remove_empty_schema_columns": True,
     },
     "cache_all_requests": False,
+    "skip_aggregates": False,
+    "standard_zip": None,
 }
 
 # Set default schema version to the latest version

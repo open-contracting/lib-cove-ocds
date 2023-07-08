@@ -82,7 +82,9 @@ class SchemaOCDS(SchemaJsonMixin):
                 self.extensions = {extension: {} for extension in extensions if isinstance(extension, str)}
 
         #: The profile builder instance for this package's extensions.
-        self.builder = ProfileBuilder(self._schema_tag, list(self.extensions))
+        self.builder = ProfileBuilder(
+            self._schema_tag, list(self.extensions), standard_base_url=self.config.config["standard_zip"]
+        )
         # Initialize extensions once.
         self.builder_extensions = list(self.builder.extensions())
 
@@ -120,7 +122,7 @@ class SchemaOCDS(SchemaJsonMixin):
             }
         except requests.RequestException as e:
             logger.exception(e)
-            return set()
+            return {}
 
     # lib-cove calls this from get_additional_codelist_values().
     def process_codelists(self):
