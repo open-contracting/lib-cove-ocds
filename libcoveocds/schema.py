@@ -1,6 +1,10 @@
+import functools
 import json
+import logging
 import os
 import warnings
+import zipfile
+from collections import defaultdict
 from copy import deepcopy
 from urllib.parse import urljoin
 
@@ -10,6 +14,8 @@ from ocdsextensionregistry.exceptions import ExtensionWarning
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 
 import libcoveocds.config
+
+logger = logging.getLogger(__name__)
 
 
 class SchemaOCDS(SchemaJsonMixin):
@@ -21,7 +27,7 @@ class SchemaOCDS(SchemaJsonMixin):
         # lib-cove uses schema_host in get_schema_validation_errors(). (This is a URL, not a host.)
         self.schema_host = schema_version_choice[1]
         # Needed by ProfileBuilder.
-        self.schema_tag = schema_version_choice[2]
+        self._schema_tag = schema_version_choice[2]
 
     def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, record_pkg=False):
         """Build the schema object using an specific OCDS schema version
@@ -75,6 +81,11 @@ class SchemaOCDS(SchemaJsonMixin):
             if isinstance(extensions, list):
                 self.extensions = {extension: {} for extension in extensions if isinstance(extension, str)}
 
+        #: The profile builder instance for this package's extensions.
+        self.builder = ProfileBuilder(self._schema_tag, list(self.extensions))
+        # Initialize extensions once.
+        self.builder_extensions = list(self.builder.extensions())
+
         self.schema_url = urljoin(self.schema_host, "release-schema.json")
         if record_pkg:
             basename = "record-package-schema.json"
@@ -98,64 +109,89 @@ class SchemaOCDS(SchemaJsonMixin):
         self.extended_schema_url = None
         self.codelists = self.config.config["schema_codelists"]["1.1"]
 
+    @functools.lru_cache
+    def standard_codelists(self):
+        try:
+            # OCDS 1.0 uses "code" column.
+            # https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv  # noqa: 501
+            return {
+                codelist.name: set(row.get("Code", row.get("code")) for row in codelist.rows)
+                for codelist in self.builder.standard_codelists()
+            }
+        except requests.RequestException as e:
+            logger.exception(e)
+            return set()
+
     def process_codelists(self):
-        core_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=False)
+        # lib-cove uses these in get_additional_codelist_values().
+        # - Used to determine whether a field has a codelist, which codelist and whether it is open.
         self.extended_codelist_schema_paths = get_schema_codelist_paths(self, use_extensions=True)
-
-        core_unique_files = frozenset(value[0] for value in core_codelist_schema_paths.values())
-        self.core_codelists = load_core_codelists(self.codelists, core_unique_files, config=self.config)
-
+        # - Used with the `in` operator, to determine whether a codelist is from an extension.
+        self.core_codelists = self.standard_codelists()
+        # - Used with get(), and the return value is used with `in`, to determine whether a code is included.
         self.extended_codelists = deepcopy(self.core_codelists)
-        self.extended_codelist_urls = {}
+        # - Used to populate "codelist_url" and "codelist_amend_urls".
+        self.extended_codelist_urls = defaultdict(list)
 
-        # load_core_codelists() returns {} on HTTP error. If so, clear the cache.
+        # standard_codelists() returns an empty set on HTTP error. If so, don't cache this empty set, and return.
         if not self.core_codelists:
-            load_core_codelists.cache_clear()
+            self.standard_codelists.cache_clear()
             return
 
-        for extension, details in self.extensions.items():
-            codelist_list = details.get("codelists")
-            if not codelist_list:
-                continue
+        for extension in self.builder_extensions:
+            input_url = extension.input_url
+            failed_codelists = self.extensions[input_url]["failed_codelists"]
 
-            base_url = "/".join(extension.split("/")[:-1]) + "/codelists/"
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always", category=ExtensionWarning)
 
-            for codelist in codelist_list:
                 try:
-                    codelist_map = load_codelist(base_url + codelist, config=self.config)
-                except UnicodeDecodeError:
-                    details["failed_codelists"][codelist] = "Unicode Error, codelists need to be in UTF-8"
-                except Exception as e:
-                    details["failed_codelists"][codelist] = f"Unknown Exception, {e}"
+                    # An unreadable metadata file or a malformed extension URL raises an error.
+                    extension_codelists = extension.codelists
+                except (requests.RequestException, NotImplementedError):
+                    # apply_extensions() will have recorded the metadata file being unreadable.
                     continue
 
-                if not codelist_map:
-                    details["failed_codelists"][codelist] = "Codelist Error, Could not find code field in codelist"
+                for warning in w:
+                    if issubclass(warning.category, ExtensionWarning):
+                        exception = warning.message.exc
+                        if isinstance(exception, requests.HTTPError):
+                            message = f"{exception.response.status_code}: {exception.response.reason}"
+                        elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
+                            message = "Couldn't be retrieved"
+                        elif isinstance(exception, UnicodeDecodeError):
+                            message = "Has non-UTF-8 characters"
+                        else:
+                            message = f"Unknown Exception, {e}"
+                        failed_codelists[warning.message.codelist] = message
 
-                if codelist[0] in ("+", "-"):
-                    codelist_extension = codelist[1:]
-                    if codelist_extension not in self.extended_codelists:
-                        details["failed_codelists"][
-                            codelist
-                        ] = f"Extension error, Trying to extend non existing codelist {codelist_extension}"
+            for name, codelist in extension_codelists.items():
+                try:
+                    codes = set(codelist.codes)
+                except KeyError:
+                    failed_codelists[name] = 'Has no "Code" column'
+                    continue
+
+                if codelist.patch:
+                    basename = codelist.basename
+
+                    if basename not in self.core_codelists:
+                        failed_codelists[name] = f"References non-existing codelist {basename}"
                         continue
 
-                if codelist[0] == "+":
-                    self.extended_codelists[codelist_extension].update(codelist_map)
-                elif codelist[0] == "-":
-                    for code in codelist_map:
-                        value = self.extended_codelists[codelist_extension].pop(code, None)
-                        if not value:
-                            details["failed_codelists"][
-                                codelist
-                            ] = f"Codelist error, Trying to remove non existing codelist value {code}"
-                else:
-                    self.extended_codelists[codelist] = codelist_map
+                    patched_codelist = self.extended_codelists[basename]
 
-                try:
-                    self.extended_codelist_urls[codelist].append(base_url + codelist)
-                except KeyError:
-                    self.extended_codelist_urls[codelist] = [base_url + codelist]
+                    if codelist.addend:
+                        patched_codelist |= codes
+                    elif codelist.subtrahend:
+                        nonexisting_codes = [code for code in codes if code not in patched_codelist]
+                        if nonexisting_codes:
+                            failed_codelists[name] = f"References non-existing code(s): {', '.join(nonexisting_codes)}"
+                        patched_codelist -= codes
+                else:
+                    self.extended_codelists[name] = codes
+
+                self.extended_codelist_urls[name].append(extension.get_url(f"codelists/{name}"))
 
     def get_schema_obj(self, deref=False, api=False):
         schema_obj = self._schema_obj
@@ -199,57 +235,45 @@ class SchemaOCDS(SchemaJsonMixin):
         return package_schema_obj
 
     def apply_extensions(self, schema_obj, api=False):
-        # This indirection is necessary, because ProfileBuilder encapsulates extension handling.
-        # This does the reverse of ProfileBuilder.extensions().
-        def extension_to_original_url(extension):
-            if extension.base_url or extension._url_pattern:
-                return extension.get_url("extension.json")
-            if extension._file_urls:
-                return extension._file_urls["release-schema.json"]
-            return extension.download_url
-
         language = self.config.config["current_language"]
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always", category=ExtensionWarning)
 
-            builder = ProfileBuilder(self.schema_tag, list(self.extensions))
             # schema_obj is modified in-place.
-            builder.patched_release_schema(schema=schema_obj)
+            self.builder.patched_release_schema(schema=schema_obj)
 
             for warning in w:
                 if issubclass(warning.category, ExtensionWarning):
                     exception = warning.message.exc
                     if isinstance(exception, requests.HTTPError):
                         message = f"{exception.response.status_code}: {exception.response.reason.lower()}"
-                    elif isinstance(exception, requests.RequestException):
+                    elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
                         message = "fetching failed"
                     elif isinstance(exception, json.JSONDecodeError):
                         message = "release schema patch is not valid JSON"
                     else:
                         message = str(exception)
-                    self.invalid_extension[extension_to_original_url(warning.message.extension)] = message
+                    self.invalid_extension[warning.message.extension.input_url] = message
 
-        self.extended = len(self.invalid_extension) < len(self.extensions)
-
-        for extension in builder.extensions():
-            original_url = extension_to_original_url(extension)
+        for extension in self.builder_extensions:
+            input_url = extension.input_url
 
             # process_codelists() needs this dict.
             details = {"failed_codelists": {}}
-            self.extensions[original_url] = details
+            self.extensions[input_url] = details
 
             # Skip metadata fields in API context.
             if api:
                 continue
 
-            details["url"] = original_url
+            details["url"] = input_url
             details["schema_url"] = None
 
-            # ocdsextensionregistry requires the metadata file to contain extension.json (like the registry). If it
+            # ocdsextensionregistry requires the input URL to contain "extension.json" (like the registry). If it
             # doesn't, ocdsextensionregistry can't determine how to retrieve it.
             if not extension.base_url and not extension._url_pattern:
-                self.invalid_extension[original_url] = "missing extension.json"
+                self.invalid_extension[input_url] = "missing extension.json"
                 continue
 
             try:
@@ -260,19 +284,19 @@ class SchemaOCDS(SchemaJsonMixin):
                 if isinstance(schemas, list) and "release_schema.json" in schemas:
                     details["schema_url"] = extension.get_url("release-schema.json")
 
-                codelists = metadata.get("codelists")
-                if isinstance(codelists, list) and codelists:
-                    details["codelists"] = codelists
-
                 for field in ("name", "description", "documentationUrl"):
                     language_map = metadata[field]
                     details[field] = language_map.get(language, language_map.get("en", ""))
             except requests.HTTPError as e:
-                self.invalid_extension[original_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
+                self.invalid_extension[input_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
             except requests.RequestException:
-                self.invalid_extension[original_url] = "fetching failed"
+                self.invalid_extension[input_url] = "fetching failed"
             except json.JSONDecodeError:
-                self.invalid_extension[original_url] = "extension metadata is not valid JSON"
+                self.invalid_extension[input_url] = "extension metadata is not valid JSON"
+
+        # It's possible for the release schema to be applied, but the metadata file to be unavailable.
+        # Nonetheless, for now, preserve prior behavior by reporting as if it were not applied.
+        self.extended = len(self.invalid_extension) < len(self.extensions)
 
     def create_extended_schema_file(self, upload_dir, upload_url, api=False):
         filepath = os.path.join(upload_dir, "extended_schema.json")
