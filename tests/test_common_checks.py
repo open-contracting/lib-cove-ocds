@@ -557,3 +557,19 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
         return out
 
     assert strip_nones(validation_error_jsons) == strip_nones(validation_error_jsons_expected)
+
+
+def test_ref_error(tmpdir):
+    url = "https://gist.githubusercontent.com/jpmckinney/7376110b73c6313507d50a628f2e6f88/raw/9192e0f45e1d6f1cae43bd8be4f18b5cc9cb6610/extension.json"  # noqa: E501
+
+    json_data = {"version": "1.1", "extensions": [url], "releases": [{"unresolvable": "1"}]}
+
+    schema = libcoveocds.schema.SchemaOCDS("1.1", json_data, lib_cove_ocds_config=config)
+    schema.create_extended_schema_file(tmpdir, "")
+
+    libcoveocds.common_checks.common_checks_ocds(
+        {"file_type": "json"},
+        tmpdir,
+        json_data,
+        schema,
+    )

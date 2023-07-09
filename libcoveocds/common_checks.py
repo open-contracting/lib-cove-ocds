@@ -1,15 +1,15 @@
 import json
+import re
 
 from jsonschema.exceptions import ValidationError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
 from libcove.lib.tools import decimal_default
+from referencing.exceptions import Unresolvable
 
 from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
 from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_records_aggregates, get_releases_aggregates
 
 try:
-    import re
-
     import bleach
     from django.utils.html import conditional_escape, escape, format_html, mark_safe
     from markdown_it import MarkdownIt
@@ -151,9 +151,15 @@ def common_checks_ocds(
     additional_checks = CHECKS[schema_obj.config.config["additional_checks"]]
 
     # Pass "-" as the schema name. The associated logic is not required by lib-cove-ocds.
-    common_checks = common_checks_context(
-        upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=schema_obj.api, cache=cache
-    )
+    try:
+        common_checks = common_checks_context(
+            upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=schema_obj.api, cache=cache
+        )
+    except Unresolvable as e:
+        # "PointerToNowhere: '/definitions/Unresolvable' does not exist within {big JSON blob}"
+        schema_obj.json_deref_error = re.sub(r" within .+", "", str(e))
+        return context
+
     ignore_errors = bool(common_checks["context"]["validation_errors"])
 
     # Note: Pelican checks whether the OCID prefix is registered.
