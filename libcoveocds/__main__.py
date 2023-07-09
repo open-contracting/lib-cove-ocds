@@ -24,7 +24,12 @@ class SetEncoder(json.JSONEncoder):
 @click.option(
     "-o", "--output-dir", default=None, help="Directory where the output is created, defaults to the name of the file"
 )
-@click.option("-s", "--schema-version", default=None, help="Version of the schema to validate the data, eg '1.0'")
+@click.option(
+    "-s",
+    "--schema-version",
+    type=click.Choice(LibCoveOCDSConfig().config["schema_version_choices"]),
+    help="Version of the schema to validate the data, eg '1.0'",
+)
 @click.option("-d", "--delete", is_flag=True, help="Delete existing directory if it exits")
 @click.option("-e", "--exclude-file", is_flag=True, help="Do not include the file in the output directory")
 @click.option(
@@ -51,10 +56,11 @@ def main(
         standard_zip = f"file://{standard_zip}"
 
     config = LibCoveOCDSConfig()
+    config.config["standard_zip"] = standard_zip
     config.config["cache_all_requests"] = True
     config.config["additional_checks"] = additional_checks
     config.config["skip_aggregates"] = skip_aggregates
-    config.config["standard_zip"] = standard_zip
+    config.config["context"] = "api"
 
     if schema_version:
         version_choices = config.config.get("schema_version_choices")

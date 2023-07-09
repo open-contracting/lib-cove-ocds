@@ -161,7 +161,7 @@ def test_schema_ocds_extensions(package_data, extensions, invalid_extension, ext
 
     schema_obj = schema.get_schema_obj()
     assert schema.invalid_extension == invalid_extension
-    assert schema.extended == extended
+    assert schema.extended is extended
 
     if extends_schema and METRICS_EXT in extensions:
         assert "Metric" in schema_obj["definitions"]

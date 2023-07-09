@@ -221,13 +221,6 @@ def test_get_releases_aggregates():
 
     assert actual_cleaned == EXPECTED_RELEASE_AGGREGATE_RANDOM
 
-    with open(fixture_path("lib", "fixtures", "common_checks", "badfile.json")) as fp:
-        data = json.load(fp)
-
-    actual = get_releases_aggregates(data, ignore_errors=True)
-
-    assert actual == {}
-
 
 def test_release_bad_ocid_prefixes():
     file_name = fixture_path("lib", "fixtures", "common_checks", "tenders_releases_7_releases_check_ocids.json")

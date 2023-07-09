@@ -8,9 +8,10 @@ from collections import defaultdict
 from copy import deepcopy
 from urllib.parse import urljoin
 
+import jsonref
 import requests
 from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths
-from ocdsextensionregistry.exceptions import ExtensionCodelistWarning, ExtensionWarning
+from ocdsextensionregistry.exceptions import DoesNotExist, ExtensionCodelistWarning, ExtensionWarning
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 
 import libcoveocds.config
@@ -27,8 +28,9 @@ class SchemaOCDS(SchemaJsonMixin):
         # cove-ocds uses version, e.g. when a user changes the version to validate against.
         self.version = version
         # lib-cove uses schema_host in get_schema_validation_errors() to call CustomRefResolver(). (URL, not host.)
+        # The rationale was to allow overriding $ref in schema files. (It would've been easier to edit the schema....)
+        # https://github.com/OpenDataServices/cove/commit/ccc46fffe430868a1cb0ddba356c719bb62896b5
         self.schema_host = schema_version_choice[1]
-        # Needed by ProfileBuilder.
         self._schema_tag = schema_version_choice[2]
 
     def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, record_pkg=False):
@@ -41,10 +43,15 @@ class SchemaOCDS(SchemaJsonMixin):
         """
         # The main configuration object.
         self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
+        # Whether used in an API context.
+        self.api = self.config.config["context"] == "api"
 
         # lib-cove uses schema_name in get_schema_validation_errors() to call CustomRefResolver(), if extended is set.
+        # It does this to resolve the release schema $ref to the patched release schema. Although this level of
+        # indirection is undesirable, there is no workaround.
         self.schema_name = "release-schema.json"
-        # lib-cove uses codelists in get_additional_codelist_values() to construct "codelist_url".
+
+        # lib-cove uses codelists in get_additional_codelist_values() for "codelist_url".
         self.codelists = self.config.config["schema_codelists"]["1.1"]
         # lib-cove uses version_choices in common_checks_context() via getattr() for "version_display_choices" and
         # "version_used_display". Re-used in this file for convenience.
@@ -68,9 +75,12 @@ class SchemaOCDS(SchemaJsonMixin):
         if select_version:
             if select_version in self.version_choices:
                 self._set_schema_version(select_version)
+            elif self.api:
+                raise AttributeError(
+                    f"select_version: {select_version} is not one of {', '.join(self.version_choices)}"
+                )
             else:
                 self.invalid_version_argument = True
-
                 # If invalid, use the "version" field in the data.
                 select_version = None
 
@@ -91,28 +101,22 @@ class SchemaOCDS(SchemaJsonMixin):
             if isinstance(extensions, list):
                 self.extensions = {extension: {} for extension in extensions if isinstance(extension, str)}
 
+        # (lib-)cove-ocds uses schema_url as a fallback to extended_schema_file, to convert between formats.
+        self.schema_url = urljoin(self.schema_host, "release-schema.json")
+        # Used in get_pkg_schema_obj() to determine which package to return.
+        if record_pkg:
+            self._package_schema_name = "record-package-schema.json"
+        else:
+            self._package_schema_name = "release-package-schema.json"
+        # lib-cove uses pkg_schema_url in common_checks_context() for "schema_url".
+        self.pkg_schema_url = urljoin(self.schema_host, self._package_schema_name)
+
         #: The profile builder instance for this package's extensions.
         self.builder = ProfileBuilder(
             self._schema_tag, list(self.extensions), standard_base_url=self.config.config["standard_zip"]
         )
         # Initialize extensions once and preserve locale caches.
         self.builder_extensions = list(self.builder.extensions())
-
-        self.schema_url = urljoin(self.schema_host, "release-schema.json")
-        if record_pkg:
-            basename = "record-package-schema.json"
-        else:
-            basename = "release-package-schema.json"
-        self.pkg_schema_url = urljoin(self.schema_host, basename)
-
-        self.record_pkg = record_pkg
-        if record_pkg:
-            self.release_schema = SchemaOCDS(
-                select_version=select_version,
-                package_data=package_data,
-                lib_cove_ocds_config=lib_cove_ocds_config,
-                record_pkg=False,
-            )
 
         # lib-cove uses extended in common_checks_context() for "extensions"."is_extended_schema".
         # If `self.extensions` is falsy, this logic can be skipped.
@@ -163,7 +167,12 @@ class SchemaOCDS(SchemaJsonMixin):
 
         for extension in self.builder_extensions:
             input_url = extension.input_url
-            failed_codelists = self.extensions[input_url]["failed_codelists"]
+
+            failed_codelists = self.extensions[input_url].get("failed_codelists")
+
+            # In a web context, skip extensions whose metadata is unavailable.
+            if failed_codelists is None:
+                continue
 
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always", category=ExtensionCodelistWarning)
@@ -216,55 +225,68 @@ class SchemaOCDS(SchemaJsonMixin):
 
                 self.extended_codelist_urls[name].append(extension.get_url(f"codelists/{name}"))
 
-    def get_schema_obj(self, deref=False, api=False):
-        schema_obj = self._schema_obj
-        if self.extended_schema_file:
-            with open(self.extended_schema_file) as fp:
-                schema_obj = json.load(fp)
-        elif self.extensions:
-            schema_obj = deepcopy(self._schema_obj)
-            self.apply_extensions(schema_obj, api=api)
-        if deref:
-            if self.extended:
-                extended_schema_str = json.dumps(schema_obj)
-                schema_obj = self.deref_schema(extended_schema_str)
-            else:
-                schema_obj = self.deref_schema(self.schema_str)
-        return schema_obj
-
+    # lib-cove calls this from many locations including get_schema_validation_errors().
+    # use_extensions is always called as True, so it is ignored.
+    #
+    # ProfileBuilder.release_package_schema() and record_package_schema() aren't used, because the patched release
+    # schema has already been calculated and cached by patched_release_schema().
+    #
+    # lib-cove resolves the release schema $ref to the patched release schema by overridding jsonschema's resolver. For
+    # this to work, lib-cove needs create_extended_schema_file() to have been called before the validator runs, like
+    # libcoveocds.api.ocds_json_output() and cove-ocds do.
+    #
+    # The resolver converts the $ref to its basename, making it impossible to circumvent this logic. It would have been
+    # less indirect to set the $ref to the file written by create_extended_schema_file() in this method rather than via
+    # the resolver. In recent versions of jsonschema, it would be simpler to add a resource to its registry.
+    #
+    # For reference, the old code and original commit:
+    # https://github.com/open-contracting/lib-cove-ocds/blob/19ed9b3f0e392e9341206c5296d79c4bcc6f1206/libcoveocds/schema.py#L196-L235  # noqa: E501
+    # https://github.com/OpenDataServices/cove/commit/1b03d44e3dcfa03313fb6b101075b9732c277ce2
+    @functools.lru_cache()
     def get_pkg_schema_obj(self, deref=False, use_extensions=True):
-        package_schema_obj = deepcopy(self._pkg_schema_obj)
-        if deref:
-            if self.extended and use_extensions:
-
-                if self.record_pkg:
-                    package_schema_obj = self.deref_schema(self.pkg_schema_str)
-                    deref_release_schema_obj = self.release_schema.get_schema_obj(deref=True)
-                    package_schema_obj["properties"]["records"]["items"]["properties"][
-                        "compiledRelease"
-                    ] = deref_release_schema_obj
-                    package_schema_obj["properties"]["records"]["items"]["properties"]["releases"]["oneOf"][
-                        1
-                    ] = deref_release_schema_obj
+        if hasattr(self, "_test_override_package_schema"):
+            with open(self._test_override_package_schema) as f:
+                if deref:
+                    return jsonref.load(f, lazy_load=False)
                 else:
-                    deref_schema_obj = self.get_schema_obj(deref=True)
-                    package_schema_obj["properties"]["releases"]["items"] = {}
-                    pkg_schema_str = json.dumps(package_schema_obj)
-                    package_schema_obj = self.deref_schema(pkg_schema_str)
-                    package_schema_obj["properties"]["releases"]["items"].update(deref_schema_obj)
+                    return json.load(f)
+        else:
+            schema = self._get_schema(self._package_schema_name)
 
+        if deref:
+            patched = self.get_schema_obj(deref=True)
+            if self._package_schema_name == "record-package-schema.json":
+                schema["definitions"]["record"]["properties"]["compiledRelease"] = patched
+                schema["definitions"]["record"]["properties"]["releases"]["oneOf"][1]["items"] = patched
+                schema = jsonref.replace_refs(schema, lazy_load=False)
             else:
-                return self.deref_schema(self.pkg_schema_str)
-        return package_schema_obj
+                schema["properties"]["releases"]["items"] = patched
 
-    def apply_extensions(self, schema_obj, api=False):
-        language = self.config.config["current_language"]
+        return schema
 
+    def _get_schema(self, name):
+        # The ocds_babel.translate.translate() makes these substitutions for published files.
+        return json.loads(
+            self.builder.get_standard_file_contents(name)
+            .replace("{{lang}}", self.config.config["current_language"])
+            .replace("{{version}}", self.version)
+        )
+
+    @functools.lru_cache()
+    def get_schema_obj(self, deref=False):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always", category=ExtensionWarning)
 
-            # schema_obj is modified in-place.
-            self.builder.patched_release_schema(schema=schema_obj)
+            schema = self.builder.patched_release_schema(schema=self._get_schema("release-schema.json"))
+            if deref:
+                try:
+                    # Don't use proxies=False. If "$ref" has "deprecated" as a sibling, it is lost.
+                    schema = jsonref.replace_refs(schema, lazy_load=False)
+                except jsonref.JsonRefError as e:
+                    # Callers must check json_deref_error.
+                    self.json_deref_error = e.message
+                    # This is the prior behavior, however surprising. https://github.com/OpenDataServices/lib-cove/blob/a97f7698d5e5ed519165e930a53fc97cc387362c/libcove/lib/common.py#L393-L405  # noqa: E501
+                    schema = {}
 
             for warning in w:
                 if issubclass(warning.category, ExtensionWarning):
@@ -279,15 +301,17 @@ class SchemaOCDS(SchemaJsonMixin):
                         message = str(exception)
                     self.invalid_extension[warning.message.extension.input_url] = message
 
+        language = self.config.config["current_language"]
+
         for extension in self.builder_extensions:
             input_url = extension.input_url
 
             # process_codelists() needs this dict.
             details = {"failed_codelists": {}}
-            self.extensions[input_url] = details
 
             # Skip metadata fields in API context.
-            if api:
+            if self.api:
+                self.extensions[input_url] = details
                 continue
 
             details["url"] = input_url
@@ -310,6 +334,12 @@ class SchemaOCDS(SchemaJsonMixin):
                 for field in ("name", "description", "documentationUrl"):
                     language_map = metadata[field]
                     details[field] = language_map.get(language, language_map.get("en", ""))
+
+                # In a web context, set the details only if metadata is available, otherwise cove-ocds' present
+                # behavior to create an empty list item for the extension.
+                self.extensions[input_url] = details
+            except DoesNotExist:
+                self.invalid_extension[input_url] = "404: not found"
             except requests.HTTPError as e:
                 self.invalid_extension[input_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
             except requests.RequestException:
@@ -321,25 +351,25 @@ class SchemaOCDS(SchemaJsonMixin):
         # Nonetheless, for now, preserve prior behavior by reporting as if it were not applied.
         self.extended = len(self.invalid_extension) < len(self.extensions)
 
-    def create_extended_schema_file(self, upload_dir, upload_url, api=False):
-        filepath = os.path.join(upload_dir, "extended_schema.json")
+        return schema
+
+    # This is always called with an `if schema_ocds.extensions` guard.
+    def create_extended_schema_file(self, upload_dir, upload_url):
+        basename = "extended_schema.json"
+        path = os.path.join(upload_dir, basename)
 
         # Always replace any existing extended schema file
-        if os.path.exists(filepath):
-            os.remove(filepath)
+        if os.path.exists(path):
+            os.remove(path)
             self.extended_schema_file = None
             self.extended_schema_url = None
 
-        if not self.extensions:
-            return
-
-        schema = self.get_schema_obj(api=api)
+        schema = self.get_schema_obj()
         if not self.extended:
             return
 
-        with open(filepath, "w") as fp:
-            json.dump(schema, fp, ensure_ascii=False, indent=2)
-            fp.write("\n")
-
-        self.extended_schema_file = filepath
-        self.extended_schema_url = urljoin(upload_url, "extended_schema.json")
+        with open(path, "w") as f:
+            json.dump(schema, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+        self.extended_schema_file = path
+        self.extended_schema_url = urljoin(upload_url, basename)

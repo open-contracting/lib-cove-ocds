@@ -142,7 +142,6 @@ def common_checks_ocds(
     upload_dir,
     json_data,
     schema_obj,
-    api=False,
     cache=True,
 ):
     """
@@ -153,7 +152,7 @@ def common_checks_ocds(
 
     # Pass "-" as the schema name. The associated logic is not required by lib-cove-ocds.
     common_checks = common_checks_context(
-        upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=api, cache=cache
+        upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=schema_obj.api, cache=cache
     )
     ignore_errors = bool(common_checks["context"]["validation_errors"])
 
@@ -165,7 +164,7 @@ def common_checks_ocds(
     # If called in an API context:
     # - Skip the schema description and reference URL for OCID prefix conformance errors.
     # - Skip the formatted message, schema title, schema description and reference URL for validation errors.
-    if not api:
+    if not schema_obj.api:
         if "conformance_errors" in context:
             ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
             # XXX: The last sentence is assumed to be a link to guidance in all versions of OCDS.

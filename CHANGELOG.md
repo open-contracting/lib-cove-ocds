@@ -18,17 +18,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `libcoveocds.config.LibCoveOCDSConfig`:
   - `schema_version_choices` values are 3-tuples (added tag), instead of 2-tuples.
   - Remove `schema_name` and `schema_item_name` keys.
+- Install dependencies for the web context with the `libcoveocds[web]` extra.
 
 Other changes:
 
 - `libcoveocds.schema.SchemaOCDS`:
-  - Use ocdsextensionregistry to merge extensions.
-    - Empty extension URLs no longer produce an error message.
-    - Merge an extension even if its metadata is missing or invalid.
+  - Raise an error if the `select_version` is invalid in API context.
+  - Extensions
+    - Create the record package schema correctly, if extensions present.
+    - Use ocdsextensionregistry to merge extensions.
     - Cache all requests made by ocdsextensionregistry by default.
 
       Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
-  - Add `schema_tag` attribute.
+    - An extra error message is no longer reported for empty extension URLs. (Already reported as invalid URI.)
+    - Merge an extension even if its metadata is missing or invalid.
+  - Codelists
+    - Log at exception level if the request fails for the standard's codelists, instead of failing silently.
+    - Report all non-existing codes being removed by an extension, not only the last.
 - Improve performance in API context.
   - Add options to `libcoveocds.config.LibCoveOCDSConfig`:
     - `additional_checks` (default "all")
@@ -39,6 +45,8 @@ Other changes:
   - Skip the metadata fields for OCDS extensions.
   - Skip sorting the JSON locations of additional checks.
   - Improve ``context_api_transform()`` performance.
+- `ocds_json_output` determines `record_pkg`, if not provided.
+- CLI validates `--schema-version`.
 - flattentool is optional.
 - Drop support for Python 3.7.
 
