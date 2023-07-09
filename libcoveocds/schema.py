@@ -277,8 +277,7 @@ class SchemaOCDS(SchemaJsonMixin):
             with open(self._test_override_package_schema) as f:
                 if deref:
                     return jsonref.load(f, lazy_load=False)
-                else:
-                    return json.load(f)
+                return json.load(f)
         else:
             schema = self._get_schema(self._package_schema_name)
 
