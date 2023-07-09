@@ -13,6 +13,7 @@ import requests
 from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths
 from ocdsextensionregistry.exceptions import DoesNotExist, ExtensionCodelistWarning, ExtensionWarning
 from ocdsextensionregistry.profile_builder import ProfileBuilder
+from referencing import Registry, Resource
 
 import libcoveocds.config
 
@@ -48,7 +49,7 @@ class SchemaOCDS(SchemaJsonMixin):
 
         # lib-cove uses schema_name in get_schema_validation_errors() to call CustomRefResolver(), if extended is set.
         # It does this to resolve the release schema $ref to the patched release schema. Although this level of
-        # indirection is undesirable, there is no workaround.
+        # indirection is undesirable, there is no workaround in lib-cove<=0.31.0.
         self.schema_name = "release-schema.json"
 
         # lib-cove uses codelists in get_additional_codelist_values() for "codelist_url".
@@ -225,6 +226,32 @@ class SchemaOCDS(SchemaJsonMixin):
 
                 self.extended_codelist_urls[name].append(extension.get_url(f"codelists/{name}"))
 
+    @property
+    def registry(self):
+        # lib-cove's get_schema_validation_errors() expects a non-dereferenced schema.
+        # The cove-ocds test with tenders_releases_1_release_with_extension_broken_json_ref.json fails, otherwise.
+        release_schema = Resource.from_contents(self.get_schema_obj())
+        versioned_release_schema = self.builder.get_standard_file_contents("versioned-release-validation-schema.json")
+        return Registry().with_resources(
+            [
+                (f"{scheme}://standard.open-contracting.org/schema/{self._schema_tag}/{prefix}-schema.json", schema)
+                # OCDS 1.0 use the http scheme.
+                for scheme in ("http", "https")
+                for prefix, schema in (
+                    ("release", release_schema),
+                    ("versioned-release-validation", versioned_release_schema),
+                )
+            ]
+        )
+
+    def _get_schema(self, name):
+        # The ocds_babel.translate.translate() makes these substitutions for published files.
+        return json.loads(
+            self.builder.get_standard_file_contents(name)
+            .replace("{{lang}}", self.config.config["current_language"])
+            .replace("{{version}}", self.version)
+        )
+
     # lib-cove calls this from many locations including get_schema_validation_errors().
     # use_extensions is always called as True, so it is ignored.
     #
@@ -237,8 +264,9 @@ class SchemaOCDS(SchemaJsonMixin):
     #
     # The resolver converts the $ref to its basename, making it impossible to circumvent this logic. It would have been
     # less indirect to set the $ref to the file written by create_extended_schema_file() in this method rather than via
-    # the resolver. In recent versions of jsonschema, it would be simpler to add a resource to its registry, like:
-    # https://github.com/python-jsonschema/jsonschema/issues/828#issuecomment-1441432076
+    # the resolver.
+    #
+    # If using jsonschema>=4.18 and a lib-cove fork, self.registry is used to achieve this.
     #
     # For reference, the old code and original commit:
     # https://github.com/open-contracting/lib-cove-ocds/blob/19ed9b3f0e392e9341206c5296d79c4bcc6f1206/libcoveocds/schema.py#L196-L235  # noqa: E501
@@ -264,14 +292,6 @@ class SchemaOCDS(SchemaJsonMixin):
                 schema["properties"]["releases"]["items"] = patched
 
         return schema
-
-    def _get_schema(self, name):
-        # The ocds_babel.translate.translate() makes these substitutions for published files.
-        return json.loads(
-            self.builder.get_standard_file_contents(name)
-            .replace("{{lang}}", self.config.config["current_language"])
-            .replace("{{version}}", self.version)
-        )
 
     @functools.lru_cache()
     def get_schema_obj(self, deref=False):

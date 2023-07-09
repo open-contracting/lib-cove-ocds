@@ -1,4 +1,3 @@
-import json
 import os
 import warnings
 
@@ -8,6 +7,7 @@ from libcoveocds.common_checks import common_checks_ocds
 from libcoveocds.config import LibCoveOCDSConfig
 from libcoveocds.lib.api import context_api_transform
 from libcoveocds.schema import SchemaOCDS
+from libcoveocds.util import json
 
 try:
     from libcove.lib.common import get_spreadsheet_meta_data
@@ -39,9 +39,9 @@ def ocds_json_output(
     if not file_type:
         file_type = get_file_type(file)
     if not json_data and file_type == "json":
-        with open(file, encoding="utf-8") as fp:
+        with open(file, "rb") as f:
             try:
-                json_data = json.load(fp)
+                json_data = json.loads(f.read())
             except ValueError:
                 raise APIException("The file looks like invalid json")
 

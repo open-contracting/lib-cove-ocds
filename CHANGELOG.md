@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## 0.12.0
+## 0.12.0 (2023-07-09)
 
 ### Added
 
@@ -43,6 +43,7 @@ Other changes:
     - Cache all requests made by ocdsextensionregistry by default. Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
     - An extra error message is no longer reported for empty extension URLs. (Already reported as invalid URI.)
     - Merge an extension even if its metadata is missing or invalid.
+    - Use jsonschema's registry instead of lib-cove's resolver.
   - Codelists
     - Log at exception level if the request fails for the standard's codelists, instead of failing silently.
     - Report all non-existing codes being removed by an extension, not only the last.
@@ -52,6 +53,7 @@ Other changes:
   - Skip the metadata fields for OCDS extensions.
   - Skip sorting the JSON locations of additional checks.
   - Improve ``context_api_transform()`` performance.
+  - Use orjson if available to load the input data.
 - `ocds_json_output` determines `record_pkg`, if not provided.
 - CLI validates `--schema-version`.
 - flattentool is optional.
