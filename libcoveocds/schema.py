@@ -231,7 +231,9 @@ class SchemaOCDS(SchemaJsonMixin):
         # lib-cove's get_schema_validation_errors() expects a non-dereferenced schema.
         # The cove-ocds test with tenders_releases_1_release_with_extension_broken_json_ref.json fails, otherwise.
         release_schema = Resource.from_contents(self.get_schema_obj())
-        versioned_release_schema = self.builder.get_standard_file_contents("versioned-release-validation-schema.json")
+        versioned_release_schema = Resource.from_contents(
+            json.loads(self.builder.get_standard_file_contents("versioned-release-validation-schema.json"))
+        )
         return Registry().with_resources(
             [
                 (f"{scheme}://standard.open-contracting.org/schema/{self._schema_tag}/{prefix}-schema.json", schema)
