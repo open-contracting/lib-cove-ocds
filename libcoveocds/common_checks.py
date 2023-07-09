@@ -1,7 +1,7 @@
 import json
 import re
 
-from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import ValidationError, _RefResolutionError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
 from libcove.lib.tools import decimal_default
 from referencing.exceptions import Unresolvable
@@ -155,7 +155,7 @@ def common_checks_ocds(
         common_checks = common_checks_context(
             upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=schema_obj.api, cache=cache
         )
-    except Unresolvable as e:
+    except (Unresolvable, _RefResolutionError) as e:
         # "PointerToNowhere: '/definitions/Unresolvable' does not exist within {big JSON blob}"
         schema_obj.json_deref_error = re.sub(r" within .+", "", str(e))
         return context
