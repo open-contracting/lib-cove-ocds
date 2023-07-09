@@ -237,7 +237,8 @@ class SchemaOCDS(SchemaJsonMixin):
     #
     # The resolver converts the $ref to its basename, making it impossible to circumvent this logic. It would have been
     # less indirect to set the $ref to the file written by create_extended_schema_file() in this method rather than via
-    # the resolver. In recent versions of jsonschema, it would be simpler to add a resource to its registry.
+    # the resolver. In recent versions of jsonschema, it would be simpler to add a resource to its registry, like:
+    # https://github.com/python-jsonschema/jsonschema/issues/828#issuecomment-1441432076
     #
     # For reference, the old code and original commit:
     # https://github.com/open-contracting/lib-cove-ocds/blob/19ed9b3f0e392e9341206c5296d79c4bcc6f1206/libcoveocds/schema.py#L196-L235  # noqa: E501

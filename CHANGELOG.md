@@ -7,17 +7,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 0.12.0
 
+### Added
+
+- Add options to `libcoveocds.config.LibCoveOCDSConfig`:
+  - `standard_zip` (default `None`)
+  - `additional_checks` (default "all")
+  - `skip_aggregates` (default `False`)
+  - `context` (default "web")
+- Add CLI options:
+  - `--additional-checks`
+  - `--skip-aggregates`
+  - `--standard-zip`
+
 ### Changed
 
 **BREAKING CHANGES:**
 
-- `libcoveocds.lib.common_checks`: Rename `get_bad_ocds_prefixes` to `get_bad_ocid_prefixes`.
+- `libcoveocds.lib.common_checks`:
+  - Rename `get_bad_ocds_prefixes` to `get_bad_ocid_prefixes`.
 - `libcoveocds.schema.SchemaOCDS`:
   - Rename `release_data` argument to `package_data`.
   - Remove `pkg_schema_name`, `default_version`, `default_schema_host` attributes.
 - `libcoveocds.config.LibCoveOCDSConfig`:
   - `schema_version_choices` values are 3-tuples (added tag), instead of 2-tuples.
-  - Remove `schema_name` and `schema_item_name` keys.
+  - Remove `schema_name`, `schema_item_name`, `schema_host` keys.
 - Install dependencies for the web context with the `libcoveocds[web]` extra.
 
 Other changes:
@@ -27,19 +40,13 @@ Other changes:
   - Extensions
     - Create the record package schema correctly, if extensions present.
     - Use ocdsextensionregistry to merge extensions.
-    - Cache all requests made by ocdsextensionregistry by default.
-
-      Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
+    - Cache all requests made by ocdsextensionregistry by default. Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
     - An extra error message is no longer reported for empty extension URLs. (Already reported as invalid URI.)
     - Merge an extension even if its metadata is missing or invalid.
   - Codelists
     - Log at exception level if the request fails for the standard's codelists, instead of failing silently.
     - Report all non-existing codes being removed by an extension, not only the last.
 - Improve performance in API context.
-  - Add options to `libcoveocds.config.LibCoveOCDSConfig`:
-    - `additional_checks` (default "all")
-    - `skip_aggregates` (default `False`)
-    - `standard_zip` (default `None`)
   - Skip the schema description and reference URL for OCID prefix conformance errors.
   - Skip the formatted message, schema title, schema description and reference URL for validation errors.
   - Skip the metadata fields for OCDS extensions.

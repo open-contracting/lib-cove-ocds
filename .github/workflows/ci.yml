@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.8, 3.9, '3.10', '3.11']  # Add pypy-3.9 once 4.18.0 released https://github.com/Julian/jsonschema/issues/828
+        python-version: [3.8, 3.9, '3.10', '3.11', pypy-3.9]
         exclude:
           # https://www.lfd.uci.edu/~gohlke/pythonlibs/ has no permalinks (for libxml2).
           - os: windows-latest
@@ -23,7 +23,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
-      - run: pip install .[test]
+      - run: pip install .[test,web]
       # https://github.com/OpenDataServices/lib-cove/pull/123
       - run: pytest -W error -W ignore::DeprecationWarning --cov libcoveocds
       - env:
