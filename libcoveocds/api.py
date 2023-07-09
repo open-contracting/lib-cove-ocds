@@ -60,10 +60,9 @@ def ocds_json_output(
     if schema_obj.invalid_version_data:
         msg = "\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m"
         raise APIException(msg.format(str(list(lib_cove_ocds_config.config["schema_version_choices"]))))
-
-    if file_type != "json" or convert:
+    if schema_obj.extensions:
         schema_obj.create_extended_schema_file(output_dir, "", api=True)
-        schema_url = schema_obj.extended_schema_file or schema_obj.schema_url
+    schema_url = schema_obj.extended_schema_file or schema_obj.schema_url
 
     context = {"file_type": file_type}
     if file_type == "json":
