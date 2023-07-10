@@ -10,7 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Use OCDS 1.1 if no `version` field. #110
+
+### Fixed
+
 - Allow use of translated codelists in extensions (i.e. with `Código` heading). #47
+- Calculate additional codelist values for record packages, if using lib-cove#125. #106
 
 ## 0.12.1 (2023-07-09)
 

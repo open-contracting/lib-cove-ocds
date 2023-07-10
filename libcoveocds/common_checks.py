@@ -221,20 +221,19 @@ def common_checks_ocds(
 
     context.update(common_checks["context"])
 
-    if "records" in json_data:
-        if not skip_aggregates:
+    if not skip_aggregates:
+        if "records" in json_data:
             context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=ignore_errors)
-    else:
-        if not skip_aggregates:
+        else:
             context["releases_aggregates"] = get_releases_aggregates(json_data, ignore_errors=ignore_errors)
 
-        additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
-        context["additional_closed_codelist_values"] = {
-            key: value for key, value in additional_codelist_values.items() if not value["isopen"]
-        }
-        context["additional_open_codelist_values"] = {
-            key: value for key, value in additional_codelist_values.items() if value["isopen"]
-        }
+    additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
+    context["additional_closed_codelist_values"] = {
+        key: value for key, value in additional_codelist_values.items() if not value["isopen"]
+    }
+    context["additional_open_codelist_values"] = {
+        key: value for key, value in additional_codelist_values.items() if value["isopen"]
+    }
 
     if additional_checks:
         context["additional_checks"] = run_additional_checks(
