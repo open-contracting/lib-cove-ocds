@@ -113,8 +113,10 @@ def ocds_json_output(
         )
     )
 
-    context["json_deref_error"] = schema_obj.json_deref_error
-    context["invalid_version_data"] = schema_obj.invalid_version_data
+    if schema_obj.json_deref_error:
+        context["json_deref_error"] = schema_obj.json_deref_error
+    if schema_obj.invalid_version_data:
+        context["invalid_version_data"] = schema_obj.invalid_version_data
 
     if file_type == "xlsx":
         # Remove unwanted files in the output
