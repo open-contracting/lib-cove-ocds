@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Use OCDS 1.1 if no `version` field. #110
+- Report `json_deref_error` and `invalid_version_data` in API context. #109
 
 ### Fixed
 

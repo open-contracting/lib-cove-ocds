@@ -114,6 +114,8 @@ Property (key) name		      Type                  Value
 ``conformance_errors``                object                A conformance_errors_ object
 ``additional_fields``                 array[object]         The top-level additional fields, as an array of additional_fields_ objects
 ``all_additional_fields``             array[object]         All additional fields, including children of other additional fields, as an array of all_additional_fields_ objects
+``json_deref_error``                  string                An exception message for an unresolvable reference
+``invalid_version_data``              boolean               Whether the ``version`` field is not a released version
 ===================================== ===================== ==============
 
 Note that wherever a schema is used, it is the extended schema (if extensions exist).

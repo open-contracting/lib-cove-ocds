@@ -61,4 +61,5 @@ def context_api_transform(context):
         ]
         extensions["invalid_extensions"] = list(map(list, invalid_extension.items()))
 
+    # Context is edited in-place, but existing callers might expect a return value.
     return context

@@ -113,6 +113,9 @@ def ocds_json_output(
         )
     )
 
+    context["json_deref_error"] = schema_obj.json_deref_error
+    context["invalid_version_data"] = schema_obj.invalid_version_data
+
     if file_type == "xlsx":
         # Remove unwanted files in the output
         # TODO: can we do this by no writing the files in the first place?
