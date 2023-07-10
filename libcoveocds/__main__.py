@@ -62,12 +62,6 @@ def main(
     config.config["skip_aggregates"] = skip_aggregates
     config.config["context"] = "api"
 
-    if schema_version:
-        version_choices = config.config.get("schema_version_choices")
-        if schema_version not in version_choices:
-            print(f"Value for schema version option is not valid. Accepted values: {', '.join(version_choices)}")
-            sys.exit(1)
-
     # Do we have output on disk? We only do in certain modes
     has_disk_output = output_dir or convert or delete or exclude_file
     if has_disk_output:
