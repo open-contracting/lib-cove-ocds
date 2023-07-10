@@ -560,7 +560,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
 
 
 def test_ref_error(tmpdir):
-    url = "https://gist.githubusercontent.com/jpmckinney/7376110b73c6313507d50a628f2e6f88/raw/9192e0f45e1d6f1cae43bd8be4f18b5cc9cb6610/extension.json"  # noqa: E501
+    url = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/unresolvable/extension.json"  # noqa: E501
 
     json_data = {"version": "1.1", "extensions": [url], "releases": [{"unresolvable": "1"}]}
 

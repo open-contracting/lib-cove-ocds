@@ -21,8 +21,8 @@ UNRESOLVABLE_HOST_EXT = "http://bad-url-for-extensions.com/extension.json"
 NO_EXTENSION_EXT = "https://example.com/not-found"
 OTHER_BASENAME_EXT = "https://example.com/not-found/other.json"
 NO_FILES_EXT = "https://example.com/not-found/extension.json"
-NO_METADATA_EXT = "https://gist.githubusercontent.com/jpmckinney/af0db955a527c8d0ac7296c913b36631/raw/1801168408776283cc2de2f8d81b2fc2cfb903a5/extension.json"  # noqa: E501
-INVALID_METADATA_EXT = "https://gist.githubusercontent.com/jpmckinney/f2bbd32e142a328cfe069a58edcdf864/raw/19a2988860525207bff5db21043b4fb600426a40/extension.json"  # noqa: E501
+NO_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/no-metadata/extension.json"  # noqa: E501
+INVALID_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/invalid-metadata/extension.json"  # noqa: E501
 
 
 @pytest.mark.parametrize("record_pkg", [False, True])
