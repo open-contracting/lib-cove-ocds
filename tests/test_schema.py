@@ -70,7 +70,7 @@ def test_pass_config_1(record_pkg):
         ("1.bad", {"version": "1.1"}, "1.1", True, False, {}),
         ("1.wrong", {"version": "1.bad"}, DEFAULT_OCDS_VERSION, True, True, {}),
         (None, {"version": "1.bad"}, DEFAULT_OCDS_VERSION, False, True, {}),
-        (None, {"extensions": ["a", "b"]}, "1.0", False, False, {"a": {}, "b": {}}),
+        (None, {"extensions": ["a", "b"]}, "1.1", False, False, {"a": {}, "b": {}}),
         (None, {"version": "1.1", "extensions": ["a", "b"]}, "1.1", False, False, {"a": {}, "b": {}}),
     ],
 )

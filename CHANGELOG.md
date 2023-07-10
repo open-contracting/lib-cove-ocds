@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 0.12.2 (2023-07-09)
+
+### Changed
+
+- Use OCDS 1.1 if no `version` field. #110
+- Allow use of translated codelists in extensions (i.e. with `Código` heading). #47
+
 ## 0.12.1 (2023-07-09)
 
 ### Fixed
@@ -18,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add options to `libcoveocds.config.LibCoveOCDSConfig`:
   - `standard_zip` (default `None`)
   - `additional_checks` (default "all")
-  - `skip_aggregates` (default `False`)
+  - `skip_aggregates` (default `False`) #43
   - `context` (default "web")
 - Add CLI options:
   - `--additional-checks`
@@ -44,10 +51,10 @@ Other changes:
 - `libcoveocds.schema.SchemaOCDS`:
   - Raise an error if the `select_version` is invalid in API context.
   - Extensions
-    - Create the record package schema correctly, if extensions present.
-    - Use ocdsextensionregistry to merge extensions.
+    - Create the record package schema correctly, if extensions present. #112
+    - Use ocdsextensionregistry to merge extensions. #81
     - Cache all requests made by ocdsextensionregistry by default. Set the `REQUESTS_CACHE_EXPIRE_AFTER` environment variable to `0` to expire immediately.
-    - An extra error message is no longer reported for empty extension URLs. (Already reported as invalid URI.)
+    - An extra error message is no longer reported for empty extension URLs. (Already reported as invalid URI.) (0.11.1)
     - Merge an extension even if its metadata is missing or invalid.
     - Use jsonschema's registry instead of lib-cove's resolver.
   - Codelists
@@ -65,9 +72,13 @@ Other changes:
 - flattentool is optional.
 - Drop support for Python 3.7.
 
+### Fixed
+
+- Catch unresolvable reference errors in jsonschema, in addition to jsonref. #66
+
 ### Removed
 
-- The deprecated `cache_schema` keyword argument to `ocds_json_output()` and `SchemaOCDS()` is removed.
+- The deprecated `cache_schema` keyword argument to `ocds_json_output()` and `SchemaOCDS()` is removed. (0.4.0)
 
 ## 0.11.3 (2023-03-16)
 
@@ -220,7 +231,6 @@ https://github.com/open-contracting/lib-cove-ocds/issues/31
 - Upgraded lib-cove to v0.6.0
 - The cache_schema option to SchemaOCDS and ocds_json_output is now deprecated; but for now it just sets the new cache_all_requests option
 
-
 ## 0.3.0 (2019-04-01)
 
 ### Changed
@@ -260,6 +270,3 @@ https://github.com/open-contracting/lib-cove-ocds/issues/31
 - Added code for function: common_checks_ocds
 - Added code for function: ocds_json_output
 - Added CLI
-
-
-

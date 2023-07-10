@@ -66,12 +66,6 @@ class SchemaOCDS(SchemaJsonMixin):
 
         self._set_schema_version(self.config.config["schema_version"])
 
-        if package_data:
-            if "version" not in package_data:
-                self._set_schema_version("1.0")
-            if "releases" not in package_data and "records" not in package_data:
-                self.missing_package = True
-
         # The selected version overrides the default version and the data version.
         if select_version:
             if select_version in self.version_choices:
@@ -82,7 +76,7 @@ class SchemaOCDS(SchemaJsonMixin):
                 )
             else:
                 self.invalid_version_argument = True
-                # If invalid, use the "version" field in the data.
+                # If invalid, use other strategies.
                 select_version = None
 
         # lib-cove uses extensions in common_checks_context() for "extensions"."extensions".
@@ -90,6 +84,8 @@ class SchemaOCDS(SchemaJsonMixin):
         # cove-ocds uses extensions to render extension-related information.
         self.extensions = {}
         if isinstance(package_data, dict):
+            if "releases" not in package_data and "records" not in package_data:
+                self.missing_package = True
             if not select_version:
                 package_version = package_data.get("version")
                 if package_version:
@@ -136,15 +132,17 @@ class SchemaOCDS(SchemaJsonMixin):
         # is set. (lib-)cove-ocds uses extended_schema_file to convert between formats, and falls back to schema_url.
         self.extended_schema_file = None
 
+    def _codelist_codes(self, codelist):
+        if not codelist.rows:
+            return set()
+        column = next(column for column in ("Code", "Código", "code") if column in codelist.rows[0])
+        return {row[column] for row in codelist.rows}
+
     @functools.lru_cache
     def _standard_codelists(self):
         try:
-            # OCDS 1.0 uses "code" column.
-            # https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv  # noqa: 501
-            return {
-                codelist.name: {row.get("Code", row.get("code")) for row in codelist.rows}
-                for codelist in self.builder.standard_codelists()
-            }
+            # OCDS 1.0 uses "code" column. https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv  # noqa: 501
+            return {codelist.name: self._codelist_codes(codelist) for codelist in self.builder.standard_codelists()}
         except requests.RequestException as e:
             logger.exception(e)
             return {}
@@ -200,8 +198,8 @@ class SchemaOCDS(SchemaJsonMixin):
 
             for name, codelist in extension_codelists.items():
                 try:
-                    codes = set(codelist.codes)
-                except KeyError:
+                    codes = self._codelist_codes(codelist)
+                except StopIteration:
                     failed_codelists[name] = 'Has no "Code" column'
                     continue
 
