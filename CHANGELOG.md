@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Report `json_deref_error` and `invalid_version_data` in API context, only if the errors occur.
+- Report `json_deref_error` in API context, only if the errors occur.
+- Don't attempt to report `invalid_version_data`, as an error is raised from `ocds_json_output()`.
 
 ## 0.12.2 (2023-07-09)
 

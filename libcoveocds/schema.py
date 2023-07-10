@@ -16,6 +16,7 @@ from ocdsextensionregistry.profile_builder import ProfileBuilder
 from referencing import Registry, Resource
 
 import libcoveocds.config
+from libcoveocds.exceptions import OCDSVersionError
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,7 @@ class SchemaOCDS(SchemaJsonMixin):
             if select_version in self.version_choices:
                 self._set_schema_version(select_version)
             elif self.api:
-                raise AttributeError(
+                raise OCDSVersionError(
                     f"select_version: {select_version} is not one of {', '.join(self.version_choices)}"
                 )
             else:
@@ -91,6 +92,10 @@ class SchemaOCDS(SchemaJsonMixin):
                 if package_version:
                     if package_version in self.version_choices:
                         self._set_schema_version(package_version)
+                    elif self.api:
+                        raise OCDSVersionError(
+                            f"The version in the data is not one of {', '.join(self.version_choices)}"
+                        )
                     else:
                         self.invalid_version_data = True
 

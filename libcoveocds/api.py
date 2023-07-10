@@ -16,50 +16,68 @@ except ImportError:
     pass
 
 
-class APIException(Exception):
-    pass
-
-
 def ocds_json_output(
-    output_dir,
-    file,
-    schema_version,
-    convert,
-    file_type=None,
-    json_data=None,
-    lib_cove_ocds_config=None,
-    record_pkg=None,
+    output_dir: str = "",
+    file: str | None = None,
+    schema_version: str | None = None,
+    convert: bool = False,
+    file_type: str | None = None,
+    json_data: dict | None = None,
+    lib_cove_ocds_config: LibCoveOCDSConfig | None = None,
+    record_pkg: bool | None = None,
 ):
     """
     If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
+
+    ``file`` is required if:
+
+    - ``file_type`` is empty
+    - ``file_type`` is "json" and ``json_data`` is empty
+    - ``file_type`` is "json" and ``convert`` is truthy
+    - ``file_type` is not "json"
+
+    In other words, ``file`` is optional if ``file_type`` is "json", ``json_data`` is present and ``convert`` is falsy.
+
+    ``output_dir`` is required if:
+
+    - ``file_type`` is "json" and ``convert`` is truthy
+    - ``file_type` is not "json"
+    - lib-cove hasn't merged #123
+
+    In other words, ``output_dir`` is optional if ``file_type`` is "json" and ``convert`` is falsy.
+
+    :param output_dir: The output directory
+    :param file: The input data as a file
+    :param schema_version: The major.minor version, e.g. "1.1". If not provided, it is determined by the ``version``
+                           field in JSON data or the ``version`` cell in a metadata tab.
+    :param convert: Whether to convert from JSON to XLSX
+    :param file_type: The file format: "csv", "json" or "xlsx". If not provided, it is determined by the ``file``
+                      extension or its first byte (i.e. ``{`` or ``[`` for JSON).
+    :param json_data: The input data. If not provided, and if ``file_type`` is "json", it is read from the ``file``.
+    :param lib_cove_ocds_config: A custom configuration of lib-cove-ocds
+    :param record_pkg: Whether the input data is a record package. If not provided, it is determined by the presence of
+                       the ``records`` field.
     """
 
     if not lib_cove_ocds_config:
         lib_cove_ocds_config = LibCoveOCDSConfig()
+
     if not file_type:
         file_type = get_file_type(file)
+
     if not json_data and file_type == "json":
         with open(file, "rb") as f:
-            try:
-                json_data = json.loads(f.read())
-            except ValueError:
-                raise APIException("The file looks like invalid json")
+            json_data = json.loads(f.read())
 
     if record_pkg is None:
         record_pkg = "records" in json_data
 
     if file_type == "json":
-        schema_obj = SchemaOCDS(
-            schema_version, json_data, lib_cove_ocds_config=lib_cove_ocds_config, record_pkg=record_pkg
-        )
+        schema_obj = SchemaOCDS(schema_version, json_data, lib_cove_ocds_config, record_pkg=record_pkg)
     else:
-        metatab_schema_url = SchemaOCDS(select_version="1.1", lib_cove_ocds_config=lib_cove_ocds_config).pkg_schema_url
+        metatab_schema_url = SchemaOCDS("1.1", lib_cove_ocds_config=lib_cove_ocds_config).pkg_schema_url
         metatab_data = get_spreadsheet_meta_data(output_dir, file, metatab_schema_url, file_type=file_type)
-        schema_obj = SchemaOCDS(schema_version, lib_cove_ocds_config=lib_cove_ocds_config, package_data=metatab_data)
-
-    if schema_obj.invalid_version_data:
-        msg = "\033[1;31mThe schema version in your data is not valid. Accepted values: {}\033[1;m"
-        raise APIException(msg.format(str(list(lib_cove_ocds_config.config["schema_version_choices"]))))
+        schema_obj = SchemaOCDS(schema_version, metatab_data, lib_cove_ocds_config)
 
     if schema_obj.extensions:
         schema_obj.create_extended_schema_file(output_dir, "")
@@ -68,6 +86,7 @@ def ocds_json_output(
     schema_url = schema_obj.extended_schema_file or schema_obj.schema_url
 
     context = {"file_type": file_type}
+
     if file_type == "json":
         if convert:
             with warnings.catch_warnings():
@@ -108,15 +127,13 @@ def ocds_json_output(
             output_dir,
             json_data,
             schema_obj,
-            # `cache` writes the results to a file, which is only relevant in the context of repetitive web requests.
+            # common_checks_context(cache=True) caches the results to a file, which is not needed in API context.
             cache=False,
         )
     )
 
     if schema_obj.json_deref_error:
         context["json_deref_error"] = schema_obj.json_deref_error
-    if schema_obj.invalid_version_data:
-        context["invalid_version_data"] = schema_obj.invalid_version_data
 
     if file_type == "xlsx":
         # Remove unwanted files in the output
