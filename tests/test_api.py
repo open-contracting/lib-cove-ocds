@@ -44,11 +44,18 @@ def test_basic_record_package():
 @pytest.mark.parametrize(
     "json_data,exception,expected",
     [
-        ("{[,]}", json.JSONDecodeError, "unexpected character: line 1 column 2 (char 1)"),
+        (
+            "{[,]}",
+            json.JSONDecodeError,
+            (
+                "unexpected character: line 1 column 2 (char 1)",
+                "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+            ),
+        ),
         (
             '{"version": "1.bad"}',
             OCDSVersionError,
-            "The version in the data is not one of 1.0, 1.1",
+            ("The version in the data is not one of 1.0, 1.1",),
         ),
     ],
 )
@@ -62,6 +69,6 @@ def test_ocds_json_output_bad_data(json_data, exception, expected):
         with pytest.raises(exception) as excinfo:
             ocds_json_output(cove_temp_folder, file_path, schema_version="", convert=False)
 
-        assert str(excinfo.value) == expected
+        assert str(excinfo.value) in expected
     finally:
         shutil.rmtree(cove_temp_folder)
