@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 
 import jsonref
 import requests
-from libcove.lib.common import SchemaJsonMixin, get_schema_codelist_paths
+from libcove.lib.common import get_schema_codelist_paths, schema_dict_fields_generator
 from ocdsextensionregistry.exceptions import DoesNotExist, ExtensionCodelistWarning, ExtensionWarning
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 from referencing import Registry, Resource
@@ -21,7 +21,7 @@ from libcoveocds.exceptions import OCDSVersionError
 logger = logging.getLogger(__name__)
 
 
-class SchemaOCDS(SchemaJsonMixin):
+class SchemaOCDS:
     def _set_schema_version(self, version):
         schema_version_choice = self.version_choices[version]
 
@@ -61,9 +61,10 @@ class SchemaOCDS(SchemaJsonMixin):
 
         # Report errors in web UI.
         self.missing_package = False
+        self.json_deref_error = None  # str
+        # Errors are raised instead in API context.
         self.invalid_version_argument = False
         self.invalid_version_data = False
-        self.json_deref_error = None  # str
 
         self._set_schema_version(self.config.config["schema_version"])
 
@@ -143,7 +144,6 @@ class SchemaOCDS(SchemaJsonMixin):
         column = next(column for column in ("Code", "Código", "code") if column in codelist.rows[0])
         return {row[column] for row in codelist.rows}
 
-    @functools.lru_cache
     def _standard_codelists(self):
         try:
             # OCDS 1.0 uses "code" column. https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv  # noqa: 501
@@ -153,6 +153,7 @@ class SchemaOCDS(SchemaJsonMixin):
             return {}
 
     # lib-cove calls this from get_additional_codelist_values().
+    @functools.lru_cache
     def process_codelists(self):
         # lib-cove uses these in get_additional_codelist_values().
         # - Used to determine whether a field has a codelist, which codelist and whether it is open.
@@ -229,7 +230,7 @@ class SchemaOCDS(SchemaJsonMixin):
 
                 self.extended_codelist_urls[name].append(extension.get_url(f"codelists/{name}"))
 
-    @property
+    @functools.cached_property
     def registry(self):
         # lib-cove's get_schema_validation_errors() expects a non-dereferenced schema.
         # The cove-ocds test with tenders_releases_1_release_with_extension_broken_json_ref.json fails, otherwise.
@@ -276,7 +277,7 @@ class SchemaOCDS(SchemaJsonMixin):
     # For reference, the old code and original commit:
     # https://github.com/open-contracting/lib-cove-ocds/blob/19ed9b3f0e392e9341206c5296d79c4bcc6f1206/libcoveocds/schema.py#L196-L235  # noqa: E501
     # https://github.com/OpenDataServices/cove/commit/1b03d44e3dcfa03313fb6b101075b9732c277ce2
-    @functools.lru_cache()
+    @functools.lru_cache
     def get_pkg_schema_obj(self, deref=False, use_extensions=True):
         if hasattr(self, "_test_override_package_schema"):
             with open(self._test_override_package_schema) as f:
@@ -297,7 +298,7 @@ class SchemaOCDS(SchemaJsonMixin):
 
         return schema
 
-    @functools.lru_cache()
+    @functools.lru_cache
     def get_schema_obj(self, deref=False):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always", category=ExtensionWarning)
@@ -377,6 +378,11 @@ class SchemaOCDS(SchemaJsonMixin):
         self.extended = len(self.invalid_extension) < len(self.extensions)
 
         return schema
+
+    # Copied from libcove.lib.common.SchemaJsonMixin.
+    @functools.lru_cache
+    def get_pkg_schema_fields(self):
+        return set(schema_dict_fields_generator(self.get_pkg_schema_obj(deref=True)))
 
     # This is always called with an `if schema_ocds.extensions` guard.
     def create_extended_schema_file(self, upload_dir, upload_url):
