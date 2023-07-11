@@ -18,13 +18,13 @@ except ImportError:
 
 def ocds_json_output(
     output_dir: str = "",
-    file: str | None = None,
-    schema_version: str | None = None,
+    file=None,  # : str | None
+    schema_version=None,  # : str | None
     convert: bool = False,
-    file_type: str | None = None,
-    json_data: dict | None = None,
-    lib_cove_ocds_config: LibCoveOCDSConfig | None = None,
-    record_pkg: bool | None = None,
+    file_type=None,  # : str | None
+    json_data=None,  # : dict | None
+    lib_cove_ocds_config=None,  # : LibCoveOCDSConfig | None
+    record_pkg=None,  # : bool | None
 ):
     """
     If flattentool is not installed, ``file_type`` must be ``"json"`` and ``convert`` must be falsy.
