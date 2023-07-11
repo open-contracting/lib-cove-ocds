@@ -61,6 +61,7 @@ def ocds_json_output(
 
     if not lib_cove_ocds_config:
         lib_cove_ocds_config = LibCoveOCDSConfig()
+        lib_cove_ocds_config.config["context"] = "api"
 
     if not file_type:
         file_type = get_file_type(file)

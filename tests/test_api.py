@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import tempfile
@@ -5,7 +6,8 @@ import tempfile
 import pytest
 
 import libcoveocds.config
-from libcoveocds.api import APIException, ocds_json_output
+from libcoveocds.api import ocds_json_output
+from libcoveocds.exceptions import OCDSVersionError
 from tests import fixture_path
 
 # Cache for faster tests.
@@ -40,23 +42,24 @@ def test_basic_record_package():
 
 
 @pytest.mark.parametrize(
-    "json_data,expected",
+    "json_data,exception,expected",
     [
-        ("{[,]}", "The file looks like invalid json"),
+        ("{[,]}", json.JSONDecodeError, "unexpected character: line 1 column 2 (char 1)"),
         (
             '{"version": "1.bad"}',
-            "\x1b[1;31mThe schema version in your data is not valid. Accepted values: ['1.0', '1.1']\x1b[1;m",
+            OCDSVersionError,
+            "The version in the data is not one of 1.0, 1.1",
         ),
     ],
 )
-def test_ocds_json_output_bad_data(json_data, expected):
+def test_ocds_json_output_bad_data(json_data, exception, expected):
     cove_temp_folder = tempfile.mkdtemp(prefix="lib-cove-ocds-tests-", dir=tempfile.gettempdir())
 
     file_path = os.path.join(cove_temp_folder, "bad_data.json")
     with open(file_path, "w") as fp:
         fp.write(json_data)
     try:
-        with pytest.raises(APIException) as excinfo:
+        with pytest.raises(exception) as excinfo:
             ocds_json_output(cove_temp_folder, file_path, schema_version="", convert=False)
 
         assert str(excinfo.value) == expected
