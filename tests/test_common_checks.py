@@ -377,6 +377,9 @@ def test_dupe_ids_1():
                         {"path": "releases", "value": "EXAMPLE-1, EXAMPLE-1-1"},
                         {"path": "releases", "value": "EXAMPLE-1, EXAMPLE-1-2"},
                     ],
+                    "docs_ref": "release-package-schema.json,,releases",
+                    "schema_title": "Releases",
+                    "schema_description_safe": "<p>An array of one or more OCDS releases.</p>\n",
                 }
             ],
         ),
@@ -401,6 +404,9 @@ def test_dupe_ids_1():
                         {"path": "records", "value": "EXAMPLE-1"},
                         {"path": "records", "value": "EXAMPLE-2"},
                     ],
+                    "docs_ref": "record-package-schema.json,,records",
+                    "schema_title": "Records",
+                    "schema_description_safe": "<p>The records for this data package.</p>\n",
                 }
             ],
         ),
@@ -434,6 +440,9 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": "uniqueItems_no_ids",
                     "values": [{"path": "releases"}],
+                    "docs_ref": "release-package-schema.json,,releases",
+                    "schema_title": "Releases",
+                    "schema_description_safe": "<p>An array of one or more OCDS releases.</p>\n",
                 },
             ],
         ),
@@ -467,6 +476,9 @@ def test_dupe_ids_1():
                     "null_clause": "",
                     "error_id": "uniqueItems_no_ids",
                     "values": [{"path": "records"}],
+                    "docs_ref": "record-package-schema.json,,records",
+                    "schema_title": "Records",
+                    "schema_description_safe": "<p>The records for this data package.</p>\n",
                 },
             ],
         ),
@@ -540,14 +552,6 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
         validation_error_json["values"] = values
         # Remove this as it can be a rather large schema object
         del validation_error_json["validator_value"]
-        # TODO: these are removed as they were't present in the lib-cove JSON
-        # We should maybe add them to the validation error fixtures now
-        if "docs_ref" in validation_error_json:
-            del validation_error_json["docs_ref"]
-        if "schema_description_safe" in validation_error_json:
-            del validation_error_json["schema_description_safe"]
-        if "schema_title" in validation_error_json:
-            del validation_error_json["schema_title"]
         validation_error_jsons.append(validation_error_json)
 
     def strip_nones(list_of_dicts):

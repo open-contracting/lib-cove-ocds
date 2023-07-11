@@ -325,3 +325,8 @@ array\*
 ^^^^^^^
 
 An array marked with an asterisk is populated from fields in the data, so could be any type (if the data doesn't conform to the schema).
+
+Contributing
+------------
+
+lib-cove-ocds was extracted from [cove](https://github.com/OpenDataServices/cove/tree/fa4441b9413324a740b8dc063ffbf0256a353c55).

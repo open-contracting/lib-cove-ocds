@@ -192,7 +192,7 @@ def common_checks_ocds(
                     error["message_safe"] = conditional_escape(error["message"])
 
             schema_block, ref_info = _lookup_schema(
-                schema_obj.get_pkg_schema_obj(deref=True), error["path_no_number"].split("/")
+                schema_obj.get_pkg_schema_obj(deref=True, proxies=True), error["path_no_number"].split("/")
             )
             if schema_block and error["message_type"] != "required":
                 if "description" in schema_block:
@@ -213,7 +213,7 @@ def common_checks_ocds(
                 else:
                     ref = ""
                     ref_path = error["path_no_number"]
-                    schema = "release-package-schema.json"
+                    schema = schema_obj.package_schema_name
                 error["docs_ref"] = format_html("{},{},{}", schema, ref, ref_path)
 
             new_validation_errors.append([json.dumps(error, sort_keys=True), values])

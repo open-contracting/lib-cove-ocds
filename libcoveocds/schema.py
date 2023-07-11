@@ -108,11 +108,11 @@ class SchemaOCDS:
         self.schema_url = urljoin(self.schema_host, "release-schema.json")
         # Used in get_pkg_schema_obj() to determine which package to return.
         if record_pkg:
-            self._package_schema_name = "record-package-schema.json"
+            self.package_schema_name = "record-package-schema.json"
         else:
-            self._package_schema_name = "release-package-schema.json"
+            self.package_schema_name = "release-package-schema.json"
         # lib-cove uses pkg_schema_url in common_checks_context() for "schema_url".
-        self.pkg_schema_url = urljoin(self.schema_host, self._package_schema_name)
+        self.pkg_schema_url = urljoin(self.schema_host, self.package_schema_name)
 
         #: The profile builder instance for this package's extensions.
         self.builder = ProfileBuilder(
@@ -138,7 +138,8 @@ class SchemaOCDS:
         # is set. (lib-)cove-ocds uses extended_schema_file to convert between formats, and falls back to schema_url.
         self.extended_schema_file = None
 
-    def _codelist_codes(self, codelist):
+    @staticmethod
+    def _codelist_codes(codelist):
         if not codelist.rows:
             return set()
         column = next(column for column in ("Code", "Código", "code") if column in codelist.rows[0])
@@ -258,8 +259,20 @@ class SchemaOCDS:
             .replace("{{version}}", self.version)
         )
 
+    # Preserve "deprecated" as a sibling of "$ref", via either `merge_props=True` or `proxies=True`.
+    #
+    # Proxies are required for libcoveocds.common_checks_lookup_schema() to determine the URL fragments for
+    # definitions' fields (though `docs_ref` is not used in cove-ocds).
+    # https://github.com/open-contracting/cove-ocds/issues/103
+    @staticmethod
+    def _jsonref_kwarg(proxies=False):
+        if proxies:
+            return {"proxies": True, "lazy_load": False}
+        return {"proxies": False, "merge_props": True}
+
     # lib-cove calls this from many locations including get_schema_validation_errors().
-    # use_extensions is always called as True, so it is ignored.
+    #
+    # All callers set use_extensions=True, so it is ignored.
     #
     # ProfileBuilder.release_package_schema() and record_package_schema() aren't used, because the patched release
     # schema has already been calculated and cached by patched_release_schema().
@@ -278,36 +291,37 @@ class SchemaOCDS:
     # https://github.com/open-contracting/lib-cove-ocds/blob/19ed9b3f0e392e9341206c5296d79c4bcc6f1206/libcoveocds/schema.py#L196-L235  # noqa: E501
     # https://github.com/OpenDataServices/cove/commit/1b03d44e3dcfa03313fb6b101075b9732c277ce2
     @functools.lru_cache
-    def get_pkg_schema_obj(self, deref=False, use_extensions=True):
+    def get_pkg_schema_obj(self, deref=False, use_extensions=True, proxies=False):
         if hasattr(self, "_test_override_package_schema"):
             with open(self._test_override_package_schema) as f:
                 if deref:
-                    return jsonref.load(f, merge_props=True, proxies=False)
+                    return jsonref.load(f, **self._jsonref_kwarg(proxies))
                 return json.load(f)
         else:
-            schema = self._get_schema(self._package_schema_name)
+            schema = self._get_schema(self.package_schema_name)
 
         if deref:
-            patched = self.get_schema_obj(deref=True)
-            if self._package_schema_name == "record-package-schema.json":
+            patched = self.get_schema_obj(deref=True, proxies=proxies)
+            if self.package_schema_name == "record-package-schema.json":
                 schema["definitions"]["record"]["properties"]["compiledRelease"] = patched
                 schema["definitions"]["record"]["properties"]["releases"]["oneOf"][1]["items"] = patched
-                schema = jsonref.replace_refs(schema, merge_props=True, proxies=False)
+                # The Record definition must be dereferenced for "additional_fields" to report correctly.
+                # Can test with tenders_records_1_record_with_invalid_extensions.json in cove-ocds.
+                schema = jsonref.replace_refs(schema, **self._jsonref_kwarg(proxies))
             else:
                 schema["properties"]["releases"]["items"] = patched
 
         return schema
 
     @functools.lru_cache
-    def get_schema_obj(self, deref=False):
+    def get_schema_obj(self, deref=False, proxies=False):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always", category=ExtensionWarning)
 
             schema = self.builder.patched_release_schema(schema=self._get_schema("release-schema.json"))
             if deref:
                 try:
-                    # Preserve "deprecated" as a sibling of "$ref".
-                    schema = jsonref.replace_refs(schema, merge_props=True, proxies=False)
+                    schema = jsonref.replace_refs(schema, **self._jsonref_kwarg(proxies))
                 except jsonref.JsonRefError as e:
                     # Callers must check json_deref_error.
                     self.json_deref_error = e.message
