@@ -282,7 +282,7 @@ class SchemaOCDS:
         if hasattr(self, "_test_override_package_schema"):
             with open(self._test_override_package_schema) as f:
                 if deref:
-                    return jsonref.load(f, lazy_load=False)
+                    return jsonref.load(f, merge_props=True, proxies=False)
                 return json.load(f)
         else:
             schema = self._get_schema(self._package_schema_name)
@@ -292,7 +292,7 @@ class SchemaOCDS:
             if self._package_schema_name == "record-package-schema.json":
                 schema["definitions"]["record"]["properties"]["compiledRelease"] = patched
                 schema["definitions"]["record"]["properties"]["releases"]["oneOf"][1]["items"] = patched
-                schema = jsonref.replace_refs(schema, lazy_load=False)
+                schema = jsonref.replace_refs(schema, merge_props=True, proxies=False)
             else:
                 schema["properties"]["releases"]["items"] = patched
 
@@ -306,8 +306,8 @@ class SchemaOCDS:
             schema = self.builder.patched_release_schema(schema=self._get_schema("release-schema.json"))
             if deref:
                 try:
-                    # Don't use proxies=False. If "$ref" has "deprecated" as a sibling, it is lost.
-                    schema = jsonref.replace_refs(schema, lazy_load=False)
+                    # Preserve "deprecated" as a sibling of "$ref".
+                    schema = jsonref.replace_refs(schema, merge_props=True, proxies=False)
                 except jsonref.JsonRefError as e:
                     # Callers must check json_deref_error.
                     self.json_deref_error = e.message
