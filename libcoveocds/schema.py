@@ -231,6 +231,10 @@ class SchemaOCDS:
 
                 self.extended_codelist_urls[name].append(extension.get_url(f"codelists/{name}"))
 
+    @functools.lru_cache
+    def validator(self, validator, format_checker):
+        return validator(self.get_pkg_schema_obj(), format_checker=format_checker, registry=self.registry)
+
     @functools.cached_property
     def registry(self):
         # lib-cove's get_schema_validation_errors() expects a non-dereferenced schema.
@@ -259,6 +263,38 @@ class SchemaOCDS:
             .replace("{{version}}", self.version)
         )
 
+    # For array codelist fields, the `codelist` custom validation keyword is set on the array field, rather than on the
+    # `items` subschema. cove-ocds needs to report codelist errors separately from other structural errors. However,
+    # the errors returned by jsonschema to get_schema_validation_errors() don't provide access to an `items` parent
+    # schema. So, we add a sentinel keyword to the `items` subschema.
+    #
+    # It is necessary to add it to string codelist fields, too, because lib-cove checks for "isCodelist" only.
+    @staticmethod
+    def _add_is_codelist(subschema: dict):
+        for value in subschema.get("properties", {}).values():
+            if not isinstance(value, dict):
+                continue
+
+            types = value.get("type", [])
+            if not isinstance(types, list):
+                types = [types]
+
+            if "array" in types:
+                if isinstance(value.get("items"), dict):
+                    if "codelist" in value and value.get("openCodelist") is False:
+                        value["items"]["isCodelist"] = True
+                    SchemaOCDS._add_is_codelist(value["items"])
+            else:
+                if "codelist" in value and value.get("openCodelist") is False:
+                    value["isCodelist"] = True
+                if "object" in types:
+                    SchemaOCDS._add_is_codelist(value)
+
+        for value in subschema.get("definitions", {}).values():
+            if not isinstance(value, dict):
+                continue
+            SchemaOCDS._add_is_codelist(value)
+
     # Preserve "deprecated" as a sibling of "$ref", via either `merge_props=True` or `proxies=True`.
     #
     # Proxies are required for libcoveocds.common_checks_lookup_schema() to determine the URL fragments for
@@ -285,7 +321,7 @@ class SchemaOCDS:
     # less indirect to set the $ref to the file written by create_extended_schema_file() in this method rather than via
     # the resolver.
     #
-    # If using jsonschema>=4.18 and lib-cove#123, self.registry is used to achieve this.
+    # If using jsonschema>=4.18 and lib-cove#123 or lib-cove#128, self.registry is used to achieve this.
     #
     # For reference, the old code and original commit:
     # https://github.com/open-contracting/lib-cove-ocds/blob/19ed9b3f0e392e9341206c5296d79c4bcc6f1206/libcoveocds/schema.py#L196-L235  # noqa: E501
@@ -340,6 +376,8 @@ class SchemaOCDS:
                     else:
                         message = str(exception)
                     self.invalid_extension[warning.message.extension.input_url] = message
+
+        self._add_is_codelist(schema)
 
         language = self.config.config["current_language"]
 

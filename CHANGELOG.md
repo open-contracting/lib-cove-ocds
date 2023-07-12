@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Fixed
 
 - Use the correct package schema in documentation URL fragments.
-- Use `JsonRef` proxies to determine the URL fragments for definitions' fields.
+- Use `JsonRef` proxies to determine the URL fragments for definitions' fields. (Regression in 0.12.4.)
+- Report closed codelists errors separately if the field is a string. (Regression in 0.12.0.)
+- Report closed codelists errors separately if the field is an array of codes. (Regression in lib-cove 0.19.0.) #110
 
 ## 0.12.4 (2023-07-11)
 
@@ -22,16 +24,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Report `json_deref_error` in API context, only if the errors occur.
-- Don't attempt to report `invalid_version_data`, as an error is raised from `ocds_json_output()`.
+- Report `json_deref_error` in API context, only if the errors occur. (Added in 0.12.2.)
+- Don't attempt to report `invalid_version_data`, as an error is raised from `ocds_json_output()`. (Added in 0.12.2.)
 - Cache public methods of `SchemaOCDS`, so that its instances can be cached.
 
 ## 0.12.2 (2023-07-09)
 
+### Added
+
+- Report `json_deref_error` and `invalid_version_data` in API context. #109
+
 ### Changed
 
 - Use OCDS 1.1 if no `version` field. #110
-- Report `json_deref_error` and `invalid_version_data` in API context. #109
 
 ### Fixed
 
