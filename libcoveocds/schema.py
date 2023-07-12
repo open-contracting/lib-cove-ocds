@@ -389,14 +389,14 @@ class SchemaOCDS:
             input_url = extension.input_url
 
             # process_codelists() needs this dict.
-            details = {"failed_codelists": {}}
+            details = {"url": input_url, "failed_codelists": {}}
 
             # Skip metadata fields in API context.
             if self.api:
                 self.extensions[input_url] = details
                 continue
 
-            details["url"] = input_url
+            # Presence checked in cove-ocds templates.
             details["schema_url"] = None
 
             # ocdsextensionregistry requires the input URL to contain "extension.json" (like the registry). If it
