@@ -239,28 +239,25 @@ class SchemaOCDS:
     def registry(self):
         # lib-cove's get_schema_validation_errors() expects a non-dereferenced schema.
         # The cove-ocds test with tenders_releases_1_release_with_extension_broken_json_ref.json fails, otherwise.
-        release_schema = Resource.from_contents(self.get_schema_obj())
-        versioned_release_schema = Resource.from_contents(
-            json.loads(self.builder.get_standard_file_contents("versioned-release-validation-schema.json"))
+        release_schema = self.get_schema_obj()
+        # get_schema_validation_errors() needs "isCodelist" properties. See _add_is_codelist(). This property is
+        # undesirable elsewhere, like in create_extended_schema_file().
+        self._add_is_codelist(release_schema)
+
+        versioned_release_schema = json.loads(
+            self.builder.get_standard_file_contents("versioned-release-validation-schema.json")
         )
+
         return Registry().with_resources(
             [
                 (f"{scheme}://standard.open-contracting.org/schema/{self._schema_tag}/{prefix}-schema.json", schema)
                 # OCDS 1.0 use the http scheme.
                 for scheme in ("http", "https")
                 for prefix, schema in (
-                    ("release", release_schema),
-                    ("versioned-release-validation", versioned_release_schema),
+                    ("release", Resource.from_contents(release_schema)),
+                    ("versioned-release-validation", Resource.from_contents(versioned_release_schema)),
                 )
             ]
-        )
-
-    def _get_schema(self, name):
-        # The ocds_babel.translate.translate() makes these substitutions for published files.
-        return json.loads(
-            self.builder.get_standard_file_contents(name)
-            .replace("{{lang}}", self.config.config["current_language"])
-            .replace("{{version}}", self.version)
         )
 
     # For array codelist fields, the `codelist` custom validation keyword is set on the array field, rather than on the
@@ -273,7 +270,7 @@ class SchemaOCDS:
     # For reference, the original commit:
     # https://github.com/OpenDataServices/cove/commit/b0591da69cae8258c7029d11e22297d86e6b98c3
     @staticmethod
-    def _add_is_codelist(subschema: dict):
+    def _add_is_codelist(subschema: dict) -> None:
         for value in subschema.get("properties", {}).values():
             if not isinstance(value, dict):
                 continue
@@ -298,6 +295,14 @@ class SchemaOCDS:
             if not isinstance(value, dict):
                 continue
             SchemaOCDS._add_is_codelist(value)
+
+    def _get_schema(self, name):
+        # The ocds_babel.translate.translate() makes these substitutions for published files.
+        return json.loads(
+            self.builder.get_standard_file_contents(name)
+            .replace("{{lang}}", self.config.config["current_language"])
+            .replace("{{version}}", self.version)
+        )
 
     # Preserve "deprecated" as a sibling of "$ref", via either `merge_props=True` or `proxies=True`.
     #
@@ -380,8 +385,6 @@ class SchemaOCDS:
                     else:
                         message = str(exception)
                     self.invalid_extension[warning.message.extension.input_url] = message
-
-        self._add_is_codelist(schema)
 
         language = self.config.config["current_language"]
 
