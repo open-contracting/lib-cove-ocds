@@ -269,6 +269,9 @@ class SchemaOCDS:
     # schema. So, we add a sentinel keyword to the `items` subschema.
     #
     # It is necessary to add it to string codelist fields, too, because lib-cove checks for "isCodelist" only.
+    #
+    # For reference, the original commit:
+    # https://github.com/OpenDataServices/cove/commit/b0591da69cae8258c7029d11e22297d86e6b98c3
     @staticmethod
     def _add_is_codelist(subschema: dict):
         for value in subschema.get("properties", {}).values():
@@ -279,13 +282,14 @@ class SchemaOCDS:
             if not isinstance(types, list):
                 types = [types]
 
+            # get_schema_codelist_paths() defaults "openCodelist" to false.
             if "array" in types:
                 if isinstance(value.get("items"), dict):
-                    if "codelist" in value and value.get("openCodelist") is False:
+                    if "codelist" in value and value.get("openCodelist", False) is False:
                         value["items"]["isCodelist"] = True
                     SchemaOCDS._add_is_codelist(value["items"])
             else:
-                if "codelist" in value and value.get("openCodelist") is False:
+                if "codelist" in value and value.get("openCodelist", False) is False:
                     value["isCodelist"] = True
                 if "object" in types:
                     SchemaOCDS._add_is_codelist(value)

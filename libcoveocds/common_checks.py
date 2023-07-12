@@ -120,7 +120,7 @@ validator.VALIDATORS["uniqueItems"] = unique_ids_or_ocids
 validator.VALIDATORS["oneOf"] = oneOf_draft4
 
 
-# ref_into is used calculate the HTML anchor for the field in the OCDS documentation.
+# ref_info is used calculate the HTML anchor for the field in the OCDS documentation.
 def _lookup_schema(schema, path, ref_info=None):
     if not path:
         return schema, ref_info
@@ -209,7 +209,10 @@ def common_checks_ocds(
                     else:
                         ref = ref.strip("#")
                     ref_path = "/".join(ref_info["path"])
-                    schema = "release-schema.json"
+                    if ref == "/definitions/record":
+                        schema = "record-package-schema.json"
+                    else:
+                        schema = "release-schema.json"
                 else:
                     ref = ""
                     ref_path = error["path_no_number"]
