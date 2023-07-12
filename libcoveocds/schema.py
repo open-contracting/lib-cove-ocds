@@ -21,6 +21,9 @@ from libcoveocds.exceptions import OCDSVersionError
 logger = logging.getLogger(__name__)
 
 
+# Note: Using lru_cache on instance methods can lead to memory leaks. However, we generally do want these to survive
+# the entire process.
+# https://beta.ruff.rs/docs/rules/cached-instance-method/
 class SchemaOCDS:
     def _set_schema_version(self, version):
         schema_version_choice = self.version_choices[version]
