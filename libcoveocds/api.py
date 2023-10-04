@@ -119,7 +119,7 @@ def ocds_json_output(
         )
 
         with open(context["converted_path"], encoding="utf-8") as fp:
-            json_data = json.load(fp)
+            json_data = json.loads(fp.read())
 
     # context is edited in-place.
     context_api_transform(
