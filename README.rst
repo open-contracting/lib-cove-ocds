@@ -5,7 +5,7 @@ Lib CoVE OCDS
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/libcoveocds.svg
    :target: https://pypi.org/project/libcoveocds/
-.. |Build Status| image:: https://github.com/open-contracting/lib-cove-ocds/actions/workflows/ci.yml
+.. |Build Status| image:: https://github.com/open-contracting/lib-cove-ocds/actions/workflows/ci.yml/badge.svg
    :target: https://github.com/open-contracting/lib-cove-ocds/actions/workflows/ci.yml
 .. |Coverage Status| image:: https://coveralls.io/repos/github/open-contracting/lib-cove-ocds/badge.svg?branch=main
    :target: https://coveralls.io/github/open-contracting/lib-cove-ocds?branch=main
