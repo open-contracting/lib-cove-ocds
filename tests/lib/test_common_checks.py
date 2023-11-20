@@ -188,13 +188,22 @@ EXPECTED_RELEASE_AGGREGATE_RANDOM = {
 }
 
 
-def test_get_releases_aggregates():
+def test_get_releases_aggregates_empty_package_object():
     assert get_releases_aggregates({}) == EMPTY_RELEASE_AGGREGATE
+
+
+def test_get_releases_aggregates_empty_releases_array():
     assert get_releases_aggregates({"releases": []}) == EMPTY_RELEASE_AGGREGATE
+
+
+def test_get_releases_aggregates_empty_releases_objects():
     release_aggregate_3_empty = EMPTY_RELEASE_AGGREGATE.copy()
     release_aggregate_3_empty["release_count"] = 3
+
     assert get_releases_aggregates({"releases": [{}, {}, {}]}) == release_aggregate_3_empty
 
+
+def test_get_releases_aggregates():
     with open(fixture_path("lib", "fixtures", "common_checks", "release_aggregate.json")) as fp:
         data = json.load(fp)
 
@@ -213,6 +222,8 @@ def test_get_releases_aggregates():
 
     assert actual_cleaned == expected_cleaned
 
+
+def test_get_releases_aggregates_random():
     with open(fixture_path("lib", "fixtures", "common_checks", "samplerubbish.json")) as fp:
         data = json.load(fp)
 
@@ -220,6 +231,12 @@ def test_get_releases_aggregates():
     actual_cleaned = {key: actual[key] for key in actual if isinstance(actual[key], (str, int, float))}
 
     assert actual_cleaned == EXPECTED_RELEASE_AGGREGATE_RANDOM
+
+
+def test_get_releases_aggregates_versioned_release():
+    data = {"versionedRelease": [{"currency": [{"value": "USD"}]}]}
+
+    assert get_releases_aggregates(data)["unique_currency"] == ["USD"]
 
 
 def test_release_bad_ocid_prefixes():

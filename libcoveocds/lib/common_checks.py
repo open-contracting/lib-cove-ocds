@@ -268,14 +268,19 @@ def get_releases_aggregates(json_data):
     )
     unique_org_count = unique_org_identifier_count + unique_org_name_count
 
-    def get_currencies(object):
-        if isinstance(object, dict):
-            for key, value in object.items():
+    def get_currencies(obj):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
                 if key == "currency":
-                    unique_currency.add(value)
+                    if isinstance(value, list):
+                        for versioned_value in value:
+                            if "value" in versioned_value:
+                                unique_currency.add(versioned_value["value"])
+                    else:
+                        unique_currency.add(value)
                 get_currencies(value)
-        if isinstance(object, list):
-            for item in object:
+        if isinstance(obj, list):
+            for item in obj:
                 get_currencies(item)
 
     get_currencies(json_data)
