@@ -57,7 +57,6 @@ def main(
 
     config = LibCoveOCDSConfig()
     config.config["standard_zip"] = standard_zip
-    config.config["cache_all_requests"] = True
     config.config["additional_checks"] = additional_checks
     config.config["skip_aggregates"] = skip_aggregates
     config.config["context"] = "api"

@@ -8,10 +8,6 @@ import libcoveocds.config
 import libcoveocds.schema
 from tests import fixture_path
 
-# Cache for faster tests.
-config = libcoveocds.config.LibCoveOCDSConfig()
-config.config["cache_all_requests"] = True
-
 DEFAULT_OCDS_VERSION = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version"]
 METRICS_EXT = "https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json"  # noqa: E501
 API_EXT = "https://chilecompracl.visualstudio.com/a6a3f587-5f23-42f6-9255-ac5852fae1e7/_apis/git/repositories/fb91c43b-011b-434b-901d-9d36ec50c586/items?path=%2Fextension.json&versionDescriptor%5BversionOptions%5D=0&versionDescriptor%5BversionType%5D=0&versionDescriptor%5Bversion%5D=master&resolveLfs=true&%24format=octetStream&api-version=5.0"  # noqa: E501
@@ -35,19 +31,16 @@ def test_basic_1(record_pkg):
         assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.1/en/record-package-schema.json"
     else:
         assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.1/en/release-package-schema.json"
-    assert schema.schema_host == "https://standard.open-contracting.org/1.1/en/"
-    assert not schema.config.config["cache_all_requests"]
 
 
 @pytest.mark.parametrize("record_pkg", [False, True])
 def test_pass_config_1(record_pkg):
-
     config = copy.deepcopy(libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT)
     config["schema_version"] = "1.0"
 
     lib_cove_ocds_config = libcoveocds.config.LibCoveOCDSConfig(config=config)
 
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=lib_cove_ocds_config, record_pkg=record_pkg)
+    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, lib_cove_ocds_config=lib_cove_ocds_config)
 
     assert schema.version == "1.0"
     assert schema.schema_url == "https://standard.open-contracting.org/1.0/en/release-schema.json"
@@ -55,8 +48,6 @@ def test_pass_config_1(record_pkg):
         assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.0/en/record-package-schema.json"
     else:
         assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.0/en/release-package-schema.json"
-    assert schema.schema_host == "https://standard.open-contracting.org/1.0/en/"
-    assert not schema.config.config["cache_all_requests"]
 
 
 @pytest.mark.parametrize(
@@ -78,11 +69,10 @@ def test_schema_ocds_constructor(
     select_version, package_data, version, invalid_version_argument, invalid_version_data, extensions
 ):
     schema = libcoveocds.schema.SchemaOCDS(select_version=select_version, package_data=package_data)
-    host = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version_choices"][version][1]
-    url = f"{host}release-package-schema.json"
+    base_url = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version_choices"][version][1]
+    url = f"{base_url}release-package-schema.json"
 
     assert schema.version == version
-    assert schema.schema_host == host
     assert schema.pkg_schema_url == url
     assert schema.invalid_version_argument == invalid_version_argument
     assert schema.invalid_version_data == invalid_version_data
@@ -155,7 +145,7 @@ def test_schema_ocds_constructor(
     ],
 )
 def test_schema_ocds_extensions(package_data, extensions, invalid_extension, extended, extends_schema):
-    schema = libcoveocds.schema.SchemaOCDS(package_data=package_data, lib_cove_ocds_config=config)
+    schema = libcoveocds.schema.SchemaOCDS(package_data=package_data)
     assert schema.extensions == extensions
     assert not schema.extended
 

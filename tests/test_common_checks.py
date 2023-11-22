@@ -6,19 +6,14 @@ import tempfile
 import pytest
 
 import libcoveocds.common_checks
-import libcoveocds.config
 import libcoveocds.schema
 from tests import fixture_path
-
-# Cache for faster tests.
-config = libcoveocds.config.LibCoveOCDSConfig()
-config.config["cache_all_requests"] = True
 
 
 def test_basic_1():
 
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
+    schema = libcoveocds.schema.SchemaOCDS()
     json_filename = fixture_path("fixtures", "common_checks", "basic_1.json")
     with open(json_filename) as fp:
         json_data = json.load(fp)
@@ -45,7 +40,7 @@ def test_basic_1():
 def test_dupe_ids_1():
 
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config)
+    schema = libcoveocds.schema.SchemaOCDS()
     json_filename = fixture_path("fixtures", "common_checks", "dupe_ids_1.json")
     with open(json_filename) as fp:
         json_data = json.load(fp)
@@ -545,12 +540,12 @@ def test_dupe_ids_1():
     ],
 )
 def test_validation_release_or_record_package(record_pkg, filename, validation_error_jsons_expected, schema_subdir):
-    schema_host = fixture_path("fixtures", "common_checks", schema_subdir, "")
-    with open(os.path.join(schema_host, filename)) as fp:
+    base_url = fixture_path("fixtures", "common_checks", schema_subdir, "")
+    with open(os.path.join(base_url, filename)) as fp:
         json_data = json.load(fp)
 
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=config, record_pkg=record_pkg)
+    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg)
     context = {
         "file_type": "json",
     }
@@ -586,8 +581,7 @@ def test_ref_error(tmpdir):
 
     json_data = {"version": "1.1", "extensions": [url], "releases": [{"unresolvable": "1"}]}
 
-    schema = libcoveocds.schema.SchemaOCDS("1.1", json_data, lib_cove_ocds_config=config)
-    schema.create_extended_schema_file(tmpdir, "")
+    schema = libcoveocds.schema.SchemaOCDS("1.1", json_data)
 
     libcoveocds.common_checks.common_checks_ocds(
         {"file_type": "json"},

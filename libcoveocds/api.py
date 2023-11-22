@@ -42,7 +42,6 @@ def ocds_json_output(
 
     - ``file_type`` is "json" and ``convert`` is truthy
     - ``file_type` is not "json"
-    - lib-cove hasn't merged #123
 
     In other words, ``output_dir`` is optional if ``file_type`` is "json" and ``convert`` is falsy.
 
@@ -80,10 +79,9 @@ def ocds_json_output(
         metatab_data = get_spreadsheet_meta_data(output_dir, file, metatab_schema_url, file_type=file_type)
         schema_obj = SchemaOCDS(schema_version, metatab_data, lib_cove_ocds_config)
 
+    # Used in conversions.
     if schema_obj.extensions:
         schema_obj.create_extended_schema_file(output_dir, "")
-
-    # Used in conversions.
     schema_url = schema_obj.extended_schema_file or schema_obj.schema_url
 
     context = {"file_type": file_type}
