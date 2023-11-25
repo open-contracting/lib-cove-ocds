@@ -540,8 +540,7 @@ def test_dupe_ids_1():
     ],
 )
 def test_validation_release_or_record_package(record_pkg, filename, validation_error_jsons_expected, schema_subdir):
-    base_url = fixture_path("fixtures", "common_checks", schema_subdir, "")
-    with open(os.path.join(base_url, filename)) as fp:
+    with open(os.path.join(fixture_path("fixtures", "common_checks", schema_subdir, ""), filename)) as fp:
         json_data = json.load(fp)
 
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
