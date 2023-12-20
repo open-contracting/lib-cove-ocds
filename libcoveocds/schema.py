@@ -25,19 +25,6 @@ logger = logging.getLogger(__name__)
 # the entire process.
 # https://beta.ruff.rs/docs/rules/cached-instance-method/
 class SchemaOCDS:
-    def _set_schema_version(self, version):
-        schema_version_choice = self.version_choices[version]
-
-        # lib-cove uses version in common_checks_context() via getattr() to determine whether to set
-        # "version_display_choices" and "version_used_display".
-        # cove-ocds uses version, e.g. when a user changes the version to validate against.
-        self.version = version
-        # lib-cove uses schema_host in get_schema_validation_errors() to call CustomRefResolver(). (URL, not host.)
-        # The rationale was to allow overriding $ref in schema files. (It would've been easier to edit the schema....)
-        # https://github.com/OpenDataServices/cove/commit/ccc46fffe430868a1cb0ddba356c719bb62896b5
-        self.schema_host = schema_version_choice[1]
-        self._schema_tag = schema_version_choice[2]
-
     def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, record_pkg=False):
         """Build the schema object using an specific OCDS schema version
 
@@ -51,16 +38,15 @@ class SchemaOCDS:
         # Whether used in an API context.
         self.api = self.config.config["context"] == "api"
 
-        # lib-cove uses schema_name in get_schema_validation_errors() to call CustomRefResolver(), if extended is set.
-        # It does this to resolve the release schema $ref to the patched release schema. Although this level of
-        # indirection is undesirable, there is no workaround in lib-cove<=0.31.0.
-        self.schema_name = "release-schema.json"
-
         # lib-cove uses codelists in get_additional_codelist_values() for "codelist_url".
         self.codelists = self.config.config["schema_codelists"]["1.1"]
         # lib-cove uses version_choices in common_checks_context() via getattr() for "version_display_choices" and
         # "version_used_display". Re-used in this file for convenience.
         self.version_choices = self.config.config["schema_version_choices"]
+        # lib-cove uses version in common_checks_context() via getattr() to determine whether to set
+        # "version_display_choices" and "version_used_display".
+        # cove-ocds uses version, e.g. when a user changes the version to validate against.
+        self.version = self.config.config["schema_version"]
 
         # Report errors in web UI.
         self.missing_package = False
@@ -69,12 +55,10 @@ class SchemaOCDS:
         self.invalid_version_argument = False
         self.invalid_version_data = False
 
-        self._set_schema_version(self.config.config["schema_version"])
-
         # The selected version overrides the default version and the data version.
         if select_version:
             if select_version in self.version_choices:
-                self._set_schema_version(select_version)
+                self.version = select_version
             elif self.api:
                 raise OCDSVersionError(
                     f"select_version: {select_version} is not one of {', '.join(self.version_choices)}"
@@ -95,7 +79,7 @@ class SchemaOCDS:
                 package_version = package_data.get("version")
                 if package_version:
                     if package_version in self.version_choices:
-                        self._set_schema_version(package_version)
+                        self.version = package_version
                     elif self.api:
                         raise OCDSVersionError(
                             f"The version in the data is not one of {', '.join(self.version_choices)}"
@@ -107,20 +91,20 @@ class SchemaOCDS:
             if isinstance(extensions, list):
                 self.extensions = {extension: {} for extension in extensions if isinstance(extension, str)}
 
-        # (lib-)cove-ocds uses schema_url as a fallback to extended_schema_file, to convert between formats.
-        self.schema_url = urljoin(self.schema_host, "release-schema.json")
+        base_url = self.version_choices[self.version][1]
+        # cove-ocds and the CLI uses schema_url as a fallback to extended_schema_file, to convert between formats.
+        self.schema_url = urljoin(base_url, "release-schema.json")
         # Used in get_pkg_schema_obj() to determine which package to return.
         if record_pkg:
             self.package_schema_name = "record-package-schema.json"
         else:
             self.package_schema_name = "release-package-schema.json"
         # lib-cove uses pkg_schema_url in common_checks_context() for "schema_url".
-        self.pkg_schema_url = urljoin(self.schema_host, self.package_schema_name)
+        self.pkg_schema_url = urljoin(base_url, self.package_schema_name)
 
+        tag = self.version_choices[self.version][2]
         #: The profile builder instance for this package's extensions.
-        self.builder = ProfileBuilder(
-            self._schema_tag, list(self.extensions), standard_base_url=self.config.config["standard_zip"]
-        )
+        self.builder = ProfileBuilder(tag, list(self.extensions), standard_base_url=self.config.config["standard_zip"])
         # Initialize extensions once and preserve locale caches.
         self.builder_extensions = list(self.builder.extensions())
 
@@ -138,7 +122,7 @@ class SchemaOCDS:
         # cove-ocds uses extended_schema_url to "Get a copy of the schema with extension patches applied".
         self.extended_schema_url = None
         # lib-cove uses extended_schema_file in get_schema_validation_errors() to call CustomRefResolver(), if extended
-        # is set. (lib-)cove-ocds uses extended_schema_file to convert between formats, and falls back to schema_url.
+        # is set. The CLI uses extended_schema_file to convert between formats, and falls back to schema_url.
         self.extended_schema_file = None
 
     @staticmethod
@@ -156,6 +140,8 @@ class SchemaOCDS:
             logger.exception(e)
             return {}
 
+    # Override
+    #
     # lib-cove calls this from get_additional_codelist_values().
     @functools.lru_cache
     def process_codelists(self):
@@ -234,6 +220,7 @@ class SchemaOCDS:
 
                 self.extended_codelist_urls[name].append(extension.get_url(f"codelists/{name}"))
 
+    # lib-cove's get_schema_validation_errors() uses this, if defined. This circumvents CustomRefResolver() logic.
     @functools.lru_cache
     def validator(self, validator, format_checker):
         return validator(self.get_pkg_schema_obj(), format_checker=format_checker, registry=self.registry)
@@ -251,9 +238,11 @@ class SchemaOCDS:
             self.builder.get_standard_file_contents("versioned-release-validation-schema.json")
         )
 
+        tag = self.version_choices[self.version][2]
+
         return Registry().with_resources(
             [
-                (f"{scheme}://standard.open-contracting.org/schema/{self._schema_tag}/{prefix}-schema.json", schema)
+                (f"{scheme}://standard.open-contracting.org/schema/{tag}/{prefix}-schema.json", schema)
                 # OCDS 1.0 use the http scheme.
                 for scheme in ("http", "https")
                 for prefix, schema in (
@@ -318,28 +307,17 @@ class SchemaOCDS:
             return {"proxies": True, "lazy_load": False}
         return {"proxies": False, "merge_props": True}
 
+    # Override
+    #
     # lib-cove calls this from many locations including get_schema_validation_errors().
     #
     # All callers set use_extensions=True, so it is ignored.
     #
     # ProfileBuilder.release_package_schema() and record_package_schema() aren't used, because the patched release
     # schema has already been calculated and cached by patched_release_schema().
-    #
-    # lib-cove resolves the release schema $ref to the patched release schema by overridding jsonschema's resolver. For
-    # this to work, lib-cove needs create_extended_schema_file() to have been called before the validator runs, like
-    # libcoveocds.api.ocds_json_output() and cove-ocds do.
-    #
-    # The resolver converts the $ref to its basename, making it impossible to circumvent this logic. It would have been
-    # less indirect to set the $ref to the file written by create_extended_schema_file() in this method rather than via
-    # the resolver.
-    #
-    # If using jsonschema>=4.18 and lib-cove#123 or lib-cove#128, self.registry is used to achieve this.
-    #
-    # For reference, the old code and original commit:
-    # https://github.com/open-contracting/lib-cove-ocds/blob/19ed9b3f0e392e9341206c5296d79c4bcc6f1206/libcoveocds/schema.py#L196-L235  # noqa: E501
-    # https://github.com/OpenDataServices/cove/commit/1b03d44e3dcfa03313fb6b101075b9732c277ce2
     @functools.lru_cache
     def get_pkg_schema_obj(self, deref=False, use_extensions=True, proxies=False):
+        # For tests only.
         if hasattr(self, "_test_override_package_schema"):
             with open(self._test_override_package_schema) as f:
                 if deref:
@@ -361,6 +339,7 @@ class SchemaOCDS:
 
         return schema
 
+    # Override
     @functools.lru_cache
     def get_schema_obj(self, deref=False, proxies=False):
         with warnings.catch_warnings(record=True) as w:
@@ -441,7 +420,9 @@ class SchemaOCDS:
 
         return schema
 
-    # Copied from libcove.lib.common.SchemaJsonMixin.
+    # Override
+    #
+    # Add decorator to copy from libcove.lib.common.SchemaJsonMixin.
     @functools.lru_cache
     def get_pkg_schema_fields(self):
         return set(schema_dict_fields_generator(self.get_pkg_schema_obj(deref=True)))

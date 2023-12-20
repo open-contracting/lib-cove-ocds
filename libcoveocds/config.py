@@ -2,13 +2,13 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     # SchemaOCDS options
     # Note: "schema_version" is set after this dict.
     #
-    # Used indirectly by lib-cove for "version_display_choices" and "version_used_display".
+    # Used by lib-cove in common_checks_context() via SchemaOCDS for "version_display_choices", "version_used_display".
     "schema_version_choices": {
         # version: (display, url, tag),
         "1.0": ("1.0", "https://standard.open-contracting.org/1.0/en/", "1__0__3"),
         "1.1": ("1.1", "https://standard.open-contracting.org/1.1/en/", "1__1__5"),
     },
-    # Used indirectly by lib-cove to construct "codelist_url".
+    # Used by lib-cove in get_additional_codelist_values() via SchemaOCDS for "codelist_url".
     "schema_codelists": {
         # version: codelist_dir,
         "1.1": "https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/",
@@ -39,8 +39,6 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     #
     # lib-cove-ocds options
     #
-    # Whether to cache requests that pass through to lib-cove.
-    "cache_all_requests": False,
     # Which additional checks to perform ("all" or "none", per libcoveocds.lib.additional_checks.CHECKS).
     "additional_checks": "all",
     # Whether to add "releases_aggregates" and "records_aggregates" to the context.

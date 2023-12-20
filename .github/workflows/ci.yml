@@ -7,13 +7,15 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        # lib-cove is a blocker for 3.12 and pypy-3.9.
-        # https://github.com/OpenDataServices/lib-cove/pull/121
-        python-version: [3.8, 3.9, '3.10', '3.11']
+        # https://github.com/requests-cache/requests-cache/issues/845
+        # https://foss.heptapod.net/pypy/pypy/-/issues/4010
+        python-version: [3.8, 3.9, '3.10', '3.11'] # 3.12 pypy-3.9
         exclude:
           # https://www.lfd.uci.edu/~gohlke/pythonlibs/ has no permalinks (for libxml2).
           - os: windows-latest
-            python-version: '3.11'
+            python-version: '3.12'
+          - os: windows-latest
+            python-version: 'pypy-3.9'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,8 +28,10 @@ jobs:
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
       - run: pip install .[test,web]
-      # https://github.com/OpenDataServices/lib-cove/issues/112
-      - run: pytest -W error -W ignore::DeprecationWarning:libcove.lib.common --cov libcoveocds
+      - if: matrix.python-version == 'pypy-3.9'
+        # https://github.com/django/asgiref/issues/393
+        run: pip install 'asgiref<3.7'
+      - run: pytest -W error --cov libcoveocds
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: coveralls --service=github
