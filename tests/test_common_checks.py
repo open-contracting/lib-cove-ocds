@@ -11,7 +11,6 @@ from tests import fixture_path
 
 
 def test_basic_1():
-
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS()
     json_filename = fixture_path("fixtures", "common_checks", "basic_1.json")
@@ -23,7 +22,6 @@ def test_basic_1():
     }
 
     try:
-
         results = libcoveocds.common_checks.common_checks_ocds(
             context,
             cove_temp_folder,
@@ -38,7 +36,6 @@ def test_basic_1():
 
 
 def test_dupe_ids_1():
-
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS()
     json_filename = fixture_path("fixtures", "common_checks", "dupe_ids_1.json")
@@ -50,7 +47,6 @@ def test_dupe_ids_1():
     }
 
     try:
-
         results = libcoveocds.common_checks.common_checks_ocds(
             context,
             cove_temp_folder,

@@ -179,7 +179,7 @@ def common_checks_ocds(
             context["conformance_errors"]["ocid_info_url"] = re.search(r"\((\S+)\)", ocid_description[index:]).group(1)
 
         new_validation_errors = []
-        for (json_key, values) in common_checks["context"]["validation_errors"]:
+        for json_key, values in common_checks["context"]["validation_errors"]:
             error = json.loads(json_key)
 
             new_message = validation_error_lookup.get(error["message_type"])

@@ -11,7 +11,6 @@ from tests import fixture_path
 
 
 def test_basic_1():
-
     cove_temp_folder = tempfile.mkdtemp(prefix="lib-cove-ocds-tests-", dir=tempfile.gettempdir())
     json_filename = fixture_path("fixtures", "api", "basic_1.json")
 
@@ -22,7 +21,6 @@ def test_basic_1():
 
 
 def test_basic_record_package():
-
     cove_temp_folder = tempfile.mkdtemp(prefix="lib-cove-ocds-tests-", dir=tempfile.gettempdir())
     json_filename = fixture_path("fixtures", "api", "basic_record_package.json")
 
