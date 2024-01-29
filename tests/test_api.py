@@ -38,7 +38,8 @@ def test_basic_record_package():
             json.JSONDecodeError,
             (
                 "unexpected character: line 1 column 2 (char 1)",
-                "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+                "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",  # orjson
+                "Key name must be string at char: line 1 column 2 (char 1)",  # pypy
             ),
         ),
         (
