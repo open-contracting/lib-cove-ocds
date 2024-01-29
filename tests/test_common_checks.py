@@ -204,8 +204,8 @@ def test_dupe_ids_1():
                     "schema_description_safe": "<p>An array of linking identifiers or releases</p>\n",
                 },
                 {
-                    "message": "[] is too short",
-                    "message_safe": "[] is too short",
+                    "message": "[] should be non-empty",
+                    "message_safe": "[] should be non-empty",
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
@@ -348,8 +348,8 @@ def test_dupe_ids_1():
                     "schema_description_safe": "<p>An array of linking identifiers or releases</p>\n",
                 },
                 {
-                    "message": "[] is too short",
-                    "message_safe": "[] is too short",
+                    "message": "[] should be non-empty",
+                    "message_safe": "[] should be non-empty",
                     "validator": "minItems",
                     "assumption": "linked_releases",
                     "message_type": "minItems",
