@@ -1,10 +1,8 @@
 import json
 import os
-import platform
 import shutil
 import tempfile
 
-import pytest
 from click.testing import CliRunner
 
 from libcoveocds.__main__ import main
@@ -92,11 +90,6 @@ def test_set_output_dir_and_delete_and_exclude():
     shutil.rmtree(output_dir)
 
 
-# https://github.com/pypy/pypy/issues/4009
-@pytest.mark.skipif(
-    platform.system() == "Darwin" and platform.python_implementation() == "PyPy",
-    reason="CI outputs .../lib/pypy3.9/site-packages/certifi/cacert.pem None",
-)
 def test_set_output_dir_and_convert():
     output_dir = tempfile.mkdtemp(
         prefix="lib-cove-ocds-tests-",
