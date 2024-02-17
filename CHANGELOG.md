@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Drop support for libcove < 0.32.
 
-## 0.12.7 (2023-12-20)
+## 0.12.7 (2023-11-20)
 
 ### Fixed
 
