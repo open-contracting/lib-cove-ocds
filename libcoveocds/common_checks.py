@@ -239,8 +239,6 @@ def common_checks_ocds(
     }
 
     if additional_checks:
-        context["additional_checks"] = run_additional_checks(
-            json_data, additional_checks, ignore_errors=True, return_on_error=[]
-        )
+        context["additional_checks"] = run_additional_checks(json_data, additional_checks)
 
     return context
