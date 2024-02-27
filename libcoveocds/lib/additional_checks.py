@@ -1,7 +1,5 @@
 from collections import defaultdict
 
-import libcove.lib.tools as tools
-
 
 def flatten_dict(data, path=""):
     for key, value in data.items():
@@ -30,7 +28,6 @@ def empty_field(data, path_prefix):
 CHECKS = {"all": [empty_field], "none": []}
 
 
-@tools.ignore_errors
 def run_additional_checks(data, functions):
     if "records" in data:
         key = "records"
