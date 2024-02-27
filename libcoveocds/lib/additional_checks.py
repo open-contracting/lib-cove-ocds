@@ -34,11 +34,17 @@ def run_additional_checks(data, functions):
     elif "releases" in data:
         key = "releases"
     else:
-        return []
+        return {}
+
+    releases_or_records = data[key]
+    if not isinstance(releases_or_records, list):
+        return {}
 
     results = defaultdict(list)
 
-    for i, data in enumerate(data[key]):
+    for i, data in enumerate(releases_or_records):
+        if not isinstance(data, dict):
+            continue
         flat = dict(flatten_dict(data, f"{key}/{i}"))
         for function in functions:
             for output in function(data, flat):
