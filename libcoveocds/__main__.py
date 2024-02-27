@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 import tempfile
+from pathlib import Path
 
 import click
 
@@ -20,18 +21,21 @@ class SetEncoder(json.JSONEncoder):
 
 @click.command()
 @click.argument("filename")
-@click.option("-c", "--convert", is_flag=True, help="Convert data from nested (json) to flat format (spreadsheet)")
-@click.option(
-    "-o", "--output-dir", default=None, help="Directory where the output is created, defaults to the name of the file"
-)
 @click.option(
     "-s",
     "--schema-version",
     type=click.Choice(LibCoveOCDSConfig().config["schema_version_choices"]),
     help="Version of the schema to validate the data, eg '1.0'",
 )
-@click.option("-d", "--delete", is_flag=True, help="Delete existing directory if it exits")
-@click.option("-e", "--exclude-file", is_flag=True, help="Do not include the file in the output directory")
+@click.option("-c", "--convert", is_flag=True, help="Convert FILENAME to CSV, ODS and Excel files")
+@click.option(
+    "-o",
+    "--output-dir",
+    type=click.Path(path_type=Path),
+    help="Output directory (defaults to basename of FILENAME)",
+)
+@click.option("-d", "--delete", is_flag=True, help="Delete output directory if it exists")
+@click.option("-e", "--exclude-file", is_flag=True, help="Exclude FILENAME from the output directory")
 @click.option(
     "--additional-checks", default="all", type=click.Choice(CHECKS), help="The set of additional checks to perform"
 )
@@ -61,43 +65,36 @@ def main(
     config.config["skip_aggregates"] = skip_aggregates
     config.config["context"] = "api"
 
-    # Do we have output on disk? We only do in certain modes
-    has_disk_output = output_dir or convert or delete or exclude_file
-    if has_disk_output:
+    keep_files = convert or output_dir
+    if keep_files:
         if not output_dir:
-            output_dir = filename.split("/")[-1].split(".")[0]
+            output_dir = Path(Path(filename).stem)
 
-        if os.path.exists(output_dir):
+        if output_dir.exists():
             if delete:
                 shutil.rmtree(output_dir)
             else:
-                print(f"Directory {output_dir} already exists")
-                sys.exit(1)
-        os.makedirs(output_dir)
+                sys.exit(f"Directory {output_dir} already exists")
+        output_dir.mkdir(parents=True)
 
         if not exclude_file:
             shutil.copy2(filename, output_dir)
     else:
-        # If not, just put in /tmp and delete after
-        output_dir = tempfile.mkdtemp(
-            prefix="lib-cove-ocds-cli-",
-            dir=tempfile.gettempdir(),
-        )
+        output_dir = tempfile.mkdtemp(prefix="lib-cove-ocds-cli-", dir=tempfile.gettempdir())
 
     try:
         result = libcoveocds.api.ocds_json_output(
             output_dir, filename, schema_version, convert=convert, file_type="json", lib_cove_ocds_config=config
         )
     finally:
-        if not has_disk_output:
+        if not keep_files:
             shutil.rmtree(output_dir)
 
     output = json.dumps(result, indent=2, cls=SetEncoder)
-    if has_disk_output:
-        with open(os.path.join(output_dir, "results.json"), "w") as fp:
-            fp.write(output)
-
-    print(output)
+    if keep_files:
+        with open(os.path.join(output_dir, "results.json"), "w") as f:
+            f.write(output)
+    click.echo(output)
 
 
 if __name__ == "__main__":

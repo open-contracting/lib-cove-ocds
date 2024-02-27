@@ -30,7 +30,7 @@ In some modes, it will also leave directory of data behind. The following option
 * Pass ``--convert`` to get it to produce spreadsheets of the data.
 * Pass ``--output-dir output`` to specify a directory name (default is a name based on the filename).
 * Pass ``--delete`` to delete the output directory if it already exists (default is to error)
-* Pass ``--exclude`` to avoid copying the original file into the output directory (default is to copy)
+* Pass ``--exclude-file`` to avoid copying the original file into the output directory (default is to copy)
 
 (If none of these are specified, it will not leave any files behind)
 

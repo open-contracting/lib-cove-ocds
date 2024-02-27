@@ -9,11 +9,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+- Create parent directories when using `--output-dir`.
+- Remove the last suffix for the default `--output-dir` value, instead of all suffixes.
 - Update the default configuration with a user-provided partial configuration, instead of requiring a user-provided full configuration.
+
+### Fixed
+
+- Use a temporary directory if `--delete` or `--exclude-file` are set without `--convert` or `--output-dir`.
+- Fix the default `--output-dir` value on Windows.
 
 ### Removed
 
-- Remove the lib-cove-web configuration options (set in Django applications, instead).
+- lib-cove-web configuration options (set in Django applications, instead).
 
 ## 0.13.0 (2023-12-20)
 
