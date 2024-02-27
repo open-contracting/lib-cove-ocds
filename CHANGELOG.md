@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+- Update the default configuration with a user-provided partial configuration, instead of requiring a user-provided full configuration.
+- Remove the lib-cove-web configuration options (set in Django applications, instead).
+
 ## 0.13.0 (2023-12-20)
 
 ### Changed

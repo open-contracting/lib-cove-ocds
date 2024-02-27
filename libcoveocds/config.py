@@ -1,3 +1,5 @@
+import copy
+
 LIB_COVE_OCDS_CONFIG_DEFAULT = {
     # SchemaOCDS options
     # Note: "schema_version" is set after this dict.
@@ -18,17 +20,9 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     # Path to ZIP file of standard repository.
     "standard_zip": None,
     #
-    # lib-cove-web options
-    #
-    "app_name": "cove_ocds",
-    "app_base_template": "cove_ocds/base.html",
-    "app_verbose_name": "Open Contracting Data Review Tool",
-    "app_strapline": "Review your OCDS data.",
-    "input_methods": ["upload", "url", "text"],
-    "support_email": "data@open-contracting.org",
-    #
     # Flatten Tool options
     #
+    # Used by lib-cove in convert_spreadsheet() and convert_json() via ocds_json_output().
     "root_list_path": "releases",
     "root_id": "ocid",
     "convert_titles": False,
@@ -53,9 +47,6 @@ LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version"] = list(LIB_COVE_OCDS_CONFIG_DEFAU
 
 class LibCoveOCDSConfig:
     def __init__(self, config=None):
-        # We need to make sure we take a copy,
-        #   so that changes to one config object don't end up effecting other config objects.
+        self.config = copy.deepcopy(LIB_COVE_OCDS_CONFIG_DEFAULT)
         if config:
-            self.config = config.copy()
-        else:
-            self.config = LIB_COVE_OCDS_CONFIG_DEFAULT.copy()
+            self.config.update(config)
