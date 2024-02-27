@@ -17,12 +17,12 @@ def flatten_dict(data, path=""):
             yield (f"{path}/{key}", value)
 
 
-def empty_field(data, path_prefix):
+def empty_field(data, path):
     """Identifying when fields, objects and arrays exist but are empty or contain only whitespace"""
 
-    for key, value in flatten_dict(data):
+    for key, value in flatten_dict(data, path):
         if isinstance(value, str) and not value.strip() or isinstance(value, (dict, list)) and not value:
-            yield {"json_location": f"{path_prefix}{key}"}
+            yield {"json_location": key}
 
 
 CHECKS = {"all": [empty_field], "none": []}
