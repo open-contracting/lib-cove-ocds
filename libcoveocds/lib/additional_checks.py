@@ -17,10 +17,10 @@ def flatten_dict(data, path=""):
             yield (f"{path}/{key}", value)
 
 
-def empty_field(data, path):
+def empty_field(data, flat):
     """Identifying when fields, objects and arrays exist but are empty or contain only whitespace"""
 
-    for key, value in flatten_dict(data, path):
+    for key, value in flat.items():
         if isinstance(value, str) and not value.strip() or isinstance(value, (dict, list)) and not value:
             yield {"json_location": key}
 
@@ -39,8 +39,9 @@ def run_additional_checks(data, functions):
     results = defaultdict(list)
 
     for i, data in enumerate(data[key]):
+        flat = dict(flatten_dict(data, f"{key}/{i}"))
         for function in functions:
-            for output in function(data, f"{key}/{i}"):
+            for output in function(data, flat):
                 results[function.__name__].append(output)
 
     # https://stackoverflow.com/a/12842716/244258
