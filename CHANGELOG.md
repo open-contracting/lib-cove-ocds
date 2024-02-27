@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Update the default configuration with a user-provided partial configuration, instead of requiring a user-provided full configuration.
+
+### Removed
+
 - Remove the lib-cove-web configuration options (set in Django applications, instead).
 
 ## 0.13.0 (2023-12-20)
