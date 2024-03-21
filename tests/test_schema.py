@@ -16,7 +16,7 @@ UNSUPPORTED_PROTOCOL_EXT = "protocol://example.com/extension.json"
 UNRESOLVABLE_HOST_EXT = "http://bad-url-for-extensions.com/extension.json"
 NO_EXTENSION_EXT = "https://example.com/not-found"
 OTHER_BASENAME_EXT = "https://example.com/not-found/other.json"
-NO_FILES_EXT = "https://example.com/not-found/extension.json"
+NO_FILES_EXT = "https://github.com/not-found/extension.json"
 NO_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/no-metadata/extension.json"  # noqa: E501
 INVALID_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/invalid-metadata/extension.json"  # noqa: E501
 
