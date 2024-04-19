@@ -14,7 +14,7 @@ from tests import CONFIG, fixture_path
 @pytest.mark.skipif(not CONFIG, reason="not in API context")
 def test_bad_context():
     output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=CONFIG)
+    schema = libcoveocds.schema.SchemaOCDS()
     with open(fixture_path("fixtures", "common_checks", "dupe_ids_1.json")) as fp:
         json_data = json.load(fp)
 
@@ -27,7 +27,7 @@ def test_bad_context():
 
 def test_basic_1():
     output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS()
+    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=CONFIG)
     with open(fixture_path("fixtures", "common_checks", "basic_1.json")) as fp:
         json_data = json.load(fp)
 
