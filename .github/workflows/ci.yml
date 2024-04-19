@@ -20,7 +20,9 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
-      - run: pip install .[test,web]
+      - run: pip install .[test]
+      - run: pytest -W error --cov libcoveocds
+      - run: pip install .[web]
       - if: matrix.python-version == 'pypy-3.9-v7.3.15'
         # https://github.com/django/asgiref/issues/393
         run: pip install 'asgiref<3.7'

@@ -7,7 +7,7 @@ import pytest
 
 import libcoveocds.common_checks
 import libcoveocds.schema
-from tests import fixture_path
+from tests import CONFIG, fixture_path
 
 
 def test_basic_1():
@@ -37,7 +37,7 @@ def test_basic_1():
 
 def test_dupe_ids_1():
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS()
+    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=CONFIG)
     json_filename = fixture_path("fixtures", "common_checks", "dupe_ids_1.json")
     with open(json_filename) as fp:
         json_data = json.load(fp)
@@ -540,7 +540,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
         json_data = json.load(fp)
 
     cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg)
+    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, lib_cove_ocds_config=CONFIG)
     context = {
         "file_type": "json",
     }
@@ -567,6 +567,11 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
         for a_dict in list_of_dicts:
             out.append({key: value for key, value in a_dict.items() if value is not None})
         return out
+
+    if CONFIG:  # if in API context
+        for validation_error_json in validation_error_jsons_expected:
+            for key in ("docs_ref", "message_safe", "schema_description_safe", "schema_title"):
+                validation_error_json.pop(key, None)
 
     assert strip_nones(validation_error_jsons) == strip_nones(validation_error_jsons_expected)
 
