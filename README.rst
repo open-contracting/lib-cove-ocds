@@ -45,6 +45,12 @@ To use this as a Python library as part of a Python script for validating multip
 
       pip install libcoveocds
 
+   If using the library in a web context, install as:
+
+   .. code-block:: bash
+
+      pip install libcoveocds[web]
+
 2. Use it in your Python code, for example:
 
    .. code-block:: python
@@ -57,11 +63,13 @@ To use this as a Python library as part of a Python script for validating multip
       from libcoveocds.config import LibCoveOCDSConfig
 
 
-      data_directory = 'path/to/your/directory/with/json/files'
+      data_directory = "path/to/your/directory/with/json/files"
       temporary_directory = tempfile.mkdtemp(dir=tempfile.gettempdir())
 
       config = LibCoveOCDSConfig()
-      config.config['cache_all_requests'] = True
+      config.config["cache_all_requests"] = True
+      # TODO: Delete this line if using the library in a web context.
+      config.config["context"] = "api"
 
       for file_name in os.listdir(data_directory):
           file_path = os.path.join(data_directory, file_name)
@@ -71,18 +79,18 @@ To use this as a Python library as part of a Python script for validating multip
                   file_path,
                   schema_version=None,
                   convert=False,
-                  file_type='json',
+                  file_type="json",
                   lib_cove_ocds_config=config
               )
          finally:
              shutil.rmtree(temporary_directory)
 
           # Do something with the result. For example:
-          if result['validation_errors']:
-              for error in result['validation_errors']:
-                  print(f'Validation error {error} found in file {file_path}')
+          if result["validation_errors"]:
+              for error in result["validation_errors"]:
+                  print(f"Validation error {error} found in file {file_path}")
           else:
-              print(f'No validation errors found for {file_path}')
+              print(f"No validation errors found for {file_path}")
 
 Code for use by external users
 ------------------------------
