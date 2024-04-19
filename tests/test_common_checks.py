@@ -11,51 +11,29 @@ from tests import CONFIG, fixture_path
 
 
 def test_basic_1():
-    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
+    output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS()
-    json_filename = fixture_path("fixtures", "common_checks", "basic_1.json")
-    with open(json_filename) as fp:
+    with open(fixture_path("fixtures", "common_checks", "basic_1.json")) as fp:
         json_data = json.load(fp)
 
-    context = {
-        "file_type": "json",
-    }
-
     try:
-        results = libcoveocds.common_checks.common_checks_ocds(
-            context,
-            cove_temp_folder,
-            json_data,
-            schema,
-        )
-
+        results = libcoveocds.common_checks.common_checks_ocds({"file_type": "json"}, output_dir, json_data, schema)
     finally:
-        shutil.rmtree(cove_temp_folder)
+        shutil.rmtree(output_dir)
 
     assert results["version_used"] == "1.1"
 
 
 def test_dupe_ids_1():
-    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
+    output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=CONFIG)
-    json_filename = fixture_path("fixtures", "common_checks", "dupe_ids_1.json")
-    with open(json_filename) as fp:
+    with open(fixture_path("fixtures", "common_checks", "dupe_ids_1.json")) as fp:
         json_data = json.load(fp)
 
-    context = {
-        "file_type": "json",
-    }
-
     try:
-        results = libcoveocds.common_checks.common_checks_ocds(
-            context,
-            cove_temp_folder,
-            json_data,
-            schema,
-        )
-
+        results = libcoveocds.common_checks.common_checks_ocds({"file_type": "json"}, output_dir, json_data, schema)
     finally:
-        shutil.rmtree(cove_temp_folder)
+        shutil.rmtree(output_dir)
 
     # https://github.com/OpenDataServices/cove/issues/782 Defines how we want this error shown
     assert len(results["validation_errors"][0][1]) == 2
@@ -536,21 +514,12 @@ def test_dupe_ids_1():
     ],
 )
 def test_validation_release_or_record_package(record_pkg, filename, validation_error_jsons_expected, schema_subdir):
+    output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
+    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, lib_cove_ocds_config=CONFIG)
     with open(os.path.join(fixture_path("fixtures", "common_checks", schema_subdir, ""), filename)) as fp:
         json_data = json.load(fp)
 
-    cove_temp_folder = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, lib_cove_ocds_config=CONFIG)
-    context = {
-        "file_type": "json",
-    }
-
-    results = libcoveocds.common_checks.common_checks_ocds(
-        context,
-        cove_temp_folder,
-        json_data,
-        schema,
-    )
+    results = libcoveocds.common_checks.common_checks_ocds({"file_type": "json"}, output_dir, json_data, schema)
 
     validation_errors = results["validation_errors"]
 
@@ -578,14 +547,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
 
 def test_ref_error(tmpdir):
     url = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/unresolvable/extension.json"  # noqa: E501
-
     json_data = {"version": "1.1", "extensions": [url], "releases": [{"unresolvable": "1"}]}
-
     schema = libcoveocds.schema.SchemaOCDS("1.1", json_data)
 
-    libcoveocds.common_checks.common_checks_ocds(
-        {"file_type": "json"},
-        tmpdir,
-        json_data,
-        schema,
-    )
+    libcoveocds.common_checks.common_checks_ocds({"file_type": "json"}, tmpdir, json_data, schema)
