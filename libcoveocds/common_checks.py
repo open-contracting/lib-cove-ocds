@@ -1,11 +1,13 @@
 import json
 import re
+from textwrap import dedent
 
 from jsonschema.exceptions import ValidationError, _RefResolutionError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
 from libcove.lib.tools import decimal_default
 from referencing.exceptions import Unresolvable
 
+from libcoveocds.exceptions import LibCoveOCDSError
 from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
 from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_records_aggregates, get_releases_aggregates
 
@@ -22,8 +24,10 @@ try:
             '<a href="https://standard.open-contracting.org/latest/en/schema/reference/#date">dates in OCDS</a>.'
         ),
     }
+
+    WEB_EXTRA_INSTALLED = True
 except ImportError:
-    pass
+    WEB_EXTRA_INSTALLED = False
 
 
 def unique_ids_or_ocids(validator, ui, instance, schema):
@@ -167,10 +171,28 @@ def common_checks_ocds(
     if ocds_prefixes_bad_format:
         context["conformance_errors"] = {"ocds_prefixes_bad_format": ocds_prefixes_bad_format}
 
+    if not schema_obj.api and not WEB_EXTRA_INSTALLED:
+        raise LibCoveOCDSError(
+            dedent(
+                """
+                Cannot format errors for web context if the libcoveocds[web] extra is not installed.
+
+                To use libcoveocds in a web context, run:
+
+                    pip install libcoveocds[web]
+
+                To use libcoveocds in an API context, set the context on the configuration:
+
+                    lib_cove_ocds_config = libcoveocds.config.LibCoveOCDSConfig()
+                    lib_cove_ocds_config.config["context"] = "api"
+                    schema_obj = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=lib_cove_ocds_config)
+                """
+            )
+        )
     # If called in an API context:
     # - Skip the schema description and reference URL for OCID prefix conformance errors.
     # - Skip the formatted message, schema title, schema description and reference URL for validation errors.
-    if not schema_obj.api:
+    elif not schema_obj.api:
         if "conformance_errors" in context:
             ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
             # XXX: The last sentence is assumed to be a link to guidance in all versions of OCDS.

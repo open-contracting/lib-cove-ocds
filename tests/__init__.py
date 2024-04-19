@@ -1,12 +1,11 @@
 import os.path
 
+import libcoveocds.common_checks
 import libcoveocds.config
 
-try:
-    import django  # noqa: F401
-
+if libcoveocds.common_checks.WEB_EXTRA_INSTALLED:
     CONFIG = None
-except ImportError:
+else:
     CONFIG = libcoveocds.config.LibCoveOCDSConfig()
     CONFIG.config["context"] = "api"
 

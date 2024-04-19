@@ -6,8 +6,23 @@ import tempfile
 import pytest
 
 import libcoveocds.common_checks
+import libcoveocds.exceptions
 import libcoveocds.schema
 from tests import CONFIG, fixture_path
+
+
+@pytest.mark.skipif(not CONFIG, reason="not in API context")
+def test_bad_context():
+    output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
+    schema = libcoveocds.schema.SchemaOCDS()
+    with open(fixture_path("fixtures", "common_checks", "dupe_ids_1.json")) as fp:
+        json_data = json.load(fp)
+
+    try:
+        with pytest.raises(libcoveocds.exceptions.LibCoveOCDSError):
+            libcoveocds.common_checks.common_checks_ocds({"file_type": "json"}, output_dir, json_data, schema)
+    finally:
+        shutil.rmtree(output_dir)
 
 
 def test_basic_1():
