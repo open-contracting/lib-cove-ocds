@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add error message if `common_checks_ocds()` is called in a web context, without dependencies installed.
 
+### Fixed
+
+- Reissue unrecognized warnings from `process_codelists()` and `get_schema_obj()`.
+
 ## 0.14.1 (2024-02-27)
 
 ### Fixed

@@ -169,7 +169,7 @@ class SchemaOCDS:
             if failed_codelists is None:
                 continue
 
-            with warnings.catch_warnings(record=True) as w:
+            with warnings.catch_warnings(record=True) as wlist:
                 warnings.simplefilter("always", category=ExtensionCodelistWarning)
 
                 try:
@@ -179,9 +179,9 @@ class SchemaOCDS:
                     # patched_release_schema() will have recorded the metadata file being unreadable.
                     continue
 
-                for warning in w:
-                    if issubclass(warning.category, ExtensionCodelistWarning):
-                        exception = warning.message.exc
+                for w in wlist:
+                    if issubclass(w.category, ExtensionCodelistWarning):
+                        exception = w.message.exc
                         if isinstance(exception, requests.HTTPError):
                             message = f"{exception.response.status_code}: {exception.response.reason}"
                         elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
@@ -190,7 +190,9 @@ class SchemaOCDS:
                             message = "Has non-UTF-8 characters"
                         else:
                             message = f"Unknown error: {exception}"
-                        failed_codelists[warning.message.codelist] = message
+                        failed_codelists[w.message.codelist] = message
+                    else:
+                        warnings.warn_explicit(w.message, w.category, w.filename, w.lineno, source=w.source)
 
             for name, codelist in extension_codelists.items():
                 try:
@@ -342,7 +344,7 @@ class SchemaOCDS:
     # Override
     @functools.lru_cache
     def get_schema_obj(self, deref=False, proxies=False):
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True) as wlist:
             warnings.simplefilter("always", category=ExtensionWarning)
 
             schema = self.builder.patched_release_schema(schema=self._get_schema("release-schema.json"))
@@ -355,9 +357,9 @@ class SchemaOCDS:
                     # This is the prior behavior, however surprising. https://github.com/OpenDataServices/lib-cove/blob/a97f7698d5e5ed519165e930a53fc97cc387362c/libcove/lib/common.py#L393-L405  # noqa: E501
                     schema = {}
 
-            for warning in w:
-                if issubclass(warning.category, ExtensionWarning):
-                    exception = warning.message.exc
+            for w in wlist:
+                if issubclass(w.category, ExtensionWarning):
+                    exception = w.message.exc
                     if isinstance(exception, requests.HTTPError):
                         message = f"{exception.response.status_code}: {exception.response.reason.lower()}"
                     elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
@@ -366,7 +368,9 @@ class SchemaOCDS:
                         message = "release schema patch is not valid JSON"
                     else:
                         message = str(exception)
-                    self.invalid_extension[warning.message.extension.input_url] = message
+                    self.invalid_extension[w.message.extension.input_url] = message
+                else:
+                    warnings.warn_explicit(w.message, w.category, w.filename, w.lineno, source=w.source)
 
         language = self.config.config["current_language"]
 
