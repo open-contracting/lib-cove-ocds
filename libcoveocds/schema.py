@@ -179,20 +179,20 @@ class SchemaOCDS:
                     # patched_release_schema() will have recorded the metadata file being unreadable.
                     continue
 
-                for w in wlist:
-                    if issubclass(w.category, ExtensionCodelistWarning):
-                        exception = w.message.exc
-                        if isinstance(exception, requests.HTTPError):
-                            message = f"{exception.response.status_code}: {exception.response.reason}"
-                        elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
-                            message = "Couldn't be retrieved"
-                        elif isinstance(exception, UnicodeDecodeError):
-                            message = "Has non-UTF-8 characters"
-                        else:
-                            message = f"Unknown error: {exception}"
-                        failed_codelists[w.message.codelist] = message
+            for w in wlist:
+                if issubclass(w.category, ExtensionCodelistWarning):
+                    exception = w.message.exc
+                    if isinstance(exception, requests.HTTPError):
+                        message = f"{exception.response.status_code}: {exception.response.reason}"
+                    elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
+                        message = "Couldn't be retrieved"
+                    elif isinstance(exception, UnicodeDecodeError):
+                        message = "Has non-UTF-8 characters"
                     else:
-                        warnings.warn_explicit(w.message, w.category, w.filename, w.lineno, source=w.source)
+                        message = f"Unknown error: {exception}"
+                    failed_codelists[w.message.codelist] = message
+                else:
+                    warnings.warn_explicit(w.message, w.category, w.filename, w.lineno, source=w.source)
 
             for name, codelist in extension_codelists.items():
                 try:
@@ -357,20 +357,20 @@ class SchemaOCDS:
                     # This is the prior behavior, however surprising. https://github.com/OpenDataServices/lib-cove/blob/a97f7698d5e5ed519165e930a53fc97cc387362c/libcove/lib/common.py#L393-L405  # noqa: E501
                     schema = {}
 
-            for w in wlist:
-                if issubclass(w.category, ExtensionWarning):
-                    exception = w.message.exc
-                    if isinstance(exception, requests.HTTPError):
-                        message = f"{exception.response.status_code}: {exception.response.reason.lower()}"
-                    elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
-                        message = "fetching failed"
-                    elif isinstance(exception, json.JSONDecodeError):
-                        message = "release schema patch is not valid JSON"
-                    else:
-                        message = str(exception)
-                    self.invalid_extension[w.message.extension.input_url] = message
+        for w in wlist:
+            if issubclass(w.category, ExtensionWarning):
+                exception = w.message.exc
+                if isinstance(exception, requests.HTTPError):
+                    message = f"{exception.response.status_code}: {exception.response.reason.lower()}"
+                elif isinstance(exception, (requests.RequestException, zipfile.BadZipFile)):
+                    message = "fetching failed"
+                elif isinstance(exception, json.JSONDecodeError):
+                    message = "release schema patch is not valid JSON"
                 else:
-                    warnings.warn_explicit(w.message, w.category, w.filename, w.lineno, source=w.source)
+                    message = str(exception)
+                self.invalid_extension[w.message.extension.input_url] = message
+            else:
+                warnings.warn_explicit(w.message, w.category, w.filename, w.lineno, source=w.source)
 
         language = self.config.config["current_language"]
 
