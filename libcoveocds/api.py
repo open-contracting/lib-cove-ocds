@@ -1,7 +1,6 @@
 import os
 import warnings
 
-from flattentool.exceptions import FlattenToolWarning
 from libcove.lib.tools import get_file_type
 
 from libcoveocds.common_checks import common_checks_ocds
@@ -11,6 +10,7 @@ from libcoveocds.schema import SchemaOCDS
 from libcoveocds.util import json
 
 try:
+    from flattentool.exceptions import FlattenToolWarning
     from libcove.lib.common import get_spreadsheet_meta_data
     from libcove.lib.converters import convert_json, convert_spreadsheet
 except ImportError:
