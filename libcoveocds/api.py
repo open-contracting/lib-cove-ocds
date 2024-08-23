@@ -1,6 +1,7 @@
 import os
 import warnings
 
+from flattentool.exceptions import FlattenToolWarning
 from libcove.lib.tools import get_file_type
 
 from libcoveocds.common_checks import common_checks_ocds
@@ -89,7 +90,7 @@ def ocds_json_output(
     if file_type == "json":
         if convert:
             with warnings.catch_warnings():
-                warnings.filterwarnings("ignore")  # flattentool uses UserWarning, so we can't set a specific category
+                warnings.filterwarnings("ignore", category=FlattenToolWarning)
 
                 context.update(
                     convert_json(
