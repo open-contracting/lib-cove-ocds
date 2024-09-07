@@ -8,7 +8,11 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         # https://github.com/requests-cache/requests-cache/issues/845
-        python-version: [3.8, 3.9, '3.10', '3.11', pypy-3.9-v7.3.15] # 3.12
+        python-version: [3.8, 3.9, '3.10', '3.11', pypy-3.10] # 3.12
+        exclude:
+          # https://github.com/pypy/pypy/issues/5027
+          - os: windows-latest
+            python-version: pypy-3.10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -16,7 +20,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: setup.cfg
-      - if: matrix.os == 'ubuntu-latest' && matrix.python-version == 'pypy-3.9-v7.3.15'
+      - if: matrix.os == 'ubuntu-latest' && matrix.python-version == 'pypy-3.10'
         run: |
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
@@ -24,9 +28,6 @@ jobs:
       # https://github.com/OpenDataServices/flatten-tool/pull/458
       - run: pytest -W error -W ignore::DeprecationWarning:ijson.compat
       - run: pip install .[web]
-      - if: matrix.python-version == 'pypy-3.9-v7.3.15'
-        # https://github.com/django/asgiref/issues/393
-        run: pip install 'asgiref<3.7'
       # https://github.com/OpenDataServices/flatten-tool/pull/458
       - run: coverage run --source=libcoveocds -m pytest -W error -W ignore::DeprecationWarning:ijson.compat
       - uses: coverallsapp/github-action@v2
