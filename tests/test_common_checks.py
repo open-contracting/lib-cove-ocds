@@ -561,7 +561,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
 
 
 def test_ref_error(tmpdir):
-    url = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/unresolvable/extension.json"  # noqa: E501
+    url = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/unresolvable/extension.json"
     json_data = {"version": "1.1", "extensions": [url], "releases": [{"unresolvable": "1"}]}
     schema = libcoveocds.schema.SchemaOCDS("1.1", json_data)
 

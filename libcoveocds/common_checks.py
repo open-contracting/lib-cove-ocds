@@ -45,7 +45,7 @@ def unique_ids_or_ocids(validator, ui, instance, schema):
 def oneOf_draft4(validator, oneOf, instance, schema):
     """
     oneOf_draft4 validator from
-    https://github.com/Julian/jsonschema/blob/d16713a4296663f3d62c50b9f9a2893cb380b7af/jsonschema/_validators.py#L337
+    https://github.com/Julian/jsonschema/blob/d16713a/jsonschema/_validators.py#L337
 
     Modified to:
     - sort the instance JSON, so we get a reproducible output that we

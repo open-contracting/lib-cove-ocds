@@ -22,13 +22,11 @@ jobs:
           sudo apt install libxml2-dev libxslt-dev
       - run: pip install .[test]
       # https://github.com/OpenDataServices/flatten-tool/pull/458
-      - run: pytest -W error -W ignore::DeprecationWarning:ijson.compat --cov libcoveocds
+      - run: pytest -W error -W ignore::DeprecationWarning:ijson.compat
       - run: pip install .[web]
       - if: matrix.python-version == 'pypy-3.9-v7.3.15'
         # https://github.com/django/asgiref/issues/393
         run: pip install 'asgiref<3.7'
       # https://github.com/OpenDataServices/flatten-tool/pull/458
-      - run: pytest -W error -W ignore::DeprecationWarning:ijson.compat --cov libcoveocds
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: coveralls --service=github
+      - run: coverage run --source=libcoveocds -m pytest -W error -W ignore::DeprecationWarning:ijson.compat
+      - uses: coverallsapp/github-action@v2

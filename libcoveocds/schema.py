@@ -134,7 +134,8 @@ class SchemaOCDS:
 
     def _standard_codelists(self):
         try:
-            # OCDS 1.0 uses "code" column. https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv  # noqa: 501
+            # OCDS 1.0 uses "code" column.
+            # https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv
             return {codelist.name: self._codelist_codes(codelist) for codelist in self.builder.standard_codelists()}
         except requests.RequestException as e:
             logger.exception(e)
@@ -354,7 +355,8 @@ class SchemaOCDS:
                 except jsonref.JsonRefError as e:
                     # Callers must check json_deref_error.
                     self.json_deref_error = e.message
-                    # This is the prior behavior, however surprising. https://github.com/OpenDataServices/lib-cove/blob/a97f7698d5e5ed519165e930a53fc97cc387362c/libcove/lib/common.py#L393-L405  # noqa: E501
+                    # This is the prior behavior, however surprising.
+                    # https://github.com/OpenDataServices/lib-cove/blob/a97f769/libcove/lib/common.py#L393-L405
                     schema = {}
 
         for w in wlist:

@@ -9,16 +9,18 @@ import libcoveocds.schema
 from tests import fixture_path
 
 DEFAULT_OCDS_VERSION = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version"]
-METRICS_EXT = "https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json"  # noqa: E501
-API_EXT = "https://chilecompracl.visualstudio.com/a6a3f587-5f23-42f6-9255-ac5852fae1e7/_apis/git/repositories/fb91c43b-011b-434b-901d-9d36ec50c586/items?path=%2Fextension.json&versionDescriptor%5BversionOptions%5D=0&versionDescriptor%5BversionType%5D=0&versionDescriptor%5Bversion%5D=master&resolveLfs=true&%24format=octetStream&api-version=5.0"  # noqa: E501
-CODELIST_EXT = "https://raw.githubusercontent.com/INAImexico/ocds_extendedProcurementCategory_extension/0ed54770c85500cf21f46e88fb06a30a5a2132b1/extension.json"  # noqa: E501
+METRICS_EXT = (
+    "https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json"
+)
+API_EXT = "https://chilecompracl.visualstudio.com/a6a3f587-5f23-42f6-9255-ac5852fae1e7/_apis/git/repositories/fb91c43b-011b-434b-901d-9d36ec50c586/items?path=%2Fextension.json&versionDescriptor%5BversionOptions%5D=0&versionDescriptor%5BversionType%5D=0&versionDescriptor%5Bversion%5D=master&resolveLfs=true&%24format=octetStream&api-version=5.0"
+CODELIST_EXT = "https://raw.githubusercontent.com/INAImexico/ocds_extendedProcurementCategory_extension/0ed54770c85500cf21f46e88fb06a30a5a2132b1/extension.json"
 UNSUPPORTED_PROTOCOL_EXT = "protocol://example.com/extension.json"
 UNRESOLVABLE_HOST_EXT = "http://bad-url-for-extensions.com/extension.json"
 NO_EXTENSION_EXT = "https://example.com/not-found"
 OTHER_BASENAME_EXT = "https://example.com/not-found/other.json"
 NO_FILES_EXT = "https://github.com/not-found/extension.json"
-NO_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/no-metadata/extension.json"  # noqa: E501
-INVALID_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/invalid-metadata/extension.json"  # noqa: E501
+NO_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/no-metadata/extension.json"
+INVALID_METADATA_EXT = "https://raw.githubusercontent.com/open-contracting/lib-cove-ocds/main/tests/fixtures/extensions/invalid-metadata/extension.json"
 
 
 @pytest.mark.parametrize("record_pkg", [False, True])
@@ -163,7 +165,7 @@ def test_schema_ocds_extensions(package_data, extensions, invalid_extension, ext
         assert not schema_obj["definitions"]["Award"]["properties"].get("agreedMetrics")
 
 
-# https://github.com/OpenDataServices/cove/issues/1054
+# https://github.com/open-contracting/lib-cove-ocds/issues/50 https://github.com/OpenDataServices/cove/issues/1054
 @pytest.mark.xfail(reason="lib-cove has a bug")
 def test_get_additional_codelist_values_replaced():
     with open(fixture_path("fixtures", "common_checks", "get_additional_codelist_values_replaced.json")) as f:
@@ -181,7 +183,7 @@ def test_get_additional_codelist_values_replaced():
         "field": "documentType",
         "codelist": "documentType.csv",
         "path": "releases/tender/documents",
-        "codelist_url": "https://raw.githubusercontent.com/open-contracting-extensions/ocds_ppp_extension/master/codelists/documentType.csv",  # noqa
+        "codelist_url": "https://raw.githubusercontent.com/open-contracting-extensions/ocds_ppp_extension/master/codelists/documentType.csv",
         "extension_codelist": False,
         "isopen": True,
         "codelist_amend_urls": [],
