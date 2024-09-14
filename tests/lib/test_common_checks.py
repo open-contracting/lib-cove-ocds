@@ -253,9 +253,7 @@ def test_release_bad_ocid_prefixes():
     with open(os.path.join(file_name)) as fp:
         user_data = json.load(fp)
 
-    user_data_ocids = []
-    for rel in user_data["releases"]:
-        user_data_ocids.append(rel["ocid"])
+    user_data_ocids = [rel["ocid"] for rel in user_data["releases"]]
 
     assert len(user_data_ocids) == 7  # 1 good, 6 bad ocds prefixes
     assert "ocds-00good-000003" in user_data_ocids  # good ocds prefix

@@ -28,26 +28,26 @@ def empty_field(data, flat):
 CHECKS = {"all": [empty_field], "none": []}
 
 
-def run_additional_checks(data, functions):
-    if "records" in data:
+def run_additional_checks(package, functions):
+    if "records" in package:
         key = "records"
-    elif "releases" in data:
+    elif "releases" in package:
         key = "releases"
     else:
         return {}
 
-    releases_or_records = data[key]
+    releases_or_records = package[key]
     if not isinstance(releases_or_records, list):
         return {}
 
     results = defaultdict(list)
 
-    for i, data in enumerate(releases_or_records):
-        if not isinstance(data, dict):
+    for i, release_or_record in enumerate(releases_or_records):
+        if not isinstance(release_or_record, dict):
             continue
-        flat = dict(flatten_dict(data, f"{key}/{i}"))
+        flat = dict(flatten_dict(release_or_record, f"{key}/{i}"))
         for function in functions:
-            for output in function(data, flat):
+            for output in function(release_or_record, flat):
                 results[function.__name__].append(output)
 
     # https://stackoverflow.com/a/12842716/244258

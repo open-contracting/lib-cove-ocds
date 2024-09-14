@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 0.15.0 (Unreleased)
+
+### Changed
+
+- Some arguments must be keyword arguments:
+
+  - `libcoveocds.api.ocds_json_output`
+  - `libcoveocds.common_checks.common_checks_ocds`
+  - `libcoveocds.schema.SchemaOCDS.__init__`
+  - `libcoveocds.schema.SchemaOCDS.get_pkg_schema_obj`
+  - `libcoveocds.schema.SchemaOCDS.get_schema_obj`
+
 ## 0.14.2 (2024-08-23)
 
 ### Changed

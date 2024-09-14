@@ -1,7 +1,7 @@
 import collections
 import re
 
-import libcove.lib.tools as tools
+from libcove.lib import tools
 
 
 @tools.ignore_errors
@@ -73,20 +73,16 @@ def get_releases_aggregates(json_data):
         if not isinstance(org, dict):
             return
 
-        identifier = org.get("identifier")
-        org_id = None
-        if identifier:
-            org_id = identifier.get("id")
-            if org_id:
-                unique_id[org_id] = org.get("name", "") or ""
-                scheme = identifier.get("scheme")
-                if scheme:
-                    unique_organisation_schemes.add(scheme)
-                if org.get("address"):
-                    organisation_identifier_address.add(org_id)
-                if org.get("contactPoint"):
-                    organisation_identifier_contact_point.add(org_id)
-        if not org_id:
+        if (identifier := org.get("identifier")) and (org_id := identifier.get("id")):
+            unique_id[org_id] = org.get("name", "") or ""
+            scheme = identifier.get("scheme")
+            if scheme:
+                unique_organisation_schemes.add(scheme)
+            if org.get("address"):
+                organisation_identifier_address.add(org_id)
+            if org.get("contactPoint"):
+                organisation_identifier_contact_point.add(org_id)
+        else:
             name = org.get("name")
             if name:
                 unique_name.add(name)
@@ -235,22 +231,22 @@ def get_releases_aggregates(json_data):
                 contracts_without_awards.append(contract)
 
     unique_buyers_count = len(unique_buyers_identifier) + len(unique_buyers_name_no_id)
-    unique_buyers = [name + " (" + str(id) + ")" for id, name in unique_buyers_identifier.items()] + list(
+    unique_buyers = [f"{name} ({org_id})" for org_id, name in unique_buyers_identifier.items()] + list(
         unique_buyers_name_no_id
     )
 
     unique_suppliers_count = len(unique_suppliers_identifier) + len(unique_suppliers_name_no_id)
-    unique_suppliers = [name + " (" + str(id) + ")" for id, name in unique_suppliers_identifier.items()] + list(
+    unique_suppliers = [f"{name} ({org_id})" for org_id, name in unique_suppliers_identifier.items()] + list(
         unique_suppliers_name_no_id
     )
 
     unique_procuring_count = len(unique_procuring_identifier) + len(unique_procuring_name_no_id)
-    unique_procuring = [name + " (" + str(id) + ")" for id, name in unique_procuring_identifier.items()] + list(
+    unique_procuring = [f"{name} ({org_id})" for org_id, name in unique_procuring_identifier.items()] + list(
         unique_procuring_name_no_id
     )
 
     unique_tenderers_count = len(unique_tenderers_identifier) + len(unique_tenderers_name_no_id)
-    unique_tenderers = [name + " (" + str(id) + ")" for id, name in unique_tenderers_identifier.items()] + list(
+    unique_tenderers = [f"{name} ({org_id})" for org_id, name in unique_tenderers_identifier.items()] + list(
         unique_tenderers_name_no_id
     )
 
@@ -394,6 +390,7 @@ def get_bad_ocid_prefixes(json_data):
             and not prefix_regex.match(ocid)
         ):
             return ocid
+        return None
 
     records = json_data.get("records")
     if records:

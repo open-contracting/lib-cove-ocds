@@ -21,6 +21,7 @@ def ocds_json_output(
     output_dir: str = "",
     file=None,  # : str | None
     schema_version=None,  # : str | None
+    *,
     convert: bool = False,
     file_type=None,  # : str | None
     json_data=None,  # : dict | None
@@ -136,8 +137,7 @@ def ocds_json_output(
         context["json_deref_error"] = schema_obj.json_deref_error
 
     if file_type == "xlsx":
-        # Remove unwanted files in the output
-        # TODO: can we do this by no writing the files in the first place?
+        # Remove unwanted files written by convert_spreadsheet().
         os.remove(os.path.join(output_dir, "heading_source_map.json"))
         os.remove(os.path.join(output_dir, "cell_source_map.json"))
 

@@ -547,10 +547,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
         validation_error_jsons.append(validation_error_json)
 
     def strip_nones(list_of_dicts):
-        out = []
-        for a_dict in list_of_dicts:
-            out.append({key: value for key, value in a_dict.items() if value is not None})
-        return out
+        return [{key: value for key, value in a_dict.items() if value is not None} for a_dict in list_of_dicts]
 
     if CONFIG:  # if in API context
         for validation_error_json in validation_error_jsons_expected:

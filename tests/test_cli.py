@@ -14,7 +14,7 @@ def test_basic():
     data = json.loads(result.output)
 
     assert result.exit_code == 0
-    assert "1.1" == data.get("version_used")
+    assert data.get("version_used") == "1.1"
 
 
 def test_old_schema():
@@ -25,7 +25,7 @@ def test_old_schema():
 
     data = json.loads(result.output)
 
-    assert "1.0" == data.get("version_used")
+    assert data.get("version_used") == "1.0"
 
 
 def test_set_output_dir():
@@ -62,7 +62,7 @@ def test_set_output_dir_and_delete():
 
     data = json.loads(result.output)
 
-    assert "1.1" == data.get("version_used")
+    assert data.get("version_used") == "1.1"
     assert sorted(os.listdir(output_dir)) == sorted(expected_files)
 
     shutil.rmtree(output_dir)
@@ -84,7 +84,7 @@ def test_set_output_dir_and_delete_and_exclude():
 
     data = json.loads(result.output)
 
-    assert "1.1" == data.get("version_used")
+    assert data.get("version_used") == "1.1"
     assert sorted(os.listdir(output_dir)) == sorted(expected_files)
 
     shutil.rmtree(output_dir)
@@ -106,7 +106,7 @@ def test_set_output_dir_and_convert():
 
     data = json.loads(result.output)
 
-    assert "1.1" == data.get("version_used")
+    assert data.get("version_used") == "1.1"
     assert sorted(os.listdir(output_dir)) == sorted(expected_files)
     # Flattened should be a directory of csv's.
     # We aren't going to check names fully

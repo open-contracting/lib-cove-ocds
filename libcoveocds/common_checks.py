@@ -36,13 +36,12 @@ def unique_ids_or_ocids(validator, ui, instance, schema):
     # are structured changes.
     if schema.get("items") == {"$ref": "#/definitions/record"}:
         return unique_ids(validator, ui, instance, schema, id_names=["ocid"])
-    elif "$ref" in schema.get("items", {}) and schema["items"]["$ref"].endswith("release-schema.json"):
+    if "$ref" in schema.get("items", {}) and schema["items"]["$ref"].endswith("release-schema.json"):
         return unique_ids(validator, ui, instance, schema, id_names=["ocid", "id"])
-    else:
-        return unique_ids(validator, ui, instance, schema, id_names=["id"])
+    return unique_ids(validator, ui, instance, schema, id_names=["id"])
 
 
-def oneOf_draft4(validator, oneOf, instance, schema):
+def one_of_draft4(validator, one_of, instance, schema):
     """
     oneOf_draft4 validator from
     https://github.com/Julian/jsonschema/blob/d16713a/jsonschema/_validators.py#L337
@@ -55,7 +54,7 @@ def oneOf_draft4(validator, oneOf, instance, schema):
     - Return more information on the ValidationError object, to allow us to
       replace the translation with a message in cove-ocds
     """
-    subschemas = enumerate(oneOf)
+    subschemas = enumerate(one_of)
     all_errors = []
     for index, subschema in subschemas:
         errs = list(validator.descend(instance, subschema, schema_path=index))
@@ -121,7 +120,7 @@ def oneOf_draft4(validator, oneOf, instance, schema):
 
 
 validator.VALIDATORS["uniqueItems"] = unique_ids_or_ocids
-validator.VALIDATORS["oneOf"] = oneOf_draft4
+validator.VALIDATORS["oneOf"] = one_of_draft4
 
 
 # ref_info is used calculate the HTML anchor for the field in the OCDS documentation.
@@ -146,6 +145,7 @@ def common_checks_ocds(
     upload_dir,
     json_data,
     schema_obj,
+    *,
     cache=True,
 ):
     """
@@ -160,7 +160,7 @@ def common_checks_ocds(
             upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=schema_obj.api, cache=cache
         )
     except (Unresolvable, _RefResolutionError) as e:
-        # "PointerToNowhere: '/definitions/Unresolvable' does not exist within {big JSON blob}"
+        # For example: "PointerToNowhere: '/definitions/Unresolvable' does not exist within {big JSON blob}"
         schema_obj.json_deref_error = re.sub(r" within .+", "", str(e))
         return context
 
@@ -192,10 +192,10 @@ def common_checks_ocds(
     # If called in an API context:
     # - Skip the schema description and reference URL for OCID prefix conformance errors.
     # - Skip the formatted message, schema title, schema description and reference URL for validation errors.
-    elif not schema_obj.api:
+    if not schema_obj.api:
         if "conformance_errors" in context:
             ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
-            # XXX: The last sentence is assumed to be a link to guidance in all versions of OCDS.
+            # The last sentence of the `ocid` description is assumed to contain a guidance URL in all OCDS versions.
             index = ocid_description.rindex(". ") + 1
             context["conformance_errors"]["ocid_description"] = ocid_description[:index]
             context["conformance_errors"]["ocid_info_url"] = re.search(r"\((\S+)\)", ocid_description[index:]).group(1)
@@ -207,11 +207,10 @@ def common_checks_ocds(
             new_message = validation_error_lookup.get(error["message_type"])
             if new_message:
                 error["message_safe"] = conditional_escape(new_message)
+            elif "message_safe" in error:
+                error["message_safe"] = mark_safe(error["message_safe"])
             else:
-                if "message_safe" in error:
-                    error["message_safe"] = mark_safe(error["message_safe"])
-                else:
-                    error["message_safe"] = conditional_escape(error["message"])
+                error["message_safe"] = conditional_escape(error["message"])
 
             schema_block, ref_info = _lookup_schema(
                 schema_obj.get_pkg_schema_obj(deref=True, proxies=True), error["path_no_number"].split("/")
@@ -226,15 +225,9 @@ def common_checks_ocds(
                     )
                 if ref_info:
                     ref = ref_info["reference"]["$ref"]
-                    if ref.endswith("release-schema.json"):
-                        ref = ""
-                    else:
-                        ref = ref.strip("#")
+                    ref = "" if ref.endswith("release-schema.json") else ref.strip("#")
                     ref_path = "/".join(ref_info["path"])
-                    if ref == "/definitions/record":
-                        schema = "record-package-schema.json"
-                    else:
-                        schema = "release-schema.json"
+                    schema = "record-package-schema.json" if ref == "/definitions/record" else "release-schema.json"
                 else:
                     ref = ""
                     ref_path = error["path_no_number"]

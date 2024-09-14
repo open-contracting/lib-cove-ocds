@@ -69,9 +69,9 @@ def test_context_api_transform_validation_additional_fields():
 
     assert transform_context["extensions"] == expected_context["extensions"]
     assert transform_context["deprecated_fields"] == expected_context["deprecated_fields"]
-    assert "validation_errors_count" not in transform_context.keys()
-    assert "additional_fields_count" not in transform_context.keys()
-    assert "data_only" not in transform_context.keys()
+    assert "validation_errors_count" not in transform_context
+    assert "additional_fields_count" not in transform_context
+    assert "data_only" not in transform_context
 
 
 def test_context_api_transform_extensions():

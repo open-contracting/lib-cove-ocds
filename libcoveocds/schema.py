@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # the entire process.
 # https://beta.ruff.rs/docs/rules/cached-instance-method/
 class SchemaOCDS:
-    def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, record_pkg=False):
+    def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, *, record_pkg=False):
         """Build the schema object using an specific OCDS schema version
 
         The version used will be select_version, package_data.get('version') or
@@ -137,14 +137,14 @@ class SchemaOCDS:
             # OCDS 1.0 uses "code" column.
             # https://github.com/open-contracting/standard/blob/1__0__3/standard/schema/codelists/organizationIdentifierRegistrationAgency_iati.csv
             return {codelist.name: self._codelist_codes(codelist) for codelist in self.builder.standard_codelists()}
-        except requests.RequestException as e:
-            logger.exception(e)
+        except requests.RequestException:
+            logger.exception()
             return {}
 
     # Override
     #
     # lib-cove calls this from get_additional_codelist_values().
-    @functools.lru_cache
+    @functools.lru_cache  # noqa: B019
     def process_codelists(self):
         # lib-cove uses these in get_additional_codelist_values().
         # - Used to determine whether a field has a codelist, which codelist and whether it is open.
@@ -224,7 +224,7 @@ class SchemaOCDS:
                 self.extended_codelist_urls[name].append(extension.get_url(f"codelists/{name}"))
 
     # lib-cove's get_schema_validation_errors() uses this, if defined. This circumvents CustomRefResolver() logic.
-    @functools.lru_cache
+    @functools.lru_cache  # noqa: B019
     def validator(self, validator, format_checker):
         return validator(self.get_pkg_schema_obj(), format_checker=format_checker, registry=self.registry)
 
@@ -305,7 +305,7 @@ class SchemaOCDS:
     # definitions' fields (though `docs_ref` is not used in cove-ocds).
     # https://github.com/open-contracting/cove-ocds/issues/103
     @staticmethod
-    def _jsonref_kwarg(proxies=False):
+    def _jsonref_kwarg(*, proxies=False):
         if proxies:
             return {"proxies": True, "lazy_load": False}
         return {"proxies": False, "merge_props": True}
@@ -318,13 +318,13 @@ class SchemaOCDS:
     #
     # ProfileBuilder.release_package_schema() and record_package_schema() aren't used, because the patched release
     # schema has already been calculated and cached by patched_release_schema().
-    @functools.lru_cache
-    def get_pkg_schema_obj(self, deref=False, use_extensions=True, proxies=False):
+    @functools.lru_cache  # noqa: B019
+    def get_pkg_schema_obj(self, *, deref=False, use_extensions=True, proxies=False):
         # For tests only.
         if hasattr(self, "_test_override_package_schema"):
             with open(self._test_override_package_schema) as f:
                 if deref:
-                    return jsonref.load(f, **self._jsonref_kwarg(proxies))
+                    return jsonref.load(f, **self._jsonref_kwarg(proxies=proxies))
                 return json.load(f)
         else:
             schema = self._get_schema(self.package_schema_name)
@@ -336,22 +336,22 @@ class SchemaOCDS:
                 schema["definitions"]["record"]["properties"]["releases"]["oneOf"][1]["items"] = patched
                 # The Record definition must be dereferenced for "additional_fields" to report correctly.
                 # Can test with tenders_records_1_record_with_invalid_extensions.json in cove-ocds.
-                schema = jsonref.replace_refs(schema, **self._jsonref_kwarg(proxies))
+                schema = jsonref.replace_refs(schema, **self._jsonref_kwarg(proxies=proxies))
             else:
                 schema["properties"]["releases"]["items"] = patched
 
         return schema
 
     # Override
-    @functools.lru_cache
-    def get_schema_obj(self, deref=False, proxies=False):
+    @functools.lru_cache  # noqa: B019
+    def get_schema_obj(self, *, deref=False, proxies=False):
         with warnings.catch_warnings(record=True) as wlist:
             warnings.simplefilter("always", category=ExtensionWarning)
 
             schema = self.builder.patched_release_schema(schema=self._get_schema("release-schema.json"))
             if deref:
                 try:
-                    schema = jsonref.replace_refs(schema, **self._jsonref_kwarg(proxies))
+                    schema = jsonref.replace_refs(schema, **self._jsonref_kwarg(proxies=proxies))
                 except jsonref.JsonRefError as e:
                     # Callers must check json_deref_error.
                     self.json_deref_error = e.message
@@ -392,7 +392,7 @@ class SchemaOCDS:
 
             # ocdsextensionregistry requires the input URL to contain "extension.json" (like the registry). If it
             # doesn't, ocdsextensionregistry can't determine how to retrieve it.
-            if not extension.base_url and not extension._url_pattern:
+            if not extension.base_url and not extension._url_pattern:  # noqa: SLF001
                 self.invalid_extension[input_url] = "missing extension.json"
                 continue
 
@@ -429,7 +429,7 @@ class SchemaOCDS:
     # Override
     #
     # Add decorator to copy from libcove.lib.common.SchemaJsonMixin.
-    @functools.lru_cache
+    @functools.lru_cache  # noqa: B019
     def get_pkg_schema_fields(self):
         return set(schema_dict_fields_generator(self.get_pkg_schema_obj(deref=True)))
 
