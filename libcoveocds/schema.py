@@ -392,7 +392,7 @@ class SchemaOCDS:
 
             # ocdsextensionregistry requires the input URL to contain "extension.json" (like the registry). If it
             # doesn't, ocdsextensionregistry can't determine how to retrieve it.
-            if not extension.base_url and not extension._url_pattern:  # noqa: SLF001
+            if not extension.base_url and not extension._url_pattern:
                 self.invalid_extension[input_url] = "missing extension.json"
                 continue
 
