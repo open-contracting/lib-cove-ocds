@@ -31,7 +31,7 @@ def test_basic_record_package():
 
 
 @pytest.mark.parametrize(
-    "json_data,exception,expected",
+    ("json_data", "exception", "expected"),
     [
         (
             "{[,]}",

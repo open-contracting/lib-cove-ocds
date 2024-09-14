@@ -67,7 +67,7 @@ def test_dupe_ids_1():
 
 
 @pytest.mark.parametrize(
-    "record_pkg,filename,schema_subdir,validation_error_jsons_expected",
+    ("record_pkg", "filename", "schema_subdir", "validation_error_jsons_expected"),
     [
         (False, "releases_no_validation_errors.json", "", []),
         (True, "records_no_validation_errors.json", "", []),
