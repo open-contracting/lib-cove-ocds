@@ -8,7 +8,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         # https://github.com/requests-cache/requests-cache/issues/845
-        python-version: [3.8, 3.9, '3.10', '3.11', pypy-3.10] # 3.12
+        python-version: [3.9, '3.10', '3.11', pypy-3.10] # 3.12
         exclude:
           # https://github.com/pypy/pypy/issues/5027
           - os: windows-latest
