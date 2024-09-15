@@ -75,7 +75,8 @@ def test_context_api_transform_validation_additional_fields():
 
 
 def test_context_api_transform_extensions():
-    """Expected result for extensions after transform:
+    """
+    Expected result for extensions after transform:
 
     'extensions': {
         'extended_schema_url': 'extended_release_schema.json',
@@ -152,7 +153,8 @@ def test_context_api_transform_extensions():
 
 
 def test_context_api_transform_deprecations():
-    """Expected result for deprecated field after transform:
+    """
+    Expected result for deprecated field after transform:
 
     'deprecated_fields': [
         {"field": "a", "paths": ["path_to_a/0/a", "path_to_a/1/a"], "explanation": ["1.1", "description_a"]},

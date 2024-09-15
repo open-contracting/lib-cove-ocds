@@ -26,7 +26,8 @@ logger = logging.getLogger(__name__)
 # https://beta.ruff.rs/docs/rules/cached-instance-method/
 class SchemaOCDS:
     def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, *, record_pkg=False):
-        """Build the schema object using an specific OCDS schema version
+        """
+        Build the schema object using an specific OCDS schema version.
 
         The version used will be select_version, package_data.get('version') or
         default version, in that order. Invalid version choices in select_version or
@@ -319,7 +320,7 @@ class SchemaOCDS:
     # ProfileBuilder.release_package_schema() and record_package_schema() aren't used, because the patched release
     # schema has already been calculated and cached by patched_release_schema().
     @functools.lru_cache  # noqa: B019
-    def get_pkg_schema_obj(self, *, deref=False, use_extensions=True, proxies=False):
+    def get_pkg_schema_obj(self, *, deref=False, use_extensions=True, proxies=False):  # noqa: ARG002 # lib-cove API
         # For tests only.
         if hasattr(self, "_test_override_package_schema"):
             with open(self._test_override_package_schema) as f:
@@ -392,7 +393,7 @@ class SchemaOCDS:
 
             # ocdsextensionregistry requires the input URL to contain "extension.json" (like the registry). If it
             # doesn't, ocdsextensionregistry can't determine how to retrieve it.
-            if not extension.base_url and not extension._url_pattern:
+            if not extension.base_url and not extension._url_pattern:  # noqa: SLF001
                 self.invalid_extension[input_url] = "missing extension.json"
                 continue
 

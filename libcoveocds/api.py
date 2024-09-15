@@ -59,7 +59,6 @@ def ocds_json_output(
     :param record_pkg: Whether the input data is a record package. If not provided, it is determined by the presence of
                        the ``records`` field.
     """
-
     if not lib_cove_ocds_config:
         lib_cove_ocds_config = LibCoveOCDSConfig()
         lib_cove_ocds_config.config["context"] = "api"

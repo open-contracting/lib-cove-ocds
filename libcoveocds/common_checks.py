@@ -43,16 +43,11 @@ def unique_ids_or_ocids(validator, ui, instance, schema):
 
 def one_of_draft4(validator, one_of, instance, schema):
     """
-    oneOf_draft4 validator from
-    https://github.com/Julian/jsonschema/blob/d16713a/jsonschema/_validators.py#L337
+    Modify oneOf_draft4 from https://github.com/Julian/jsonschema/blob/d16713a/jsonschema/_validators.py#L337.
 
-    Modified to:
-    - sort the instance JSON, so we get a reproducible output that we
-      can can test more easily
-    - Yield all the individual errors for linked or embedded releases within a
-      record.
-    - Return more information on the ValidationError object, to allow us to
-      replace the translation with a message in cove-ocds
+    - Sort the instance JSON, so we get a reproducible output that we can can test more easily.
+    - Yield all the individual errors for linked or embedded releases within a record.
+    - Return more information on the ValidationError, to allow us to use a translated message in cove-ocds.
     """
     subschemas = enumerate(one_of)
     all_errors = []
@@ -149,6 +144,8 @@ def common_checks_ocds(
     cache=True,
 ):
     """
+    Perform all checks.
+
     param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
     """
     skip_aggregates = schema_obj.config.config["skip_aggregates"]

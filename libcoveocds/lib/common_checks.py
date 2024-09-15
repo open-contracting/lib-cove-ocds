@@ -376,7 +376,7 @@ def get_records_aggregates(json_data):
 
 
 def get_bad_ocid_prefixes(json_data):
-    """Yield tuples with ('ocid', 'path/to/ocid') for ocids with malformed prefixes"""
+    """Yield tuples with ('ocid', 'path/to/ocid') for ocids with malformed prefixes."""
     if not isinstance(json_data, dict):
         return []
 
