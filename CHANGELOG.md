@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - `libcoveocds.schema.SchemaOCDS.get_pkg_schema_obj`
   - `libcoveocds.schema.SchemaOCDS.get_schema_obj`
 
+- Drop support for Python 3.8.
+
 ## 0.14.2 (2024-08-23)
 
 ### Changed
@@ -190,7 +192,7 @@ Other changes:
 
 ### Changed
 
-- Drop support for Python 3.6 (end-of-life 2021-12-23).
+- Drop support for Python 3.6.
 
 ### Fixed
 
