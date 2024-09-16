@@ -39,8 +39,8 @@ def context_api_transform(context):
     ]
 
     validation_errors = []
-    for error, path_values in context["validation_errors"]:
-        error = json.loads(error)
+    for json_error, path_values in context["validation_errors"]:
+        error = json.loads(json_error)
         validation_errors.extend(
             {
                 "type": error["message_type"],
