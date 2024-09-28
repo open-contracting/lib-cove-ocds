@@ -9,7 +9,15 @@ def _update_documents_counter(obj, counter):
 
 
 def get_releases_aggregates(json_data):
-    release_count = 0
+    if not isinstance(json_data, dict):
+        return {}
+    releases = json_data.get("releases", [])
+    if not isinstance(releases, list):
+        return {}
+    releases = [release for release in releases if isinstance(release, dict)]
+
+    ### Populated by for-loop
+
     unique_ocids = set()
     tags = collections.Counter()
     unique_lang = set()
@@ -17,7 +25,7 @@ def get_releases_aggregates(json_data):
     unique_release_ids = set()
     duplicate_release_ids = set()
 
-    #  for matching with contracts
+    # for matching with contracts
     unique_award_id = set()
 
     planning_ocids = set()
@@ -34,6 +42,13 @@ def get_releases_aggregates(json_data):
     award_dates = []
     contract_dates = []
 
+    release_tender_item_ids = set()
+    release_award_item_ids = set()
+    release_contract_item_ids = set()
+    unique_item_ids = set()
+
+    ### Populated by process_org()
+
     unique_buyers_identifier = {}
     unique_buyers_name_no_id = set()
     unique_suppliers_identifier = {}
@@ -49,14 +64,10 @@ def get_releases_aggregates(json_data):
     organisation_identifier_contact_point = set()
     organisation_name_no_id_contact_point = set()
 
-    release_tender_item_ids = set()
-    release_award_item_ids = set()
-    release_contract_item_ids = set()
+    # Populated by get_item_scheme()
     item_identifier_schemes = set()
-    unique_item_ids = set()
 
-    unique_currency = set()
-
+    # Populated by/with _update_documents_counter()
     planning_doctype = collections.Counter()
     planning_doc_count = 0
     tender_doctype = collections.Counter()
@@ -101,10 +112,8 @@ def get_releases_aggregates(json_data):
             if scheme:
                 item_identifier_schemes.add(scheme)
 
-    releases = json_data.get("releases", [])
     for release in releases:
         # ### Release Section ###
-        release_count = release_count + 1
         ocid = release.get("ocid")
         release_id = release.get("id")
         if not ocid:
@@ -200,33 +209,6 @@ def get_releases_aggregates(json_data):
                         milestone, implementation_milestones_doctype
                     )
 
-    contracts_without_awards = []
-    for release in releases:
-        for contract in release.get("contracts", []):
-            award_id = contract.get("awardID")
-            if award_id not in unique_award_id:
-                contracts_without_awards.append(contract)
-
-    unique_buyers_count = len(unique_buyers_identifier) + len(unique_buyers_name_no_id)
-    unique_buyers = [f"{name} ({org_id})" for org_id, name in unique_buyers_identifier.items()] + list(
-        unique_buyers_name_no_id
-    )
-
-    unique_suppliers_count = len(unique_suppliers_identifier) + len(unique_suppliers_name_no_id)
-    unique_suppliers = [f"{name} ({org_id})" for org_id, name in unique_suppliers_identifier.items()] + list(
-        unique_suppliers_name_no_id
-    )
-
-    unique_procuring_count = len(unique_procuring_identifier) + len(unique_procuring_name_no_id)
-    unique_procuring = [f"{name} ({org_id})" for org_id, name in unique_procuring_identifier.items()] + list(
-        unique_procuring_name_no_id
-    )
-
-    unique_tenderers_count = len(unique_tenderers_identifier) + len(unique_tenderers_name_no_id)
-    unique_tenderers = [f"{name} ({org_id})" for org_id, name in unique_tenderers_identifier.items()] + list(
-        unique_tenderers_name_no_id
-    )
-
     unique_org_identifier_count = len(
         set(unique_buyers_identifier)
         | set(unique_suppliers_identifier)
@@ -239,7 +221,8 @@ def get_releases_aggregates(json_data):
         | unique_procuring_name_no_id
         | unique_tenderers_name_no_id
     )
-    unique_org_count = unique_org_identifier_count + unique_org_name_count
+
+    unique_currency = set()
 
     def get_currencies(obj):
         if isinstance(obj, dict):
@@ -259,7 +242,7 @@ def get_releases_aggregates(json_data):
     get_currencies(json_data)
 
     return {
-        "release_count": release_count,
+        "release_count": len(releases),
         "unique_ocids": sorted(unique_ocids, key=lambda x: str(x)),
         "unique_initation_type": sorted(unique_initation_type, key=lambda x: str(x)),
         "duplicate_release_ids": sorted(duplicate_release_ids, key=lambda x: str(x)),
@@ -290,17 +273,37 @@ def get_releases_aggregates(json_data):
         "unique_procuring_name_no_id": sorted(unique_procuring_name_no_id, key=lambda x: str(x)),
         "unique_tenderers_identifier": unique_tenderers_identifier,
         "unique_tenderers_name_no_id": sorted(unique_tenderers_name_no_id, key=lambda x: str(x)),
-        "unique_buyers": sorted(set(unique_buyers)),
-        "unique_suppliers": sorted(set(unique_suppliers)),
-        "unique_procuring": sorted(set(unique_procuring)),
-        "unique_tenderers": sorted(set(unique_tenderers)),
-        "unique_buyers_count": unique_buyers_count,
-        "unique_suppliers_count": unique_suppliers_count,
-        "unique_procuring_count": unique_procuring_count,
-        "unique_tenderers_count": unique_tenderers_count,
+        "unique_buyers": sorted(
+            set(
+                [f"{name} ({org_id})" for org_id, name in unique_buyers_identifier.items()]
+                + list(unique_buyers_name_no_id)
+            )
+        ),
+        "unique_suppliers": sorted(
+            set(
+                [f"{name} ({org_id})" for org_id, name in unique_suppliers_identifier.items()]
+                + list(unique_suppliers_name_no_id)
+            )
+        ),
+        "unique_procuring": sorted(
+            set(
+                [f"{name} ({org_id})" for org_id, name in unique_procuring_identifier.items()]
+                + list(unique_procuring_name_no_id)
+            )
+        ),
+        "unique_tenderers": sorted(
+            set(
+                [f"{name} ({org_id})" for org_id, name in unique_tenderers_identifier.items()]
+                + list(unique_tenderers_name_no_id)
+            )
+        ),
+        "unique_buyers_count": len(unique_buyers_identifier) + len(unique_buyers_name_no_id),
+        "unique_suppliers_count": len(unique_suppliers_identifier) + len(unique_suppliers_name_no_id),
+        "unique_procuring_count": len(unique_procuring_identifier) + len(unique_procuring_name_no_id),
+        "unique_tenderers_count": len(unique_tenderers_identifier) + len(unique_tenderers_name_no_id),
         "unique_org_identifier_count": unique_org_identifier_count,
         "unique_org_name_count": unique_org_name_count,
-        "unique_org_count": unique_org_count,
+        "unique_org_count": unique_org_identifier_count + unique_org_name_count,
         "unique_organisation_schemes": sorted(unique_organisation_schemes, key=lambda x: str(x)),
         "organisations_with_address": len(organisation_identifier_address) + len(organisation_name_no_id_address),
         "organisations_with_contact_point": len(organisation_identifier_contact_point)
@@ -328,12 +331,23 @@ def get_releases_aggregates(json_data):
         "contract_doctype": dict(contract_doctype),
         "implementation_doctype": dict(implementation_doctype),
         "implementation_milestones_doctype": dict(implementation_milestones_doctype),
-        "contracts_without_awards": contracts_without_awards,
+        "contracts_without_awards": [
+            contract
+            for release in releases
+            for contract in release.get("contracts", [])
+            if contract.get("awardID") not in unique_award_id
+        ],
     }
 
 
 def get_records_aggregates(json_data):
+    if not isinstance(json_data, dict):
+        return {}
     records = json_data.get("records", [])
+    if not isinstance(records, list):
+        return {}
+    records = [record for record in records if isinstance(record, dict)]
+
     return {
         "count": len(records),
         "unique_ocids": {record["ocid"] for record in records if "ocid" in record},
