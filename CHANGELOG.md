@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+- `libcoveocds.api.ocds_json_output` no longer accepts a `file_type` argument.
 - Reduce use of libcove. These removals might cause errors:
 
   - `ignore_errors` decorator from `get_records_aggregates` and `get_releases_aggregates` functions
