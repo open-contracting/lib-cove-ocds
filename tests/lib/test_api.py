@@ -53,15 +53,13 @@ def test_context_api_transform_validation_additional_fields():
     }
     transform_context = context_api_transform(context)
 
-    validation_errors = zip(transform_context["validation_errors"], expected_context["validation_errors"])
-    for result in validation_errors:
+    for result in zip(transform_context["validation_errors"], expected_context["validation_errors"]):
         assert len(result[0]) == len(result[1])
         for k, v in result[0].items():
             assert result[1][k] == v
     assert len(transform_context["validation_errors"]) == len(expected_context["validation_errors"])
 
-    additional_fields = zip(transform_context["additional_fields"], expected_context["additional_fields"])
-    for result in additional_fields:
+    for result in zip(transform_context["additional_fields"], expected_context["additional_fields"]):
         assert len(result[0]) == len(result[1])
         for k, v in result[0].items():
             assert result[1][k] == v

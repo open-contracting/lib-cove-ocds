@@ -4,7 +4,6 @@ from textwrap import dedent
 
 from jsonschema.exceptions import ValidationError, _RefResolutionError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
-from libcove.lib.tools import decimal_default
 from referencing.exceptions import Unresolvable
 
 from libcoveocds.exceptions import LibCoveOCDSError
@@ -97,8 +96,7 @@ def one_of_draft4(validator, one_of, instance, schema):
         all_errors.extend(errs)
     else:
         err = ValidationError(
-            f"{json.dumps(instance, sort_keys=True, default=decimal_default)} "
-            "is not valid under any of the given schemas",
+            f"{json.dumps(instance, sort_keys=True)} " "is not valid under any of the given schemas",
             context=all_errors,
         )
         err.error_id = "oneOf_any"
@@ -160,8 +158,6 @@ def common_checks_ocds(
         # For example: "PointerToNowhere: '/definitions/Unresolvable' does not exist within {big JSON blob}"
         schema_obj.json_deref_error = re.sub(r" within .+", "", str(e))
         return context
-
-    ignore_errors = bool(common_checks["context"]["validation_errors"])
 
     # Note: Pelican checks whether the OCID prefix is registered.
     ocds_prefixes_bad_format = get_bad_ocid_prefixes(json_data)
@@ -238,9 +234,9 @@ def common_checks_ocds(
 
     if not skip_aggregates:
         if "records" in json_data:
-            context["records_aggregates"] = get_records_aggregates(json_data, ignore_errors=ignore_errors)
+            context["records_aggregates"] = get_records_aggregates(json_data)
         else:
-            context["releases_aggregates"] = get_releases_aggregates(json_data, ignore_errors=ignore_errors)
+            context["releases_aggregates"] = get_releases_aggregates(json_data)
 
     additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
     context["additional_closed_codelist_values"] = {

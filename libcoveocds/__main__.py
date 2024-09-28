@@ -84,7 +84,7 @@ def main(
 
     try:
         result = libcoveocds.api.ocds_json_output(
-            output_dir, filename, schema_version, convert=convert, file_type="json", lib_cove_ocds_config=config
+            output_dir, filename, schema_version, convert=convert, lib_cove_ocds_config=config
         )
     finally:
         if not keep_files:

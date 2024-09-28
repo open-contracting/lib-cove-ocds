@@ -1,10 +1,13 @@
 import collections
 import re
 
-from libcove.lib import tools
+
+def _update_documents_counter(obj, counter):
+    documents = obj.get("documents", [])
+    counter.update(document["documentType"] for document in documents if document.get("documentType"))
+    return len(documents)
 
 
-@tools.ignore_errors
 def get_releases_aggregates(json_data):
     release_count = 0
     unique_ocids = set()
@@ -98,7 +101,7 @@ def get_releases_aggregates(json_data):
             if scheme:
                 item_identifier_schemes.add(scheme)
 
-    releases = tools.get_no_exception(json_data, "releases", [])
+    releases = json_data.get("releases", [])
     for release in releases:
         # ### Release Section ###
         release_count = release_count + 1
@@ -112,60 +115,47 @@ def get_releases_aggregates(json_data):
             unique_release_ids.add(release_id)
 
         unique_ocids.add(release["ocid"])
-        if "tag" in release:
-            tags.update(tools.to_list(release["tag"]))
-        initiation_type = release.get("initiationType")
-        if initiation_type:
+        if tag := release.get("tag"):
+            tags.update(tag if isinstance(tag, list) else [tag])
+        if initiation_type := release.get("initiationType"):
             unique_initation_type.add(initiation_type)
 
-        release_date = release.get("date", "")
-        if release_date:
+        if release_date := release.get("date"):
             release_dates.append(str(release_date))
 
-        if "language" in release:
-            unique_lang.add(release["language"])
-        buyer = release.get("buyer")
-        if buyer:
+        if language := release.get("language"):
+            unique_lang.add(language)
+        if buyer := release.get("buyer"):
             process_org(buyer, unique_buyers_identifier, unique_buyers_name_no_id)
 
         # ### Planning Section ###
-        planning = tools.get_no_exception(release, "planning", {})
+        planning = release.get("planning", {})
         if planning and isinstance(planning, dict):
             planning_ocids.add(ocid)
-            planning_doc_count += tools.update_docs(planning, planning_doctype)
+            planning_doc_count += _update_documents_counter(planning, planning_doctype)
 
         # ### Tender Section ###
-        tender = tools.get_no_exception(release, "tender", {})
+        tender = release.get("tender", {})
         if tender and isinstance(tender, dict):
             tender_ocids.add(ocid)
-            tender_doc_count += tools.update_docs(tender, tender_doctype)
-            tender_period = tender.get("tenderPeriod")
-            if tender_period:
-                start_date = tender_period.get("startDate", "")
-                if start_date:
-                    tender_dates.append(str(start_date))
-            procuring_entity = tender.get("procuringEntity")
-            if procuring_entity:
+            tender_doc_count += _update_documents_counter(tender, tender_doctype)
+            if (tender_period := tender.get("tenderPeriod")) and (start_date := tender_period.get("startDate", "")):
+                tender_dates.append(str(start_date))
+            if procuring_entity := tender.get("procuringEntity"):
                 process_org(procuring_entity, unique_procuring_identifier, unique_procuring_name_no_id)
-            tenderers = tender.get("tenderers", [])
-            for tenderer in tenderers:
+            for tenderer in tender.get("tenderers", []):
                 process_org(tenderer, unique_tenderers_identifier, unique_tenderers_name_no_id)
-            tender_items = tender.get("items", [])
-            for item in tender_items:
-                item_id = item.get("id")
-                if item_id:
+            for item in tender.get("items", []):
+                if item_id := item.get("id"):
                     unique_item_ids.add(item_id)
                 if item_id and release_id:
                     release_tender_item_ids.add((ocid, release_id, item_id))
                 get_item_scheme(item)
-            milestones = tender.get("milestones")
-            if milestones:
-                for milestone in milestones:
-                    tender_milestones_doc_count += tools.update_docs(milestone, tender_milestones_doctype)
+            for milestone in tender.get("milestones", []):
+                tender_milestones_doc_count += _update_documents_counter(milestone, tender_milestones_doctype)
 
         # ### Award Section ###
-        awards = tools.get_no_exception(release, "awards", [])
-        for award in awards:
+        for award in release.get("awards", []):
             if not isinstance(award, dict):
                 continue
             award_id = award.get("id")
@@ -173,59 +163,46 @@ def get_releases_aggregates(json_data):
             if award_id:
                 unique_award_id.add(award_id)
                 awardid_ocids.add((award_id, ocid))
-            award_date = award.get("date", "")
-            if award_date:
+            if award_date := award.get("date", ""):
                 award_dates.append(str(award_date))
-            award_items = award.get("items", [])
-            for item in award_items:
-                item_id = item.get("id")
-                if item_id:
+            for item in award.get("items", []):
+                if item_id := item.get("id"):
                     unique_item_ids.add(item_id)
                 if item_id and release_id and award_id:
                     release_award_item_ids.add((ocid, release_id, award_id, item_id))
                 get_item_scheme(item)
-            suppliers = award.get("suppliers", [])
-            for supplier in suppliers:
+            for supplier in award.get("suppliers", []):
                 process_org(supplier, unique_suppliers_identifier, unique_suppliers_name_no_id)
-            award_doc_count += tools.update_docs(award, award_doctype)
+            award_doc_count += _update_documents_counter(award, award_doctype)
 
         # ### Contract section
-        contracts = tools.get_no_exception(release, "contracts", [])
-        for contract in contracts:
+        for contract in release.get("contracts", []):
             contract_id = contract.get("id")
             contract_ocids.add(ocid)
             if contract_id:
                 contractid_ocids.add((contract_id, ocid))
-            period = contract.get("period")
-            if period:
-                start_date = period.get("startDate", "")
-                if start_date:
-                    contract_dates.append(start_date)
-            contract_items = contract.get("items", [])
-            for item in contract_items:
-                item_id = item.get("id")
-                if item_id:
+            if (period := contract.get("period")) and (start_date := period.get("startDate", "")):
+                contract_dates.append(start_date)
+            for item in contract.get("items", []):
+                if item_id := item.get("id"):
                     unique_item_ids.add(item_id)
                 if item_id and release_id and contract_id:
                     release_contract_item_ids.add((ocid, release_id, contract_id, item_id))
                 get_item_scheme(item)
-            contract_doc_count += tools.update_docs(contract, contract_doctype)
-            implementation = contract.get("implementation")
-            if implementation:
+            contract_doc_count += _update_documents_counter(contract, contract_doctype)
+            if implementation := contract.get("implementation"):
                 implementation_ocids.add(ocid)
                 if contract_id:
                     implementation_contractid_ocids.add((contract_id, ocid))
-                implementation_doc_count += tools.update_docs(implementation, implementation_doctype)
-                implementation_milestones = implementation.get("milestones", [])
-                for milestone in implementation_milestones:
-                    implementation_milestones_doc_count += tools.update_docs(
+                implementation_doc_count += _update_documents_counter(implementation, implementation_doctype)
+                for milestone in implementation.get("milestones", []):
+                    implementation_milestones_doc_count += _update_documents_counter(
                         milestone, implementation_milestones_doctype
                     )
 
     contracts_without_awards = []
     for release in releases:
-        contracts = release.get("contracts", [])
-        for contract in contracts:
+        for contract in release.get("contracts", []):
             award_id = contract.get("awardID")
             if award_id not in unique_award_id:
                 contracts_without_awards.append(contract)
@@ -355,23 +332,11 @@ def get_releases_aggregates(json_data):
     }
 
 
-@tools.ignore_errors
 def get_records_aggregates(json_data):
-    # Unique ocids
-    unique_ocids = set()
-
-    if "records" in json_data:
-        for record in json_data["records"]:
-            # Gather all the ocids
-            if "ocid" in record:
-                unique_ocids.add(record["ocid"])
-
-    # Number of records
-    count = len(json_data["records"]) if "records" in json_data else 0
-
+    records = json_data.get("records", [])
     return {
-        "count": count,
-        "unique_ocids": unique_ocids,
+        "count": len(records),
+        "unique_ocids": {record["ocid"] for record in records if "ocid" in record},
     }
 
 
@@ -392,8 +357,7 @@ def get_bad_ocid_prefixes(json_data):
             return ocid
         return None
 
-    records = json_data.get("records")
-    if records:
+    if records := json_data.get("records"):
         bad_prefixes = []
         if isinstance(records, list):
             for i, record in enumerate(records):
@@ -414,8 +378,7 @@ def get_bad_ocid_prefixes(json_data):
                     bad_prefixes.append((ocid, f"records/{i}/compiledRelease/ocid"))
         return bad_prefixes
 
-    releases = json_data.get("releases")
-    if releases:
+    if releases := json_data.get("releases"):
         bad_prefixes = []
         if isinstance(releases, list):
             for j, release in enumerate(releases):
