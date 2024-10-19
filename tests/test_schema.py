@@ -65,6 +65,19 @@ def test_pass_config_1(record_pkg):
         (None, {"version": "1.bad"}, DEFAULT_OCDS_VERSION, False, True, {}),
         (None, {"extensions": ["a", "b"]}, "1.1", False, False, {"a": {}, "b": {}}),
         (None, {"version": "1.1", "extensions": ["a", "b"]}, "1.1", False, False, {"a": {}, "b": {}}),
+        # falsy invalid_version_data
+        (None, {"version": None}, "1.1", False, True, {}),
+        (None, {"version": False}, "1.1", False, True, {}),
+        (None, {"version": 0}, "1.1", False, True, {}),
+        (None, {"version": 0.0}, "1.1", False, True, {}),
+        (None, {"version": []}, "1.1", False, True, {}),
+        (None, {"version": {}}, "1.1", False, True, {}),
+        # truthy invalid_version_data
+        (None, {"version": True}, "1.1", False, True, {}),
+        (None, {"version": 1}, "1.1", False, True, {}),
+        (None, {"version": 1.1}, "1.1", False, True, {}),
+        (None, {"version": [1]}, "1.1", False, True, {}),
+        (None, {"version": {"1": "1"}}, "1.1", False, True, {}),
     ],
 )
 def test_schema_ocds_constructor(
