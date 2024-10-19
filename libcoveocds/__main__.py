@@ -39,7 +39,7 @@ class SetEncoder(json.JSONEncoder):
 @click.option(
     "--additional-checks", default="all", type=click.Choice(CHECKS), help="The set of additional checks to perform"
 )
-@click.option("--skip-aggregates", is_flag=True, help="Skip releases_aggregates and records_aggregates")
+@click.option("--skip-aggregates", is_flag=True, help="Skip count and unique_ocids_count")
 @click.option(
     "--standard-zip",
     type=click.Path(exists=True, dir_okay=False),

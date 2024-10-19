@@ -1,5 +1,6 @@
 import json
 import re
+import typing
 from textwrap import dedent
 
 from jsonschema.exceptions import ValidationError, _RefResolutionError
@@ -8,7 +9,7 @@ from referencing.exceptions import Unresolvable
 
 from libcoveocds.exceptions import LibCoveOCDSError
 from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
-from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_records_aggregates, get_releases_aggregates
+from libcoveocds.lib.common_checks import get_bad_ocid_prefixes
 
 try:
     import bleach
@@ -144,7 +145,7 @@ def common_checks_ocds(
     """
     Perform all checks.
 
-    param skip_aggregates: whether to skip "releases_aggregates" and "records_aggregates"
+    param skip_aggregates: whether to skip "count" and "unique_ocids_count"
     """
     skip_aggregates = schema_obj.config.config["skip_aggregates"]
     additional_checks = CHECKS[schema_obj.config.config["additional_checks"]]
@@ -232,11 +233,21 @@ def common_checks_ocds(
 
     context.update(common_checks["context"])
 
-    if not skip_aggregates:
-        if "records" in json_data:
-            context["records_aggregates"] = get_records_aggregates(json_data)
-        else:
-            context["releases_aggregates"] = get_releases_aggregates(json_data)
+    if not skip_aggregates and isinstance(json_data, dict):
+        count = 0
+        unique_ocids = set()
+
+        releases_or_records = json_data.get("records", []) or json_data.get("releases", [])
+        if isinstance(releases_or_records, list):
+            for release_or_record in releases_or_records:
+                if not isinstance(release_or_record, dict):
+                    continue
+                count += 1
+                if (ocid := release_or_record.get("ocid")) and isinstance(ocid, typing.Hashable):
+                    unique_ocids.add(release_or_record["ocid"])
+
+        context["count"] = count
+        context["unique_ocids_count"] = len(unique_ocids)
 
     additional_codelist_values = get_additional_codelist_values(schema_obj, json_data)
     context["additional_closed_codelist_values"] = {

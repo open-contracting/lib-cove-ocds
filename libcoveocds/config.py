@@ -35,7 +35,7 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     #
     # Which additional checks to perform ("all" or "none", per libcoveocds.lib.additional_checks.CHECKS).
     "additional_checks": "all",
-    # Whether to add "releases_aggregates" and "records_aggregates" to the context.
+    # Whether to add "count" and "unique_ocids_count" to the context.
     "skip_aggregates": False,
     # The context in which lib-cove-ocds is used ("web" or "api").
     "context": "web",
