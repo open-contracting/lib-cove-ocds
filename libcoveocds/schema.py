@@ -78,15 +78,18 @@ class SchemaOCDS:
                 self.missing_package = True
             if not select_version:
                 package_version = package_data.get("version")
-                if package_version:
-                    if package_version in self.version_choices:
-                        self.version = package_version
-                    elif self.api:
-                        raise OCDSVersionError(
-                            f"The version in the data is not one of {', '.join(self.version_choices)}"
-                        )
-                    else:
-                        self.invalid_version_data = True
+                if isinstance(package_version, str):
+                    if package_version:
+                        if package_version in self.version_choices:
+                            self.version = package_version
+                        elif self.api:
+                            raise OCDSVersionError(
+                                f"The version in the data is not one of {', '.join(self.version_choices)}"
+                            )
+                        else:
+                            self.invalid_version_data = True
+                else:
+                    self.invalid_version_data = True
 
             extensions = package_data.get("extensions")
             if isinstance(extensions, list):
