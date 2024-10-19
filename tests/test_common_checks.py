@@ -37,6 +37,8 @@ def test_basic_1():
         shutil.rmtree(output_dir)
 
     assert results["version_used"] == "1.1"
+    assert results["count"] == 1
+    assert results["unique_ocids_count"] == 1
 
 
 def test_dupe_ids_1():
@@ -55,6 +57,8 @@ def test_dupe_ids_1():
     # test paths
     assert results["validation_errors"][0][1][0]["path"] == "releases"
     assert results["validation_errors"][0][1][1]["path"] == "releases"
+    assert results["count"] == 4
+    assert results["unique_ocids_count"] == 1
     # test values
     # we don't know what order they will come out in, so fix the order ourselves
     values = [
@@ -536,15 +540,15 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
 
     results = libcoveocds.common_checks.common_checks_ocds({"file_type": "json"}, output_dir, json_data, schema)
 
-    validation_errors = results["validation_errors"]
+    validation_error_jsons = results["validation_errors"]
 
-    validation_error_jsons = []
-    for validation_error_json, values in validation_errors:
-        validation_error_json = json.loads(validation_error_json)
-        validation_error_json["values"] = values
+    validation_errors = []
+    for validation_error_json, values in validation_error_jsons:
+        validation_error = json.loads(validation_error_json)
+        validation_error["values"] = values
         # Remove this as it can be a rather large schema object
-        del validation_error_json["validator_value"]
-        validation_error_jsons.append(validation_error_json)
+        del validation_error["validator_value"]
+        validation_errors.append(validation_error)
 
     def strip_nones(list_of_dicts):
         return [{key: value for key, value in a_dict.items() if value is not None} for a_dict in list_of_dicts]
@@ -554,7 +558,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
             for key in ("docs_ref", "message_safe", "schema_description_safe", "schema_title"):
                 validation_error_json.pop(key, None)
 
-    assert strip_nones(validation_error_jsons) == strip_nones(validation_error_jsons_expected)
+    assert strip_nones(validation_errors) == strip_nones(validation_error_jsons_expected)
 
 
 def test_ref_error(tmpdir):
