@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Removed
+
+- Remove `libcoveocds.schema.SchemaOCDS` attributes. Callers can check these conditions directly.
+
+  - `missing_package`: Check whether the package data's `releases` or `records` field is set.
+  - `invalid_version_argument`: Check whether the `select_version` argument is valid.
+  - `invalid_version_data`: Check whether the package data's `version` field is valid.
+
 ## 0.17.0 (2024-10-19)
 
 ### Removed

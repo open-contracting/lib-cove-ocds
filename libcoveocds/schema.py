@@ -29,10 +29,13 @@ class SchemaOCDS:
         """
         Build the schema object using an specific OCDS schema version.
 
-        The version used will be select_version, package_data.get('version') or
-        default version, in that order. Invalid version choices in select_version or
-        package_data will be skipped and registered as self.invalid_version_argument
-        and self.invalid_version_data respectively.
+        The version used will be select_version, package_data.get('version') or default version, in that order.
+        Invalid version choices in select_version or package_data will be skipped.
+
+        .. attention::
+
+           This class is vulnerable to server-side request forgery (SSRF). A user can create a release package or
+           record package whose extension URLs point to internal resources, which would receive a GET request.
         """
         # The main configuration object.
         self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
@@ -46,15 +49,10 @@ class SchemaOCDS:
         self.version_choices = self.config.config["schema_version_choices"]
         # lib-cove uses version in common_checks_context() via getattr() to determine whether to set
         # "version_display_choices" and "version_used_display".
-        # cove-ocds uses version, e.g. when a user changes the version to validate against.
         self.version = self.config.config["schema_version"]
 
         # Report errors in web UI.
-        self.missing_package = False
         self.json_deref_error = None  # str
-        # Errors are raised instead in API context.
-        self.invalid_version_argument = False
-        self.invalid_version_data = False
 
         # The selected version overrides the default version and the data version.
         if select_version:
@@ -64,9 +62,7 @@ class SchemaOCDS:
                 raise OCDSVersionError(
                     f"select_version: {select_version} is not one of {', '.join(self.version_choices)}"
                 )
-            else:
-                self.invalid_version_argument = True
-                # If invalid, use other strategies.
+            else:  # If invalid, use other strategies.
                 select_version = None
 
         # lib-cove uses extensions in common_checks_context() for "extensions"."extensions".
@@ -74,21 +70,12 @@ class SchemaOCDS:
         # cove-ocds uses extensions to render extension-related information.
         self.extensions = {}
         if isinstance(package_data, dict):
-            if "releases" not in package_data and "records" not in package_data:
-                self.missing_package = True
             if not select_version and "version" in package_data:
                 package_version = package_data["version"]
-                if not isinstance(package_version, str):
-                    self.invalid_version_data = True
-                elif package_version:
-                    if package_version in self.version_choices:
-                        self.version = package_version
-                    elif self.api:
-                        raise OCDSVersionError(
-                            f"The version in the data is not one of {', '.join(self.version_choices)}"
-                        )
-                    else:
-                        self.invalid_version_data = True
+                if isinstance(package_version, str) and package_version in self.version_choices:
+                    self.version = package_version
+                elif self.api:
+                    raise OCDSVersionError(f"The version in the data is not one of {', '.join(self.version_choices)}")
 
             extensions = package_data.get("extensions")
             if isinstance(extensions, list):

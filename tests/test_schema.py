@@ -53,44 +53,40 @@ def test_pass_config_1(record_pkg):
 
 
 @pytest.mark.parametrize(
-    ("select_version", "package_data", "version", "invalid_version_argument", "invalid_version_data", "extensions"),
+    ("select_version", "package_data", "version", "extensions"),
     [
-        (None, None, DEFAULT_OCDS_VERSION, False, False, {}),
-        ("1.0", None, "1.0", False, False, {}),
-        (None, {"version": "1.1"}, "1.1", False, False, {}),
-        (None, {"version": "1.1", "extensions": ["c", "d"]}, "1.1", False, False, {"c": {}, "d": {}}),
-        ("1.1", {"version": "1.0"}, "1.1", False, False, {}),
-        ("1.bad", {"version": "1.1"}, "1.1", True, False, {}),
-        ("1.wrong", {"version": "1.bad"}, DEFAULT_OCDS_VERSION, True, True, {}),
-        (None, {"version": "1.bad"}, DEFAULT_OCDS_VERSION, False, True, {}),
-        (None, {"extensions": ["a", "b"]}, "1.1", False, False, {"a": {}, "b": {}}),
-        (None, {"version": "1.1", "extensions": ["a", "b"]}, "1.1", False, False, {"a": {}, "b": {}}),
-        # falsy invalid_version_data
-        (None, {"version": None}, "1.1", False, True, {}),
-        (None, {"version": False}, "1.1", False, True, {}),
-        (None, {"version": 0}, "1.1", False, True, {}),
-        (None, {"version": 0.0}, "1.1", False, True, {}),
-        (None, {"version": []}, "1.1", False, True, {}),
-        (None, {"version": {}}, "1.1", False, True, {}),
-        # truthy invalid_version_data
-        (None, {"version": True}, "1.1", False, True, {}),
-        (None, {"version": 1}, "1.1", False, True, {}),
-        (None, {"version": 1.1}, "1.1", False, True, {}),
-        (None, {"version": [1]}, "1.1", False, True, {}),
-        (None, {"version": {"1": "1"}}, "1.1", False, True, {}),
+        (None, None, DEFAULT_OCDS_VERSION, {}),
+        ("1.0", None, "1.0", {}),
+        (None, {"version": "1.1"}, "1.1", {}),
+        (None, {"version": "1.1", "extensions": ["http://c", "http://d"]}, "1.1", {"http://c": {}, "http://d": {}}),
+        ("1.1", {"version": "1.0"}, "1.1", {}),
+        ("1.bad", {"version": "1.1"}, "1.1", {}),
+        ("1.wrong", {"version": "1.bad"}, DEFAULT_OCDS_VERSION, {}),
+        (None, {"version": "1.bad"}, DEFAULT_OCDS_VERSION, {}),
+        (None, {"extensions": ["http://a", "http://b"]}, "1.1", {"http://a": {}, "http://b": {}}),
+        (None, {"version": "1.1", "extensions": ["http://a", "http://b"]}, "1.1", {"http://a": {}, "http://b": {}}),
+        # falsy version
+        (None, {"version": None}, "1.1", {}),
+        (None, {"version": False}, "1.1", {}),
+        (None, {"version": 0}, "1.1", {}),
+        (None, {"version": 0.0}, "1.1", {}),
+        (None, {"version": []}, "1.1", {}),
+        (None, {"version": {}}, "1.1", {}),
+        # truthy version
+        (None, {"version": True}, "1.1", {}),
+        (None, {"version": 1}, "1.1", {}),
+        (None, {"version": 1.1}, "1.1", {}),
+        (None, {"version": [1]}, "1.1", {}),
+        (None, {"version": {"1": "1"}}, "1.1", {}),
     ],
 )
-def test_schema_ocds_constructor(
-    select_version, package_data, version, invalid_version_argument, invalid_version_data, extensions
-):
+def test_schema_ocds_constructor(select_version, package_data, version, extensions):
     schema = libcoveocds.schema.SchemaOCDS(select_version=select_version, package_data=package_data)
     base_url = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version_choices"][version][1]
     url = f"{base_url}release-package-schema.json"
 
     assert schema.version == version
     assert schema.pkg_schema_url == url
-    assert schema.invalid_version_argument == invalid_version_argument
-    assert schema.invalid_version_data == invalid_version_data
     assert schema.extensions == extensions
 
 
@@ -104,7 +100,7 @@ def test_schema_ocds_constructor(
         (
             {"version": "1.1", "extensions": [UNSUPPORTED_PROTOCOL_EXT]},
             {UNSUPPORTED_PROTOCOL_EXT: {}},
-            {UNSUPPORTED_PROTOCOL_EXT: "fetching failed"},
+            {UNSUPPORTED_PROTOCOL_EXT: "URI scheme is not http or https"},
             False,
             False,
         ),
