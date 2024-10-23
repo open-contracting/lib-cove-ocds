@@ -8,7 +8,6 @@ from pathlib import Path
 import click
 
 from libcoveocds.common_checks import common_checks_ocds
-from libcoveocds.config import LibCoveOCDSConfig
 from libcoveocds.lib.additional_checks import CHECKS
 from libcoveocds.lib.api import context_api_transform
 from libcoveocds.schema import SchemaOCDS
@@ -58,9 +57,6 @@ def main(
     if standard_zip:
         standard_zip = f"file://{standard_zip}"
 
-    lib_cove_ocds_config = LibCoveOCDSConfig()
-    lib_cove_ocds_config.config["standard_zip"] = standard_zip
-
     if output_dir:
         if output_dir.exists():
             if delete:
@@ -80,7 +76,7 @@ def main(
             json_data = json.loads(f.read())
 
         schema_obj = SchemaOCDS(
-            schema_version, json_data, lib_cove_ocds_config, record_pkg="records" in json_data, api=True
+            schema_version, json_data, record_pkg="records" in json_data, api=True, standard_base_url=standard_zip
         )
 
         context = {"file_type": "json"}

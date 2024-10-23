@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - `context`: Pass `api=True` to `libcoveocds.common_checks.common_checks_ocds` and `libcoveocds.schema.SchemaOCDS`.
   - `current_language`: Pass `language` to `libcoveocds.schema.SchemaOCDS`.
   - `skip_aggregates`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
+  - `standard_zip`: Pass `standard_base_url` to `libcoveocds.schema.SchemaOCDS`.
   - `convert_titles`
   - `flatten_tool`
   - `root_id`

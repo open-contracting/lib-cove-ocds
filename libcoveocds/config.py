@@ -15,8 +15,6 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
         # version: codelist_dir,
         "1.1": "https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/",
     },
-    # Path to ZIP file of standard repository.
-    "standard_zip": None,
 }
 
 # Set default schema version to the latest version

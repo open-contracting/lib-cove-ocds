@@ -38,6 +38,7 @@ class SchemaOCDS:
         record_pkg=False,
         api=False,
         language="en",
+        standard_base_url=None,
     ):
         """
         Build the schema object using an specific OCDS schema version.
@@ -107,7 +108,7 @@ class SchemaOCDS:
 
         tag = self.version_choices[self.version][2]
         #: The profile builder instance for this package's extensions.
-        self.builder = ProfileBuilder(tag, list(self.extensions), standard_base_url=self.config.config["standard_zip"])
+        self.builder = ProfileBuilder(tag, list(self.extensions), standard_base_url=standard_base_url)
         # Initialize extensions once and preserve locale caches.
         self.builder_extensions = list(self.builder.extensions())
 
