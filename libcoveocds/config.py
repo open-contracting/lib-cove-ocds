@@ -15,8 +15,6 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
         # version: codelist_dir,
         "1.1": "https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/",
     },
-    # The language key to use to read extension metadata.
-    "current_language": "en",
     # Path to ZIP file of standard repository.
     "standard_zip": None,
 }

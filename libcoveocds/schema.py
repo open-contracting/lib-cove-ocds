@@ -30,7 +30,14 @@ logger = logging.getLogger(__name__)
 # https://beta.ruff.rs/docs/rules/cached-instance-method/
 class SchemaOCDS:
     def __init__(
-        self, select_version=None, package_data=None, lib_cove_ocds_config=None, *, record_pkg=False, api=False
+        self,
+        select_version=None,
+        package_data=None,
+        lib_cove_ocds_config=None,
+        *,
+        record_pkg=False,
+        api=False,
+        language="en",
     ):
         """
         Build the schema object using an specific OCDS schema version.
@@ -47,6 +54,8 @@ class SchemaOCDS:
         self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
         # Whether used in an API context.
         self.api = api
+        #: The language key to use to read extension metadata.
+        self.language = language
 
         # lib-cove uses codelists in get_additional_codelist_values() for "codelist_url".
         self.codelists = self.config.config["schema_codelists"]["1.1"]
@@ -286,7 +295,7 @@ class SchemaOCDS:
         # The ocds_babel.translate.translate() makes these substitutions for published files.
         return json.loads(
             self.builder.get_standard_file_contents(name)
-            .replace("{{lang}}", self.config.config["current_language"])
+            .replace("{{lang}}", self.language)
             .replace("{{version}}", self.version)
         )
 
@@ -365,8 +374,6 @@ class SchemaOCDS:
             else:
                 warnings.warn_explicit(w.message, w.category, w.filename, w.lineno, source=w.source)
 
-        language = self.config.config["current_language"]
-
         for extension in self.builder_extensions:
             input_url = extension.input_url
 
@@ -397,7 +404,7 @@ class SchemaOCDS:
 
                 for field in ("name", "description", "documentationUrl"):
                     language_map = metadata[field]
-                    details[field] = language_map.get(language, language_map.get("en", ""))
+                    details[field] = language_map.get(self.language, language_map.get("en", ""))
 
                 # In a web context, set the details only if metadata is available, otherwise cove-ocds' present
                 # behavior to create an empty list item for the extension.

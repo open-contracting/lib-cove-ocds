@@ -11,8 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Remove `libcoveocds.api`.
 - Remove Flatten Tool integration.
-
-  - Remove `--convert` flag from CLI. Use [flatten-tool](https://flatten-tool.readthedocs.io/en/latest/), instead. For example,
+  - Remove `--convert` flag from CLI. Use [flatten-tool](https://flatten-tool.readthedocs.io/en/latest/), instead. For example:
 
     ```bash
     pip install flatten-tool ocdsextensionregistry
@@ -34,6 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Remove `libcoveocds.config.LibCoveOCDSConfig` options:
   - `additional_checks`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
   - `context`: Pass `api=True` to `libcoveocds.common_checks.common_checks_ocds` and `libcoveocds.schema.SchemaOCDS`.
+  - `current_language`: Pass `language` to `libcoveocds.schema.SchemaOCDS`.
   - `skip_aggregates`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
   - `convert_titles`
   - `flatten_tool`
