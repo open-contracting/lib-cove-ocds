@@ -19,11 +19,6 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     "current_language": "en",
     # Path to ZIP file of standard repository.
     "standard_zip": None,
-    #
-    # lib-cove-ocds options
-    #
-    # The context in which lib-cove-ocds is used ("web" or "api").
-    "context": "web",
 }
 
 # Set default schema version to the latest version

@@ -3,11 +3,7 @@ import os.path
 import libcoveocds.common_checks
 import libcoveocds.config
 
-if libcoveocds.common_checks.WEB_EXTRA_INSTALLED:
-    CONFIG = None
-else:
-    CONFIG = libcoveocds.config.LibCoveOCDSConfig()
-    CONFIG.config["context"] = "api"
+CONFIG = None if libcoveocds.common_checks.WEB_EXTRA_INSTALLED else libcoveocds.config.LibCoveOCDSConfig()
 
 
 def fixture_path(*paths):

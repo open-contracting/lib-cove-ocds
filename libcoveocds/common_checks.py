@@ -135,7 +135,15 @@ def _lookup_schema(schema, path, ref_info=None):
 
 
 def common_checks_ocds(
-    context, upload_dir, json_data, schema_obj, *, cache=True, additional_checks="all", skip_aggregates=False
+    context,
+    upload_dir,
+    json_data,
+    schema_obj,
+    *,
+    cache=True,
+    api=False,
+    additional_checks="all",
+    skip_aggregates=False,
 ):
     """
     Perform all checks.
@@ -148,7 +156,7 @@ def common_checks_ocds(
     # Pass "-" as the schema name. The associated logic is not required by lib-cove-ocds.
     try:
         common_checks = common_checks_context(
-            upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=schema_obj.api, cache=cache
+            upload_dir, json_data, schema_obj, "-", context, fields_regex=True, api=api, cache=cache
         )
     except (Unresolvable, _RefResolutionError) as e:
         # For example: "PointerToNowhere: '/definitions/Unresolvable' does not exist within {big JSON blob}"
@@ -160,7 +168,7 @@ def common_checks_ocds(
     if ocds_prefixes_bad_format:
         context["conformance_errors"] = {"ocds_prefixes_bad_format": ocds_prefixes_bad_format}
 
-    if not schema_obj.api and not WEB_EXTRA_INSTALLED:
+    if not api and not WEB_EXTRA_INSTALLED:
         raise LibCoveOCDSError(
             dedent(
                 """
@@ -170,18 +178,14 @@ def common_checks_ocds(
 
                     pip install libcoveocds[web]
 
-                To use libcoveocds in an API context, set the context on the configuration:
-
-                    lib_cove_ocds_config = libcoveocds.config.LibCoveOCDSConfig()
-                    lib_cove_ocds_config.config["context"] = "api"
-                    schema_obj = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=lib_cove_ocds_config)
+                To use libcoveocds in an API context, pass api=True to SchemaOCDS() and common_checks_ocds().
                 """
             )
         )
     # If called in an API context:
     # - Skip the schema description and reference URL for OCID prefix conformance errors.
     # - Skip the formatted message, schema title, schema description and reference URL for validation errors.
-    if not schema_obj.api:
+    if not api:
         if "conformance_errors" in context:
             ocid_description = schema_obj.get_schema_obj()["properties"]["ocid"]["description"]
             # The last sentence of the `ocid` description is assumed to contain a guidance URL in all OCDS versions.

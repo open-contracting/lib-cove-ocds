@@ -29,7 +29,9 @@ logger = logging.getLogger(__name__)
 # the entire process.
 # https://beta.ruff.rs/docs/rules/cached-instance-method/
 class SchemaOCDS:
-    def __init__(self, select_version=None, package_data=None, lib_cove_ocds_config=None, *, record_pkg=False):
+    def __init__(
+        self, select_version=None, package_data=None, lib_cove_ocds_config=None, *, record_pkg=False, api=False
+    ):
         """
         Build the schema object using an specific OCDS schema version.
 
@@ -44,7 +46,7 @@ class SchemaOCDS:
         # The main configuration object.
         self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
         # Whether used in an API context.
-        self.api = self.config.config["context"] == "api"
+        self.api = api
 
         # lib-cove uses codelists in get_additional_codelist_values() for "codelist_url".
         self.codelists = self.config.config["schema_codelists"]["1.1"]

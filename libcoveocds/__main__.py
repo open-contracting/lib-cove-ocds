@@ -60,7 +60,6 @@ def main(
 
     lib_cove_ocds_config = LibCoveOCDSConfig()
     lib_cove_ocds_config.config["standard_zip"] = standard_zip
-    lib_cove_ocds_config.config["context"] = "api"
 
     if output_dir:
         if output_dir.exists():
@@ -80,7 +79,9 @@ def main(
         with open(filename, "rb") as f:
             json_data = json.loads(f.read())
 
-        schema_obj = SchemaOCDS(schema_version, json_data, lib_cove_ocds_config, record_pkg="records" in json_data)
+        schema_obj = SchemaOCDS(
+            schema_version, json_data, lib_cove_ocds_config, record_pkg="records" in json_data, api=True
+        )
 
         context = {"file_type": "json"}
 
@@ -93,6 +94,7 @@ def main(
                 schema_obj,
                 # common_checks_context(cache=True) caches the results to a file, which is not needed in API context.
                 cache=False,
+                api=True,
                 additional_checks=additional_checks,
                 skip_aggregates=skip_aggregates,
             )

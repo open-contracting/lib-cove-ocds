@@ -19,10 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     ocdsextensionregistry patched-release-schema my-release-package.json > schema.json
     flatten-tool flatten --root-id=ocid --root-list-path=releases --output-format=xlsx --use-titles --schema=schema.json my-release-package.json
     ```
-
   - Remove `convert` argument from `libcoveocds.api.ocds_json_output`.
-  - Remove related configuration from `libcoveocds.config`.
-
 - Remove `libcoveocds.schema.SchemaOCDS` attributes. Callers can calculate these directly.
 
   - `missing_package`: Check whether the package data's `releases` or `records` field is set.
@@ -36,7 +33,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     ```
 - Remove `libcoveocds.config.LibCoveOCDSConfig` options:
   - `additional_checks`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
+  - `context`: Pass `api=True` to `libcoveocds.common_checks.common_checks_ocds` and `libcoveocds.schema.SchemaOCDS`.
   - `skip_aggregates`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
+  - `convert_titles`
+  - `flatten_tool`
+  - `root_id`
+  - `root_list_path`
 
 ## 0.17.0 (2024-10-19)
 
