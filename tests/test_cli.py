@@ -3,18 +3,61 @@ import os
 import shutil
 import tempfile
 
+import pytest
 from click.testing import CliRunner
 
 from libcoveocds.__main__ import main
+from libcoveocds.exceptions import OCDSVersionError
 
 
-def test_basic():
+@pytest.mark.parametrize(
+    ("data", "exception", "expected"),
+    [
+        (
+            "{[,]}",
+            json.JSONDecodeError,
+            (
+                "unexpected character: line 1 column 2 (char 1)",
+                "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",  # orjson
+                "Key name must be string at char: line 1 column 2 (char 1)",  # pypy
+            ),
+        ),
+        (
+            '{"version": "1.bad"}',
+            OCDSVersionError,
+            ("The version in the data is not one of 1.0, 1.1",),
+        ),
+    ],
+)
+def test_failure(data, exception, expected, tmpdir):
+    path = os.path.join(tmpdir, "bad_data.json")
+    with open(path, "w") as f:
+        f.write(data)
+
     runner = CliRunner()
-    result = runner.invoke(main, [os.path.join("tests", "fixtures", "common_checks", "basic_1.json")])
+    result = runner.invoke(main, [path])
+
+    assert result.exit_code == 1
+    assert result.output == ""
+    assert result.exc_info[0] is exception
+    assert str(result.exc_info[1]) in expected
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        os.path.join("tests", "fixtures", "common_checks", "basic_1.json"),
+        os.path.join("tests", "fixtures", "api", "basic_1.json"),
+        os.path.join("tests", "fixtures", "api", "basic_record_package.json"),
+    ],
+)
+def test_success(path):
+    runner = CliRunner()
+    result = runner.invoke(main, [path])
     data = json.loads(result.output)
 
     assert result.exit_code == 0
-    assert data.get("version_used") == "1.1"
+    assert data["validation_errors"] == []
 
 
 def test_old_schema():
@@ -22,10 +65,6 @@ def test_old_schema():
     result = runner.invoke(main, ["-s", "1.0", os.path.join("tests", "fixtures", "common_checks", "basic_1.json")])
 
     assert result.exit_code == 0
-
-    data = json.loads(result.output)
-
-    assert data.get("version_used") == "1.0"
 
 
 def test_set_output_dir():
@@ -60,9 +99,6 @@ def test_set_output_dir_and_delete():
 
     assert result.exit_code == 0
 
-    data = json.loads(result.output)
-
-    assert data.get("version_used") == "1.1"
     assert sorted(os.listdir(output_dir)) == sorted(expected_files)
 
     shutil.rmtree(output_dir)
@@ -82,9 +118,6 @@ def test_set_output_dir_and_delete_and_exclude():
 
     assert result.exit_code == 0
 
-    data = json.loads(result.output)
-
-    assert data.get("version_used") == "1.1"
     assert sorted(os.listdir(output_dir)) == sorted(expected_files)
 
     shutil.rmtree(output_dir)

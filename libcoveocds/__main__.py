@@ -7,9 +7,11 @@ from pathlib import Path
 
 import click
 
-import libcoveocds.api
+from libcoveocds.common_checks import common_checks_ocds
 from libcoveocds.config import LibCoveOCDSConfig
 from libcoveocds.lib.additional_checks import CHECKS
+from libcoveocds.lib.api import context_api_transform
+from libcoveocds.schema import SchemaOCDS
 
 
 class SetEncoder(json.JSONEncoder):
@@ -24,8 +26,7 @@ class SetEncoder(json.JSONEncoder):
 @click.option(
     "-s",
     "--schema-version",
-    type=click.Choice(LibCoveOCDSConfig().config["schema_version_choices"]),
-    help="Version of the schema to validate the data, eg '1.0'",
+    help="OCDS version againsts which to validate, like '1.0' (defaults to version declared in data)",
 )
 @click.option(
     "-o",
@@ -57,11 +58,11 @@ def main(
     if standard_zip:
         standard_zip = f"file://{standard_zip}"
 
-    config = LibCoveOCDSConfig()
-    config.config["standard_zip"] = standard_zip
-    config.config["additional_checks"] = additional_checks
-    config.config["skip_aggregates"] = skip_aggregates
-    config.config["context"] = "api"
+    lib_cove_ocds_config = LibCoveOCDSConfig()
+    lib_cove_ocds_config.config["standard_zip"] = standard_zip
+    lib_cove_ocds_config.config["additional_checks"] = additional_checks
+    lib_cove_ocds_config.config["skip_aggregates"] = skip_aggregates
+    lib_cove_ocds_config.config["context"] = "api"
 
     if output_dir:
         if output_dir.exists():
@@ -71,18 +72,39 @@ def main(
                 sys.exit(f"Directory {output_dir} already exists")
         output_dir.mkdir(parents=True)
 
+        # Including the file helps when batch processing.
         if not exclude_file:
             shutil.copy2(filename, output_dir)
     else:
         output_dir = tempfile.mkdtemp(prefix="lib-cove-ocds-cli-", dir=tempfile.gettempdir())
 
     try:
-        result = libcoveocds.api.ocds_json_output(output_dir, filename, schema_version, lib_cove_ocds_config=config)
+        with open(filename, "rb") as f:
+            json_data = json.loads(f.read())
+
+        schema_obj = SchemaOCDS(schema_version, json_data, lib_cove_ocds_config, record_pkg="records" in json_data)
+
+        context = {"file_type": "json"}
+
+        # context is edited in-place.
+        context_api_transform(
+            common_checks_ocds(
+                context,
+                output_dir,
+                json_data,
+                schema_obj,
+                # common_checks_context(cache=True) caches the results to a file, which is not needed in API context.
+                cache=False,
+            )
+        )
+
+        if schema_obj.json_deref_error:
+            context["json_deref_error"] = schema_obj.json_deref_error
     finally:
         if not output_dir:
             shutil.rmtree(output_dir)
 
-    output = json.dumps(result, indent=2, cls=SetEncoder)
+    output = json.dumps(context, indent=2, cls=SetEncoder)
     if output_dir:
         with open(os.path.join(output_dir, "results.json"), "w") as f:
             f.write(output)

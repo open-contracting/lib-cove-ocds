@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+- Remove `libcoveocds.api`.
 - Remove Flatten Tool integration.
 
   - Remove `--convert` flag from CLI. Use [flatten-tool](https://flatten-tool.readthedocs.io/en/latest/), instead. For example,

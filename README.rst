@@ -50,33 +50,7 @@ To use this as a Python library as part of a Python script for validating multip
 
       pip install libcoveocds[web]
 
-2. Use it in your Python code, for example:
-
-   .. code-block:: python
-
-      import os
-      import shutil
-      import tempfile
-
-      from libcoveocds.api import ocds_json_output
-
-
-      data_directory = "path/to/your/directory/with/json/files"
-      temporary_directory = tempfile.mkdtemp(dir=tempfile.gettempdir())
-
-      for filename in os.listdir(data_directory):
-          path = os.path.join(data_directory, filename)
-          try:
-              result = ocds_json_output(temporary_directory, path, file_type="json")
-         finally:
-             shutil.rmtree(temporary_directory)
-
-          # Do something with the result. For example:
-          if result["validation_errors"]:
-              for error in result["validation_errors"]:
-                  print(f"Validation error {error} found in {path}")
-          else:
-              print(f"No validation errors found for {path}")
+2. Use it in your Python code. See ``libcoveocds.__main__``, for example.
 
 Code for use by external users
 ------------------------------
