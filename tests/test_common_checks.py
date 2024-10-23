@@ -8,10 +8,10 @@ import pytest
 import libcoveocds.common_checks
 import libcoveocds.exceptions
 import libcoveocds.schema
-from tests import CONFIG, fixture_path
+from tests import fixture_path
 
 
-@pytest.mark.skipif(not CONFIG, reason="not in API context")
+@pytest.mark.skipif(libcoveocds.common_checks.WEB_EXTRA_INSTALLED, reason="in web context")
 def test_bad_context():
     output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
     schema = libcoveocds.schema.SchemaOCDS()
@@ -27,7 +27,7 @@ def test_bad_context():
 
 def test_basic_1():
     output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=CONFIG)
+    schema = libcoveocds.schema.SchemaOCDS()
     with open(fixture_path("fixtures", "common_checks", "basic_1.json")) as fp:
         json_data = json.load(fp)
 
@@ -43,7 +43,7 @@ def test_basic_1():
 
 def test_dupe_ids_1():
     output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(lib_cove_ocds_config=CONFIG)
+    schema = libcoveocds.schema.SchemaOCDS()
     with open(fixture_path("fixtures", "common_checks", "dupe_ids_1.json")) as fp:
         json_data = json.load(fp)
 
@@ -534,7 +534,7 @@ def test_dupe_ids_1():
 )
 def test_validation_release_or_record_package(record_pkg, filename, validation_error_jsons_expected, schema_subdir):
     output_dir = tempfile.mkdtemp(prefix="libcoveocds-tests-", dir=tempfile.gettempdir())
-    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, lib_cove_ocds_config=CONFIG)
+    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg)
     with open(os.path.join(fixture_path("fixtures", "common_checks", schema_subdir, ""), filename)) as fp:
         json_data = json.load(fp)
 
@@ -553,7 +553,7 @@ def test_validation_release_or_record_package(record_pkg, filename, validation_e
     def strip_nones(list_of_dicts):
         return [{key: value for key, value in a_dict.items() if value is not None} for a_dict in list_of_dicts]
 
-    if CONFIG:  # if in API context
+    if not libcoveocds.common_checks.WEB_EXTRA_INSTALLED:
         for validation_error_json in validation_error_jsons_expected:
             for key in ("docs_ref", "message_safe", "schema_description_safe", "schema_title"):
                 validation_error_json.pop(key, None)

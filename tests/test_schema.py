@@ -1,14 +1,11 @@
-import copy
 import json
 
 import pytest
-from libcove.lib.common import get_additional_codelist_values
 
-import libcoveocds.config
 import libcoveocds.schema
+from libcoveocds.common_checks import get_additional_codelist_values
 from tests import fixture_path
 
-DEFAULT_OCDS_VERSION = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version"]
 METRICS_EXT = (
     "https://raw.githubusercontent.com/open-contracting-extensions/ocds_metrics_extension/master/extension.json"
 )
@@ -36,12 +33,7 @@ def test_basic_1(record_pkg):
 
 @pytest.mark.parametrize("record_pkg", [False, True])
 def test_pass_config_1(record_pkg):
-    config = copy.deepcopy(libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT)
-    config["schema_version"] = "1.0"
-
-    lib_cove_ocds_config = libcoveocds.config.LibCoveOCDSConfig(config=config)
-
-    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, lib_cove_ocds_config=lib_cove_ocds_config)
+    schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, select_version="1.0")
 
     assert schema.version == "1.0"
     if record_pkg:
@@ -53,14 +45,14 @@ def test_pass_config_1(record_pkg):
 @pytest.mark.parametrize(
     ("select_version", "package_data", "version", "extensions"),
     [
-        (None, None, DEFAULT_OCDS_VERSION, {}),
+        (None, None, libcoveocds.schema.DEFAULT_VERSION, {}),
         ("1.0", None, "1.0", {}),
         (None, {"version": "1.1"}, "1.1", {}),
         (None, {"version": "1.1", "extensions": ["http://c", "http://d"]}, "1.1", {"http://c": {}, "http://d": {}}),
         ("1.1", {"version": "1.0"}, "1.1", {}),
         ("1.bad", {"version": "1.1"}, "1.1", {}),
-        ("1.wrong", {"version": "1.bad"}, DEFAULT_OCDS_VERSION, {}),
-        (None, {"version": "1.bad"}, DEFAULT_OCDS_VERSION, {}),
+        ("1.wrong", {"version": "1.bad"}, libcoveocds.schema.DEFAULT_VERSION, {}),
+        (None, {"version": "1.bad"}, libcoveocds.schema.DEFAULT_VERSION, {}),
         (None, {"extensions": ["http://a", "http://b"]}, "1.1", {"http://a": {}, "http://b": {}}),
         (None, {"version": "1.1", "extensions": ["http://a", "http://b"]}, "1.1", {"http://a": {}, "http://b": {}}),
         # falsy version
@@ -80,11 +72,9 @@ def test_pass_config_1(record_pkg):
 )
 def test_schema_ocds_constructor(select_version, package_data, version, extensions):
     schema = libcoveocds.schema.SchemaOCDS(select_version=select_version, package_data=package_data)
-    base_url = libcoveocds.config.LIB_COVE_OCDS_CONFIG_DEFAULT["schema_version_choices"][version][1]
-    url = f"{base_url}release-package-schema.json"
 
     assert schema.version == version
-    assert schema.pkg_schema_url == url
+    assert schema.pkg_schema_url == f"https://standard.open-contracting.org/{version}/en/release-package-schema.json"
     assert schema.extensions == extensions
 
 

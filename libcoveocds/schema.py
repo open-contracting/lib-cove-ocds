@@ -19,10 +19,12 @@ from ocdsextensionregistry.exceptions import (
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 from referencing import Registry, Resource
 
-import libcoveocds.config
 from libcoveocds.exceptions import OCDSVersionError
 
 logger = logging.getLogger(__name__)
+
+VERSION_TAGS = {"1.0": "1__0__3", "1.1": "1__1__5"}
+DEFAULT_VERSION = "1.1"
 
 
 # Note: Using lru_cache on instance methods can lead to memory leaks. However, we generally do want these to survive
@@ -33,7 +35,6 @@ class SchemaOCDS:
         self,
         select_version=None,
         package_data=None,
-        lib_cove_ocds_config=None,
         *,
         record_pkg=False,
         api=False,
@@ -51,8 +52,6 @@ class SchemaOCDS:
            This class is vulnerable to server-side request forgery (SSRF). A user can create a release package or
            record package whose extension URLs point to internal resources, which would receive a GET request.
         """
-        # The main configuration object.
-        self.config = lib_cove_ocds_config or libcoveocds.config.LibCoveOCDSConfig()
         # Whether used in an API context.
         self.api = api
         #: The language key to use to read extension metadata.
@@ -60,24 +59,17 @@ class SchemaOCDS:
 
         # lib-cove uses codelists in get_additional_codelist_values() for "codelist_url".
         self.codelists = self.config.config["schema_codelists"]["1.1"]
-        # lib-cove uses version_choices in common_checks_context() via getattr() for "version_display_choices" and
-        # "version_used_display". Re-used in this file for convenience.
-        self.version_choices = self.config.config["schema_version_choices"]
-        # lib-cove uses version in common_checks_context() via getattr() to determine whether to set
-        # "version_display_choices" and "version_used_display".
-        self.version = self.config.config["schema_version"]
+        self.version = DEFAULT_VERSION
 
         # Report errors in web UI.
         self.json_deref_error = None  # str
 
         # The selected version overrides the default version and the data version.
         if select_version:
-            if select_version in self.version_choices:
+            if select_version in VERSION_TAGS:
                 self.version = select_version
             elif self.api:
-                raise OCDSVersionError(
-                    f"select_version: {select_version} is not one of {', '.join(self.version_choices)}"
-                )
+                raise OCDSVersionError(f"select_version: {select_version} is not one of {', '.join(VERSION_TAGS)}")
             else:  # If invalid, use other strategies.
                 select_version = None
 
@@ -88,27 +80,28 @@ class SchemaOCDS:
         if isinstance(package_data, dict):
             if not select_version and "version" in package_data:
                 package_version = package_data["version"]
-                if isinstance(package_version, str) and package_version in self.version_choices:
+                if isinstance(package_version, str) and package_version in VERSION_TAGS:
                     self.version = package_version
                 elif self.api:
-                    raise OCDSVersionError(f"The version in the data is not one of {', '.join(self.version_choices)}")
+                    raise OCDSVersionError(f"The version in the data is not one of {', '.join(VERSION_TAGS)}")
 
             extensions = package_data.get("extensions")
             if isinstance(extensions, list):
                 self.extensions = {extension: {} for extension in extensions if isinstance(extension, str)}
 
-        base_url = self.version_choices[self.version][1]
+        self.base_url = f"https://standard.open-contracting.org/{self.version}/{self.language}/"
         # Used in get_pkg_schema_obj() to determine which package to return.
         if record_pkg:
             self.package_schema_name = "record-package-schema.json"
         else:
             self.package_schema_name = "release-package-schema.json"
         # lib-cove uses pkg_schema_url in common_checks_context() for "schema_url".
-        self.pkg_schema_url = urljoin(base_url, self.package_schema_name)
+        self.pkg_schema_url = urljoin(self.base_url, self.package_schema_name)
 
-        tag = self.version_choices[self.version][2]
         #: The profile builder instance for this package's extensions.
-        self.builder = ProfileBuilder(tag, list(self.extensions), standard_base_url=standard_base_url)
+        self.builder = ProfileBuilder(
+            VERSION_TAGS[self.version], list(self.extensions), standard_base_url=standard_base_url
+        )
         # Initialize extensions once and preserve locale caches.
         self.builder_extensions = list(self.builder.extensions())
 
@@ -242,7 +235,7 @@ class SchemaOCDS:
             self.builder.get_standard_file_contents("versioned-release-validation-schema.json")
         )
 
-        tag = self.version_choices[self.version][2]
+        tag = VERSION_TAGS[self.version]
 
         return Registry().with_resources(
             [
