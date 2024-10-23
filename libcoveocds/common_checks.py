@@ -135,20 +135,15 @@ def _lookup_schema(schema, path, ref_info=None):
 
 
 def common_checks_ocds(
-    context,
-    upload_dir,
-    json_data,
-    schema_obj,
-    *,
-    cache=True,
+    context, upload_dir, json_data, schema_obj, *, cache=True, additional_checks="all", skip_aggregates=False
 ):
     """
     Perform all checks.
 
-    param skip_aggregates: whether to skip "count" and "unique_ocids_count"
+    :param additional_checks: which additional checks to perform ("all" or "none")
+    :param skip_aggregates: whether to skip adding "count" and "unique_ocids_count" to the context
     """
-    skip_aggregates = schema_obj.config.config["skip_aggregates"]
-    additional_checks = CHECKS[schema_obj.config.config["additional_checks"]]
+    additional_checks = CHECKS[additional_checks]
 
     # Pass "-" as the schema name. The associated logic is not required by lib-cove-ocds.
     try:

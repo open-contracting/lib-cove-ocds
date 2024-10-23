@@ -60,8 +60,6 @@ def main(
 
     lib_cove_ocds_config = LibCoveOCDSConfig()
     lib_cove_ocds_config.config["standard_zip"] = standard_zip
-    lib_cove_ocds_config.config["additional_checks"] = additional_checks
-    lib_cove_ocds_config.config["skip_aggregates"] = skip_aggregates
     lib_cove_ocds_config.config["context"] = "api"
 
     if output_dir:
@@ -95,6 +93,8 @@ def main(
                 schema_obj,
                 # common_checks_context(cache=True) caches the results to a file, which is not needed in API context.
                 cache=False,
+                additional_checks=additional_checks,
+                skip_aggregates=skip_aggregates,
             )
         )
 

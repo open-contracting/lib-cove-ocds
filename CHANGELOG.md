@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     ```python
     urljoin(schema_obj.version_choices[schema_obj.version][2], "release-schema.json")
     ```
+- Remove `libcoveocds.config.LibCoveOCDSConfig` options:
+  - `additional_checks`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
+  - `skip_aggregates`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
 
 ## 0.17.0 (2024-10-19)
 
