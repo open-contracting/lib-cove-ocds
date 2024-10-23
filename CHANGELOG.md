@@ -14,32 +14,33 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
-- Remove `libcoveocds.api`.
-- Remove Flatten Tool integration.
-  - Remove `--convert` flag from CLI. Use [flatten-tool](https://flatten-tool.readthedocs.io/en/latest/), instead. For example:
+- Remove Flatten Tool integration, including `--convert` CLI flag. Use [flatten-tool](https://flatten-tool.readthedocs.io/en/latest/), instead. For example:
 
-    ```bash
-    pip install flatten-tool ocdsextensionregistry
-    ocdsextensionregistry patched-release-schema my-release-package.json > schema.json
-    flatten-tool flatten --root-id=ocid --root-list-path=releases --output-format=xlsx --use-titles --schema=schema.json my-release-package.json
-    ```
-  - Remove `convert` argument from `libcoveocds.api.ocds_json_output`.
-- Remove `lib_cove_ocds_config` argument and `config` attribute from `libcoveocds.schema.SchemaOCDS`.
-- Remove `libcoveocds.schema.SchemaOCDS` attributes. Callers can calculate these directly.
+  ```bash
+  pip install flatten-tool ocdsextensionregistry
+  ocdsextensionregistry patched-release-schema my-release-package.json > schema.json
+  flatten-tool flatten --root-id=ocid --root-list-path=releases --output-format=xlsx --use-titles --schema=schema.json my-release-package.json
+  ```
+
+- Remove `libcoveocds.api`. Adapt `libcoveocds.__main__`, instead.
+
+- Remove `libcoveocds.schema.SchemaOCDS` attributes:
   - `extended_schema_file`: Use [ProfileBuilder](https://ocdsextensionregistry.readthedocs.io/en/latest/api/profile_builder.html) or [patched-release-schema](https://ocdsextensionregistry.readthedocs.io/en/latest/cli.html#patched-release-schema) from [ocdsextensionregistry](https://ocdsextensionregistry.readthedocs.io/en/latest/).
-  - `invalid_version_argument`: Check whether the `select_version` argument is valid.
-  - `invalid_version_data`: Check whether the package data's `version` field is valid.
-  - `missing_package`: Check whether the package data's `releases` or `records` field is set.
+  - `invalid_version_argument`: Use `select_version not in libcoveocds.schema.VERSION_TAGS`.
+  - `invalid_version_data`: Use `not isinstance(package["version"], str) or package["version"] not in libcoveocds.schema.VERSION_TAGS`.
+  - `missing_package`: Use `"releases" not in package and "records" not in package`.
   - `schema_url`: Use `urljoin(schema_obj.base_url, "release-schema.json")`.
-  - `version_choices`: Use `libcoveocds.schema.VERSION_TAGS`.
+  - `version_choices`: Use `libcoveocds.schema.VERSION_TAGS` or `libcoveocds.schema.SchemaOCDS.base_url`.
+
 - Remove `libcoveocds.config.LibCoveOCDSConfig`:
+  - Remove `lib_cove_ocds_config` argument and `config` attribute from `libcoveocds.schema.SchemaOCDS`.
   - `additional_checks`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
   - `context`: Pass `api=True` to `libcoveocds.common_checks.common_checks_ocds` and `libcoveocds.schema.SchemaOCDS`.
   - `current_language`: Pass `language` to `libcoveocds.schema.SchemaOCDS`.
-  - `skip_aggregates`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
   - `schema_codelists`: Use `"https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/"`.
   - `schema_version_choices`: Use `libcoveocds.schema.VERSION_TAGS` or `libcoveocds.schema.SchemaOCDS.base_url`.
   - `schema_version`: Use `libcoveocds.schema.DEFAULT_VERSION`.
+  - `skip_aggregates`: Pass as keyword argument to `libcoveocds.common_checks.common_checks_ocds`.
   - `standard_zip`: Pass `standard_base_url` to `libcoveocds.schema.SchemaOCDS`.
   - `convert_titles`
   - `flatten_tool`
