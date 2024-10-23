@@ -121,63 +121,62 @@ Note that this list will exclude codelist errors, which instead appear in ``addi
 
 lib-cove-ocds uses the ``jsonschema`` module's ``uniqueItems`` validator to check for unique OCIDs and IDs.
 
-======================= =========== ========
-Property (key) name     Type        Value
-======================= =========== ========
-``type``                string      The JSON Schema keyword that caused the validation error, e.g. ``minLength`` (`full list in the jsonschema lib <https://github.com/Julian/jsonschema/blob/9b6a9f5/jsonschema/validators.py#L321-L345>`_), unless the keyword is ``type`` or ``format``, in which case this is the relevant `type <https://datatracker.ietf.org/doc/html/draft-zyp-json-schema-04#section-3.5>`_ or `format <https://datatracker.ietf.org/doc/html/draft-fge-json-schema-validation-00#section-7.3>`_, e.g. ``array`` or ``date-time``
-``field``               string      The JSON Pointer to the erroneous data, with array indices removed, e.g. ``releases/tender/items``
-``description``         string      A human-readable error message, e.g. ``'id' is missing but required within 'items'``
-``path``                string      The JSON Pointer to the erroneous data, e.g. ``releases/0/tender/items/0``
-``value``               any         The value in the data that was erroneous, or ``""`` if not applicable
-======================= =========== ========
+==================== ====== =====
+Property (key) name  Type   Value
+==================== ====== =====
+``type``             string The JSON Schema keyword that caused the validation error, e.g. ``minLength`` (`full list in the jsonschema lib <https://github.com/Julian/jsonschema/blob/9b6a9f5/jsonschema/validators.py#L321-L345>`_), unless the keyword is ``type`` or ``format``, in which case this is the relevant `type <https://datatracker.ietf.org/doc/html/draft-zyp-json-schema-04#section-3.5>`_ or `format <https://datatracker.ietf.org/doc/html/draft-fge-json-schema-validation-00#section-7.3>`_, e.g. ``array`` or ``date-time``
+``field``            string The JSON Pointer to the erroneous data, with array indices removed, e.g. ``releases/tender/items``
+``description``      string A human-readable error message, e.g. ``'id' is missing but required within 'items'``
+``path``             string The JSON Pointer to the erroneous data, e.g. ``releases/0/tender/items/0``
+``value``            any    The value in the data that was erroneous, or ``""`` if not applicable
+==================== ====== =====
 
 deprecated_fields
 ^^^^^^^^^^^^^^^^^
 
-======================================= =========================== ==============
-Property (key) name	                Type                        Value
-======================================= =========================== ==============
-``paths``                               array[string]               An array of JSON Pointers to parent objects containing deprecated fields, e.g. ``["releases/0/tender"]``
-``explanation``                         array[string]               A pair of the version in which the field was deprecated, and the human-readable deprecation message, e.g. ``["1.1", "Some explanation text"]``
-``field``                               string                      The name of the field within the parent object that is deprecated, e.g. ``amendment``
-======================================= =========================== ==============
+=================== ============= =====
+Property (key) name Type          Value
+=================== ============= =====
+``paths``           array[string] An array of JSON Pointers to parent objects containing deprecated fields, e.g. ``["releases/0/tender"]``
+``explanation``     array[string] A pair of the version in which the field was deprecated, and the human-readable deprecation message, e.g. ``["1.1", "Some explanation text"]``
+``field``           string        The name of the field within the parent object that is deprecated, e.g. ``amendment``
+=================== ============= =====
 
 additional codelist object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-=========================== ======================= ============
-Property (key) name	    Type                    Value
-=========================== ======================= ============
-``path``                    string                  The JSON Pointer to the parent object, with array indices removed, e.g. ``releases/tender/documents``
-``field``                   string                  The name of the codelist field, e.g. ``documentType`` 
-``codelist``                string                  The filename of the codelist, e.g. ``documentType.csv``
-``codelist_url``            string                  The URL of the codelist, e.g. ``https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/documentType.csv``
-``codelist_amend_urls``     array[array[string]     The URLs of the codelist patches in extensions that modify the codelist, as an array of pairs of ``+`` or ``-`` and the URL, e.g. ``[["+", "https://raw.githubusercontent.com/open-contracting-extensions/ocds_tariffs_extension/d9df2969030b0a555c24c7db685262c714b4da24/codelists/+documentType.csv"]]``
-``isopen``                  boolean                 Is this an open codelist?
-``values``                  array*                  Values of the field that are not in the codelist
-``extension_codelist``      boolean                 Is the codelist added by an extension? (Not only modified by it)
-=========================== ======================= ============
+======================= =================== =====
+Property (key) name     Type                Value
+======================= =================== =====
+``path``                string              The JSON Pointer to the parent object, with array indices removed, e.g. ``releases/tender/documents``
+``field``               string              The name of the codelist field, e.g. ``documentType``
+``codelist``            string              The filename of the codelist, e.g. ``documentType.csv``
+``codelist_url``        string              The URL of the codelist, e.g. ``https://raw.githubusercontent.com/open-contracting/standard/1.1/schema/codelists/documentType.csv``
+``codelist_amend_urls`` array[array[string] The URLs of the codelist patches in extensions that modify the codelist, as an array of pairs of ``+`` or ``-`` and the URL, e.g. ``[["+", "https://raw.githubusercontent.com/open-contracting-extensions/ocds_tariffs_extension/d9df2969030b0a555c24c7db685262c714b4da24/codelists/+documentType.csv"]]``
+``isopen``              boolean             Is this an open codelist?
+``values``              array*              Values of the field that are not in the codelist
+``extension_codelist``  boolean             Is the codelist added by an extension? (Not only modified by it)
+======================= =================== =====
 
 additional check object
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-=========================== ===================== ==============
-Property (key) name	    Type                  Value
-=========================== ===================== ==============
-``json_location``           string                A JSON Pointer to the problematic data, e.g. ``releases/0/buyer``
-=========================== ===================== ==============
-
+=================== ====== =====
+Property (key) name Type   Value
+=================== ====== =====
+``json_location``   string A JSON Pointer to the problematic data, e.g. ``releases/0/buyer``
+=================== ====== =====
 
 conformance_errors
 ^^^^^^^^^^^^^^^^^^
 
-=============================== ======================= =====
-Property (key) name	        Type                    Value
-=============================== ======================= =====
-``ocds_prefixes_bad_format``    array[array[string]]    An array of pairs of a bad ``ocid`` value and the JSON Pointer to it, e.g. ``["MY-ID", "releases/0/ocid"]``
-``ocid_description``            string                  The description of the ``ocid`` field from the OCDS schema
-``ocid_info_url``               string                  The URL to the identifiers content in the OCDS documentation
-=============================== ======================= =====
+============================ ==================== =====
+Property (key) name          Type                 Value
+============================ ==================== =====
+``ocds_prefixes_bad_format`` array[array[string]] An array of pairs of a bad ``ocid`` value and the JSON Pointer to it, e.g. ``["MY-ID", "releases/0/ocid"]``
+``ocid_description``         string               The description of the ``ocid`` field from the OCDS schema
+``ocid_info_url``            string               The URL to the identifiers content in the OCDS documentation
+============================ ==================== =====
 
 additional_fields
 ^^^^^^^^^^^^^^^^^
@@ -193,16 +192,16 @@ Property (key) name	      Type      Value
 all_additional_fields
 ^^^^^^^^^^^^^^^^^^^^^
 
-=================================== =========== ==============
-Property (key) name	            Type        Value
-=================================== =========== ==============
-``count``                           integer     The number of times the additional field is set
-``examples``                        array*      A sample of up to 3 values of the field
-``root_additional_field``           boolean     Is the parent object described by the schema?
-``additional_field_descendance``    object      The additional fields that are descendants of this field. Is only set if ``root_additional_field`` is true. A mapping from an additional field's JSON Pointer (with array indices removed) to an all_additional_fields_ object in which ``root_additional_field`` is false
-``path``                            string      The JSON Pointer to the parent object, with array indices removed, e.g. ``/releases/tender``
-``field_name``                      string      The name of the additional field, e.g. ``myField``
-=================================== =========== ==============
+================================ ======= =====
+Property (key) name              Type    Value
+================================ ======= =====
+``count``                        integer The number of times the additional field is set
+``examples``                     array*  A sample of up to 3 values of the field
+``root_additional_field``        boolean Is the parent object described by the schema?
+``additional_field_descendance`` object  The additional fields that are descendants of this field. Is only set if ``root_additional_field`` is true. A mapping from an additional field's JSON Pointer (with array indices removed) to an all_additional_fields_ object in which ``root_additional_field`` is false
+``path``                         string  The JSON Pointer to the parent object, with array indices removed, e.g. ``/releases/tender``
+``field_name``                   string  The name of the additional field, e.g. ``myField``
+================================ ======= =====
 
 array\*
 ^^^^^^^
