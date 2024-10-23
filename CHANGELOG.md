@@ -9,11 +9,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
-- Remove `libcoveocds.schema.SchemaOCDS` attributes. Callers can check these conditions directly.
+- Remove Flatten Tool integration.
+
+  - Remove `--convert` flag from CLI. Use [flatten-tool](https://flatten-tool.readthedocs.io/en/latest/), instead. For example,
+
+    ```bash
+    pip install flatten-tool ocdsextensionregistry
+    ocdsextensionregistry patched-release-schema my-release-package.json > schema.json
+    flatten-tool flatten --root-id=ocid --root-list-path=releases --output-format=xlsx --use-titles --schema=schema.json my-release-package.json
+    ```
+
+  - Remove `convert` argument from `libcoveocds.api.ocds_json_output`.
+  - Remove related configuration from `libcoveocds.config`.
+
+- Remove `libcoveocds.schema.SchemaOCDS` attributes. Callers can calculate these directly.
 
   - `missing_package`: Check whether the package data's `releases` or `records` field is set.
   - `invalid_version_argument`: Check whether the `select_version` argument is valid.
   - `invalid_version_data`: Check whether the package data's `version` field is valid.
+  - `extended_schema_file`: Use [ProfileBuilder](https://ocdsextensionregistry.readthedocs.io/en/latest/api/profile_builder.html) or [patched-release-schema](https://ocdsextensionregistry.readthedocs.io/en/latest/cli.html#patched-release-schema) from [ocdsextensionregistry](https://ocdsextensionregistry.readthedocs.io/en/latest/).
+  - `schema_url`: Equivalent to:
+
+    ```python
+    urljoin(schema_obj.version_choices[schema_obj.version][2], "release-schema.json")
+    ```
 
 ## 0.17.0 (2024-10-19)
 

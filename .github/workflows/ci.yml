@@ -25,9 +25,7 @@ jobs:
           sudo apt update
           sudo apt install libxml2-dev libxslt-dev
       - run: pip install .[test]
-      # https://github.com/OpenDataServices/flatten-tool/pull/458
-      - run: pytest -W error -W ignore::DeprecationWarning:ijson.compat
+      - run: pytest -W error
       - run: pip install .[web]
-      # https://github.com/OpenDataServices/flatten-tool/pull/458
-      - run: coverage run --source=libcoveocds -m pytest -W error -W ignore::DeprecationWarning:ijson.compat
+      - run: coverage run --source=libcoveocds -m pytest -W error
       - uses: coverallsapp/github-action@v2

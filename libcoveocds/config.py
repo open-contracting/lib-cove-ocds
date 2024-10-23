@@ -20,17 +20,6 @@ LIB_COVE_OCDS_CONFIG_DEFAULT = {
     # Path to ZIP file of standard repository.
     "standard_zip": None,
     #
-    # Flatten Tool options
-    #
-    # Used by lib-cove in convert_spreadsheet() and convert_json() via ocds_json_output().
-    "root_list_path": "releases",
-    "root_id": "ocid",
-    "convert_titles": False,
-    "flatten_tool": {
-        "disable_local_refs": True,
-        "remove_empty_schema_columns": True,
-    },
-    #
     # lib-cove-ocds options
     #
     # Which additional checks to perform ("all" or "none", per libcoveocds.lib.additional_checks.CHECKS).

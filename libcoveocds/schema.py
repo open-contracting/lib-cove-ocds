@@ -1,7 +1,6 @@
 import functools
 import json
 import logging
-import os
 import warnings
 import zipfile
 from collections import defaultdict
@@ -11,7 +10,12 @@ from urllib.parse import urljoin
 import jsonref
 import requests
 from libcove.lib.common import get_schema_codelist_paths, schema_dict_fields_generator
-from ocdsextensionregistry.exceptions import DoesNotExist, ExtensionCodelistWarning, ExtensionWarning
+from ocdsextensionregistry.exceptions import (
+    DoesNotExist,
+    ExtensionCodelistWarning,
+    ExtensionWarning,
+    UnsupportedSchemeError,
+)
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 from referencing import Registry, Resource
 
@@ -82,8 +86,6 @@ class SchemaOCDS:
                 self.extensions = {extension: {} for extension in extensions if isinstance(extension, str)}
 
         base_url = self.version_choices[self.version][1]
-        # cove-ocds and the CLI uses schema_url as a fallback to extended_schema_file, to convert between formats.
-        self.schema_url = urljoin(base_url, "release-schema.json")
         # Used in get_pkg_schema_obj() to determine which package to return.
         if record_pkg:
             self.package_schema_name = "record-package-schema.json"
@@ -111,9 +113,6 @@ class SchemaOCDS:
         # If `self.extensions` is falsy, this logic can be skipped.
         # cove-ocds uses extended_schema_url to "Get a copy of the schema with extension patches applied".
         self.extended_schema_url = None
-        # lib-cove uses extended_schema_file in get_schema_validation_errors() to call CustomRefResolver(), if extended
-        # is set. The CLI uses extended_schema_file to convert between formats, and falls back to schema_url.
-        self.extended_schema_file = None
 
     @staticmethod
     def _codelist_codes(codelist):
@@ -224,7 +223,7 @@ class SchemaOCDS:
         # The cove-ocds test with tenders_releases_1_release_with_extension_broken_json_ref.json fails, otherwise.
         release_schema = self.get_schema_obj()
         # get_schema_validation_errors() needs "isCodelist" properties. See _add_is_codelist(). This property is
-        # undesirable elsewhere, like in create_extended_schema_file().
+        # undesirable elsewhere, if using the extended schema for other purposes.
         self._add_is_codelist(release_schema)
 
         versioned_release_schema = json.loads(
@@ -403,6 +402,8 @@ class SchemaOCDS:
                 self.extensions[input_url] = details
             except DoesNotExist:
                 self.invalid_extension[input_url] = "404: not found"
+            except UnsupportedSchemeError as e:
+                self.invalid_extension[input_url] = str(e)
             except requests.HTTPError as e:
                 self.invalid_extension[input_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
             except requests.RequestException:
@@ -422,24 +423,3 @@ class SchemaOCDS:
     @functools.lru_cache  # noqa: B019
     def get_pkg_schema_fields(self):
         return set(schema_dict_fields_generator(self.get_pkg_schema_obj(deref=True)))
-
-    # This is always called with an `if schema_ocds.extensions` guard.
-    def create_extended_schema_file(self, upload_dir, upload_url):
-        basename = "extended_schema.json"
-        path = os.path.join(upload_dir, basename)
-
-        # Always replace any existing extended schema file
-        if os.path.exists(path):
-            os.remove(path)
-            self.extended_schema_file = None
-            self.extended_schema_url = None
-
-        schema = self.get_schema_obj()
-        if not self.extended:
-            return
-
-        with open(path, "w") as f:
-            json.dump(schema, f, ensure_ascii=False, indent=2)
-            f.write("\n")
-        self.extended_schema_file = path
-        self.extended_schema_url = urljoin(upload_url, basename)

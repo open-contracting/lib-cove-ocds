@@ -88,31 +88,3 @@ def test_set_output_dir_and_delete_and_exclude():
     assert sorted(os.listdir(output_dir)) == sorted(expected_files)
 
     shutil.rmtree(output_dir)
-
-
-def test_set_output_dir_and_convert():
-    output_dir = tempfile.mkdtemp(
-        prefix="lib-cove-ocds-tests-",
-        dir=tempfile.gettempdir(),
-    )
-    runner = CliRunner()
-    result = runner.invoke(
-        main, ["-c", "-d", "-o", output_dir, os.path.join("tests", "fixtures", "common_checks", "basic_1.json")]
-    )
-    # Should have results file and original file and the converted files
-    expected_files = ["basic_1.json", "flattened", "flattened.ods", "flattened.xlsx", "results.json"]
-
-    assert result.exit_code == 0
-
-    data = json.loads(result.output)
-
-    assert data.get("version_used") == "1.1"
-    assert sorted(os.listdir(output_dir)) == sorted(expected_files)
-    # Flattened should be a directory of csv's.
-    # We aren't going to check names fully
-    # That would leave this test brittle if flatten-tools naming scheme changed,
-    # so we will just check extension
-    for filename in os.listdir(os.path.join(output_dir, "flattened")):
-        assert filename.endswith(".csv")
-
-    shutil.rmtree(output_dir)

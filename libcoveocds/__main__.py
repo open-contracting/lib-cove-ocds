@@ -27,7 +27,6 @@ class SetEncoder(json.JSONEncoder):
     type=click.Choice(LibCoveOCDSConfig().config["schema_version_choices"]),
     help="Version of the schema to validate the data, eg '1.0'",
 )
-@click.option("-c", "--convert", is_flag=True, help="Convert FILENAME to CSV, ODS and Excel files")
 @click.option(
     "-o",
     "--output-dir",
@@ -48,7 +47,6 @@ class SetEncoder(json.JSONEncoder):
 def main(
     filename,
     output_dir,
-    convert,
     schema_version,
     delete,
     exclude_file,
@@ -65,11 +63,7 @@ def main(
     config.config["skip_aggregates"] = skip_aggregates
     config.config["context"] = "api"
 
-    keep_files = convert or output_dir
-    if keep_files:
-        if not output_dir:
-            output_dir = Path(Path(filename).stem)
-
+    if output_dir:
         if output_dir.exists():
             if delete:
                 shutil.rmtree(output_dir)
@@ -83,15 +77,13 @@ def main(
         output_dir = tempfile.mkdtemp(prefix="lib-cove-ocds-cli-", dir=tempfile.gettempdir())
 
     try:
-        result = libcoveocds.api.ocds_json_output(
-            output_dir, filename, schema_version, convert=convert, lib_cove_ocds_config=config
-        )
+        result = libcoveocds.api.ocds_json_output(output_dir, filename, schema_version, lib_cove_ocds_config=config)
     finally:
-        if not keep_files:
+        if not output_dir:
             shutil.rmtree(output_dir)
 
     output = json.dumps(result, indent=2, cls=SetEncoder)
-    if keep_files:
+    if output_dir:
         with open(os.path.join(output_dir, "results.json"), "w") as f:
             f.write(output)
     click.echo(output)

@@ -27,7 +27,6 @@ You can also pass ``--schema-version 1.X`` to force it to check against a certai
 
 In some modes, it will also leave directory of data behind. The following options apply to this mode:
 
-* Pass ``--convert`` to get it to produce spreadsheets of the data.
 * Pass ``--output-dir output`` to specify a directory name (default is a name based on the filename).
 * Pass ``--delete`` to delete the output directory if it already exists (default is to error)
 * Pass ``--exclude-file`` to avoid copying the original file into the output directory (default is to copy)

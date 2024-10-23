@@ -28,7 +28,6 @@ def test_basic_1(record_pkg):
     schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg)
 
     assert schema.version == "1.1"
-    assert schema.schema_url == "https://standard.open-contracting.org/1.1/en/release-schema.json"
     if record_pkg:
         assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.1/en/record-package-schema.json"
     else:
@@ -45,7 +44,6 @@ def test_pass_config_1(record_pkg):
     schema = libcoveocds.schema.SchemaOCDS(record_pkg=record_pkg, lib_cove_ocds_config=lib_cove_ocds_config)
 
     assert schema.version == "1.0"
-    assert schema.schema_url == "https://standard.open-contracting.org/1.0/en/release-schema.json"
     if record_pkg:
         assert schema.pkg_schema_url == "https://standard.open-contracting.org/1.0/en/record-package-schema.json"
     else:
@@ -100,7 +98,7 @@ def test_schema_ocds_constructor(select_version, package_data, version, extensio
         (
             {"version": "1.1", "extensions": [UNSUPPORTED_PROTOCOL_EXT]},
             {UNSUPPORTED_PROTOCOL_EXT: {}},
-            {UNSUPPORTED_PROTOCOL_EXT: "URI scheme is not http or https"},
+            {UNSUPPORTED_PROTOCOL_EXT: "URI scheme 'protocol' not supported"},
             False,
             False,
         ),
