@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Changed
+
+- Move `get_bad_ocid_prefixes` from `libcoveocds.lib.common_checks` to `libcoveocds.common_checks`.
+
 ### Removed
 
 - Remove `libcoveocds.api`.

@@ -1,7 +1,7 @@
 import json
 import os
 
-from libcoveocds.lib.common_checks import get_bad_ocid_prefixes
+from libcoveocds.common_checks import get_bad_ocid_prefixes
 from tests import fixture_path
 
 

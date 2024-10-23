@@ -9,7 +9,6 @@ from referencing.exceptions import Unresolvable
 
 from libcoveocds.exceptions import LibCoveOCDSError
 from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
-from libcoveocds.lib.common_checks import get_bad_ocid_prefixes
 
 try:
     import bleach
@@ -132,6 +131,55 @@ def _lookup_schema(schema, path, ref_info=None):
         if head in schema["properties"]:
             return _lookup_schema(schema["properties"][head], tail, ref_info)
     return None, None
+
+
+def get_bad_ocid_prefixes(json_data):
+    """Yield tuples with ('ocid', 'path/to/ocid') for ocids with malformed prefixes."""
+    if not isinstance(json_data, dict):
+        return []
+
+    prefix_regex = re.compile(r"^ocds-[a-z0-9]{6}")
+
+    def _is_bad_prefix(item):
+        if (
+            isinstance(item, dict)
+            and (ocid := item.get("ocid"))
+            and isinstance(ocid, str)
+            and not prefix_regex.match(ocid)
+        ):
+            return ocid
+        return None
+
+    if records := json_data.get("records"):
+        bad_prefixes = []
+        if isinstance(records, list):
+            for i, record in enumerate(records):
+                if not isinstance(record, dict):
+                    continue
+
+                if ocid := _is_bad_prefix(record):
+                    bad_prefixes.append((ocid, f"records/{i}/ocid"))
+
+                releases = record.get("releases")
+                if isinstance(releases, list):
+                    for j, release in enumerate(releases):
+                        if ocid := _is_bad_prefix(release):
+                            bad_prefixes.append((ocid, f"records/{i}/releases/{j}/ocid"))
+
+                compiled_release = record.get("compiledRelease")
+                if ocid := _is_bad_prefix(compiled_release):
+                    bad_prefixes.append((ocid, f"records/{i}/compiledRelease/ocid"))
+        return bad_prefixes
+
+    if releases := json_data.get("releases"):
+        bad_prefixes = []
+        if isinstance(releases, list):
+            for j, release in enumerate(releases):
+                if ocid := _is_bad_prefix(release):
+                    bad_prefixes.append((ocid, f"releases/{j}/ocid"))
+        return bad_prefixes
+
+    return []
 
 
 def common_checks_ocds(
