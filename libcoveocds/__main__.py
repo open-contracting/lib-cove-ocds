@@ -7,8 +7,8 @@ from pathlib import Path
 
 import click
 
+from libcoveocds.additional_checks import CHECKS
 from libcoveocds.common_checks import common_checks_ocds
-from libcoveocds.lib.additional_checks import CHECKS
 from libcoveocds.lib.api import context_api_transform
 from libcoveocds.schema import SchemaOCDS
 

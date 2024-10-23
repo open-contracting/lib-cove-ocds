@@ -7,8 +7,8 @@ from jsonschema.exceptions import ValidationError, _RefResolutionError
 from libcove.lib.common import common_checks_context, get_additional_codelist_values, unique_ids, validator
 from referencing.exceptions import Unresolvable
 
+from libcoveocds.additional_checks import CHECKS, run_additional_checks
 from libcoveocds.exceptions import LibCoveOCDSError
-from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
 
 try:
     import bleach

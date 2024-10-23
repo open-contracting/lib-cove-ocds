@@ -1,6 +1,6 @@
 import json
 
-from libcoveocds.lib.additional_checks import CHECKS, run_additional_checks
+from libcoveocds.additional_checks import CHECKS, run_additional_checks
 
 checks = CHECKS["all"]
 
