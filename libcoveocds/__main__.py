@@ -13,13 +13,6 @@ from libcoveocds.lib.api import context_api_transform
 from libcoveocds.schema import SchemaOCDS
 
 
-class SetEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, set):
-            return list(obj)
-        return json.JSONEncoder.default(self, obj)
-
-
 @click.command()
 @click.argument("filename")
 @click.option(
@@ -102,11 +95,11 @@ def main(
         if not output_dir:
             shutil.rmtree(output_dir)
 
-    output = json.dumps(context, indent=2, cls=SetEncoder)
     if output_dir:
         with open(os.path.join(output_dir, "results.json"), "w") as f:
-            f.write(output)
-    click.echo(output)
+            json.dump(context, f)
+    else:
+        json.dump(context, sys.stdout, indent=2)
 
 
 if __name__ == "__main__":
