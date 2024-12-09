@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 0.16.3 (2024-12-09)
+
+### Fixed
+
+- Release aggregates are robust to bad data.
+
 ## 0.16.2 (2024-10-19)
 
 ### Fixed

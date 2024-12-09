@@ -4,7 +4,11 @@ import re
 
 def _update_documents_counter(obj, counter):
     documents = obj.get("documents", [])
-    counter.update(document["documentType"] for document in documents if document.get("documentType"))
+    counter.update(
+        document["documentType"]
+        for document in documents
+        if isinstance(document, dict) and document.get("documentType")
+    )
     return len(documents)
 
 
@@ -155,6 +159,8 @@ def get_releases_aggregates(json_data):
             for tenderer in tender.get("tenderers", []):
                 process_org(tenderer, unique_tenderers_identifier, unique_tenderers_name_no_id)
             for item in tender.get("items", []):
+                if not isinstance(item, dict):
+                    continue
                 if item_id := item.get("id"):
                     unique_item_ids.add(item_id)
                 if item_id and release_id:
@@ -175,6 +181,8 @@ def get_releases_aggregates(json_data):
             if award_date := award.get("date", ""):
                 award_dates.append(str(award_date))
             for item in award.get("items", []):
+                if not isinstance(item, dict):
+                    continue
                 if item_id := item.get("id"):
                     unique_item_ids.add(item_id)
                 if item_id and release_id and award_id:
@@ -193,6 +201,8 @@ def get_releases_aggregates(json_data):
             if (period := contract.get("period")) and (start_date := period.get("startDate", "")):
                 contract_dates.append(start_date)
             for item in contract.get("items", []):
+                if not isinstance(item, dict):
+                    continue
                 if item_id := item.get("id"):
                     unique_item_ids.add(item_id)
                 if item_id and release_id and contract_id:
