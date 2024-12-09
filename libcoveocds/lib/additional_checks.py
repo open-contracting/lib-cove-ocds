@@ -20,7 +20,7 @@ def flatten_dict(data, path=""):
 def empty_field(_data, flat):
     """Yield fields, objects and arrays that are set but empty or containing only whitespace."""
     for key, value in flat.items():
-        if isinstance(value, str) and not value.strip() or isinstance(value, (dict, list)) and not value:
+        if (isinstance(value, str) and not value.strip()) or (isinstance(value, (dict, list)) and not value):
             yield {"json_location": key}
 
 
