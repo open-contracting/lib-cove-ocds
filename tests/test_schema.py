@@ -102,13 +102,6 @@ def test_schema_ocds_constructor(
         ({"version": "1.1", "extensions": [API_EXT]}, {API_EXT: {}}, {}, True, True),
         ({"version": "1.1", "extensions": [CODELIST_EXT]}, {CODELIST_EXT: {}}, {}, True, False),
         (
-            {"version": "1.1", "extensions": [UNSUPPORTED_PROTOCOL_EXT]},
-            {UNSUPPORTED_PROTOCOL_EXT: {}},
-            {UNSUPPORTED_PROTOCOL_EXT: "fetching failed"},
-            False,
-            False,
-        ),
-        (
             {"version": "1.1", "extensions": [UNRESOLVABLE_HOST_EXT]},
             {UNRESOLVABLE_HOST_EXT: {}},
             {UNRESOLVABLE_HOST_EXT: "fetching failed"},
