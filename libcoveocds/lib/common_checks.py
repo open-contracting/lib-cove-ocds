@@ -3,6 +3,8 @@ import re
 
 
 def _update_documents_counter(obj, counter):
+    if not isinstance(obj, dict):
+        return 0
     documents = obj.get("documents", [])
     counter.update(
         document["documentType"]
