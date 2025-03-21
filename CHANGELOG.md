@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 0.16.5 (2025-03-21)
+
+### Fixed
+
+- Release aggregates are robust to array fields that are null or blank.
+
 ## 0.16.4 (2024-12-11)
 
 ### Fixed

@@ -158,9 +158,9 @@ def get_releases_aggregates(json_data):
                 tender_dates.append(str(start_date))
             if procuring_entity := tender.get("procuringEntity"):
                 process_org(procuring_entity, unique_procuring_identifier, unique_procuring_name_no_id)
-            for tenderer in tender.get("tenderers", []):
+            for tenderer in tender.get("tenderers") or []:
                 process_org(tenderer, unique_tenderers_identifier, unique_tenderers_name_no_id)
-            for item in tender.get("items", []):
+            for item in tender.get("items") or []:
                 if not isinstance(item, dict):
                     continue
                 if item_id := item.get("id"):
@@ -168,11 +168,11 @@ def get_releases_aggregates(json_data):
                 if item_id and release_id:
                     release_tender_item_ids.add((ocid, release_id, item_id))
                 get_item_scheme(item)
-            for milestone in tender.get("milestones", []):
+            for milestone in tender.get("milestones") or []:
                 tender_milestones_doc_count += _update_documents_counter(milestone, tender_milestones_doctype)
 
         # ### Award Section ###
-        for award in release.get("awards", []):
+        for award in release.get("awards") or []:
             if not isinstance(award, dict):
                 continue
             award_id = award.get("id")
@@ -182,7 +182,7 @@ def get_releases_aggregates(json_data):
                 awardid_ocids.add((award_id, ocid))
             if award_date := award.get("date", ""):
                 award_dates.append(str(award_date))
-            for item in award.get("items", []):
+            for item in award.get("items") or []:
                 if not isinstance(item, dict):
                     continue
                 if item_id := item.get("id"):
@@ -190,19 +190,19 @@ def get_releases_aggregates(json_data):
                 if item_id and release_id and award_id:
                     release_award_item_ids.add((ocid, release_id, award_id, item_id))
                 get_item_scheme(item)
-            for supplier in award.get("suppliers", []):
+            for supplier in award.get("suppliers") or []:
                 process_org(supplier, unique_suppliers_identifier, unique_suppliers_name_no_id)
             award_doc_count += _update_documents_counter(award, award_doctype)
 
         # ### Contract section
-        for contract in release.get("contracts", []):
+        for contract in release.get("contracts") or []:
             contract_id = contract.get("id")
             contract_ocids.add(ocid)
             if contract_id:
                 contractid_ocids.add((contract_id, ocid))
             if (period := contract.get("period")) and (start_date := period.get("startDate", "")):
                 contract_dates.append(start_date)
-            for item in contract.get("items", []):
+            for item in contract.get("items") or []:
                 if not isinstance(item, dict):
                     continue
                 if item_id := item.get("id"):
@@ -216,7 +216,7 @@ def get_releases_aggregates(json_data):
                 if contract_id:
                     implementation_contractid_ocids.add((contract_id, ocid))
                 implementation_doc_count += _update_documents_counter(implementation, implementation_doctype)
-                for milestone in implementation.get("milestones", []):
+                for milestone in implementation.get("milestones") or []:
                     implementation_milestones_doc_count += _update_documents_counter(
                         milestone, implementation_milestones_doctype
                     )
@@ -346,7 +346,7 @@ def get_releases_aggregates(json_data):
         "contracts_without_awards": [
             contract
             for release in releases
-            for contract in release.get("contracts", [])
+            for contract in release.get("contracts") or []
             if contract.get("awardID") not in unique_award_id
         ],
     }
