@@ -104,7 +104,7 @@ def test_schema_ocds_constructor(
         (
             {"version": "1.1", "extensions": [UNSUPPORTED_PROTOCOL_EXT]},
             {UNSUPPORTED_PROTOCOL_EXT: {}},
-            {UNSUPPORTED_PROTOCOL_EXT: "fetching failed"},
+            {UNSUPPORTED_PROTOCOL_EXT: "URI scheme 'protocol' not supported"},
             False,
             False,
         ),

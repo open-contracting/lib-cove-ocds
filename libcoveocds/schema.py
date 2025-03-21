@@ -11,7 +11,12 @@ from urllib.parse import urljoin
 import jsonref
 import requests
 from libcove.lib.common import get_schema_codelist_paths, schema_dict_fields_generator
-from ocdsextensionregistry.exceptions import DoesNotExist, ExtensionCodelistWarning, ExtensionWarning
+from ocdsextensionregistry.exceptions import (
+    DoesNotExist,
+    ExtensionCodelistWarning,
+    ExtensionWarning,
+    UnsupportedSchemeError,
+)
 from ocdsextensionregistry.profile_builder import ProfileBuilder
 from referencing import Registry, Resource
 
@@ -179,7 +184,12 @@ class SchemaOCDS:
                 try:
                     # An unreadable metadata file or a malformed extension URL raises an error.
                     extension_codelists = extension.codelists
-                except (requests.RequestException, NotImplementedError):
+                except (
+                    NotImplementedError,  # raised by ExtensionVersion.get_url()
+                    UnsupportedSchemeError,
+                    requests.RequestException,  # superclass of requests.HTTPError
+                    json.JSONDecodeError,
+                ):
                     # patched_release_schema() will have recorded the metadata file being unreadable.
                     continue
 
@@ -416,6 +426,8 @@ class SchemaOCDS:
                 self.extensions[input_url] = details
             except DoesNotExist:
                 self.invalid_extension[input_url] = "404: not found"
+            except UnsupportedSchemeError as e:
+                self.invalid_extension[input_url] = str(e)
             except requests.HTTPError as e:
                 self.invalid_extension[input_url] = f"{e.response.status_code}: {e.response.reason.lower()}"
             except requests.RequestException:
