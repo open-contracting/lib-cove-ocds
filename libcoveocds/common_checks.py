@@ -97,7 +97,7 @@ def one_of_draft4(validator, one_of, instance, schema):
         all_errors.extend(errs)
     else:
         err = ValidationError(
-            f"{json.dumps(instance, sort_keys=True)} " "is not valid under any of the given schemas",
+            f"{json.dumps(instance, sort_keys=True)} is not valid under any of the given schemas",
             context=all_errors,
         )
         err.error_id = "oneOf_any"
