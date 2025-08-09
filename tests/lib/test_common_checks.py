@@ -1,6 +1,8 @@
 import json
 import os
 
+import pytest
+
 from libcoveocds.lib.common_checks import get_bad_ocid_prefixes, get_releases_aggregates
 from tests import fixture_path
 
@@ -201,6 +203,19 @@ def test_get_releases_aggregates_empty_releases_objects():
     release_aggregate_3_empty["release_count"] = 3
 
     assert get_releases_aggregates({"releases": [{}, {}, {}]}) == release_aggregate_3_empty
+
+
+@pytest.mark.parametrize(
+    ("tag", "expected"),
+    [
+        (1, {1: 1}),
+        ([1, 2, 3], {1: 1, 2: 1, 3: 1}),
+        ([[1, 2, 3]], {1: 1, 2: 1, 3: 1}),
+        ([[4, 5, 6], 1, 2, 3], {1: 1, 2: 1, 3: 1}),
+    ],
+)
+def test_get_releases_aggregates_tags(tag, expected):
+    assert get_releases_aggregates({"releases": [{"ocid": 1, "tag": tag}]})["tags"] == expected
 
 
 def test_get_releases_aggregates():

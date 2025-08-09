@@ -1,5 +1,6 @@
 import collections
 import re
+from collections.abc import Hashable
 
 
 def _update_documents_counter(obj, counter):
@@ -131,7 +132,14 @@ def get_releases_aggregates(json_data):
 
         unique_ocids.add(release["ocid"])
         if tag := release.get("tag"):
-            tags.update(tag if isinstance(tag, list) else [tag])
+            if isinstance(tag, Hashable):
+                tags.update([tag])
+            elif isinstance(tag, list):
+                # https://github.com/OpenDataServices/flatten-tool/issues/479
+                if len(tag) == 1 and isinstance(tag[0], list):
+                    tags.update(tag[0])
+                else:
+                    tags.update(item for item in tag if isinstance(item, Hashable))
         if initiation_type := release.get("initiationType"):
             unique_initation_type.add(initiation_type)
 
